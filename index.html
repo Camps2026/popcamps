@@ -899,6 +899,261 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 
 <script>
 /* ─── CAMP DATA with regType ─── */
+
+/* ═══════════════════════════════════════════════
+   AIRTABLE INTEGRATION
+   Fetches live camp data on page load.
+   Data flows: Airtable → parseAirtableRecords()
+   → camps[] → applyFilters() → renderCamps()
+═══════════════════════════════════════════════ */
+
+var AIRTABLE_TOKEN   = 'patvbhTRA9BAxkNCE.db61c38fb0eac29b9dbc3a5dca624e755c796f98f7bea0d9a35ec6a5a44f8c49';
+var AIRTABLE_BASE_ID = 'appRCq4XOz2sKdfhn';
+var AIRTABLE_TABLE   = 'Camps';
+
+// Maps Airtable Camp Type → imgClass and icon
+var typeStyles = {
+  'Sports':    {imgClass:'img-sports',  icon:'⚽'},
+  'Arts':      {imgClass:'img-arts',    icon:'🎨'},
+  'STEM':      {imgClass:'img-stem',    icon:'💻'},
+  'Outdoor':   {imgClass:'img-outdoor', icon:'🏕️'},
+  'Music':     {imgClass:'img-music',   icon:'🎸'},
+  'Dance':     {imgClass:'img-dance',   icon:'💃'},
+  'Cooking':   {imgClass:'img-cooking', icon:'🍳'},
+  'Academic':  {imgClass:'img-chess',   icon:'♟️'},
+  'Day Camp':  {imgClass:'img-sports',  icon:'☀️'},
+  'Swimming':  {imgClass:'img-water',   icon:'🏊'},
+  'Science':   {imgClass:'img-water',   icon:'🔬'},
+  'Writing':   {imgClass:'img-outdoor', icon:'✍️'},
+  'Media':     {imgClass:'img-music',   icon:'🎬'},
+  'Health':    {imgClass:'img-sports',  icon:'🏃'},
+  'Default':   {imgClass:'img-stem',    icon:'🎓'},
+};
+
+function getTypeStyle(type) {
+  return typeStyles[type] || typeStyles['Default'];
+}
+
+// Registration type mapping from sheet values
+function parseRegType(val) {
+  if (!val) return 'external';
+  var v = val.toLowerCase();
+  if (v.includes('phone') || v.includes('call'))    return 'phone';
+  if (v.includes('contact') || v.includes('inquiry') || v.includes('email')) return 'contact';
+  if (v.includes('native') || v.includes('campquest')) return 'native';
+  return 'external';
+}
+
+function parseBoolean(val) {
+  if (!val) return false;
+  if (typeof val === 'boolean') return val;
+  var v = String(val).toLowerCase().trim();
+  return v === 'yes' || v === 'true' || v === '1' || v === 'checked';
+}
+
+function parsePrice(val) {
+  if (!val) return 0;
+  return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
+}
+
+function formatPrice(num) {
+  return num ? '$' + num.toLocaleString() : 'Contact';
+}
+
+// Convert one Airtable record → camp object the UI expects
+function parseAirtableRecord(record, index) {
+  var f = record.fields;
+
+  var campName    = f['Camp Name']         || '';
+  var campType    = f['Camp Type']         || 'Default';
+  var cityState   = f['City / State']      || '';
+  var website     = f['Website URL']       || null;
+  var phone       = f['Phone Number']      || null;
+  var ageMin      = parseInt(f['Age Min']) || 0;
+  var ageMax      = parseInt(f['Age Max']) || 99;
+  var priceNum    = parsePrice(f['Price Per Week ($)']);
+  var regTypeRaw  = f['Registration Type'] || '';
+  var dates       = f['Session Dates']     || '';
+  var beforeAfter = parseBoolean(f['Before & After Care']);
+  var meals       = parseBoolean(f['Meals Available']);
+  var overnight   = parseBoolean(f['Overnight Camp']);
+  var displayType = f['Display Type']      || 'standard';
+  var parentId    = f['Parent Camp ID']    || null;
+  var subject     = f['Subject Tag']       || campType;
+
+  var style   = getTypeStyle(campType);
+  var regType = parseRegType(regTypeRaw);
+
+  // Build ages display
+  var ages = (ageMin && ageMax) ? (ageMin + '–' + ageMax) : (ageMin ? ageMin + '+' : 'All ages');
+
+  // Parse dates — if comma-separated, make an array
+  var parsedDates = dates;
+  if (dates && dates.includes(',')) {
+    parsedDates = dates.split(',').map(function(d){ return d.trim(); }).filter(Boolean);
+  }
+
+  // First date for week field
+  var firstDate = Array.isArray(parsedDates) ? parsedDates[0] : parsedDates;
+  var week = firstDate ? firstDate.split('–')[0].trim() : '';
+
+  var camp = {
+    id:             index,
+    airtableId:     record.id,
+    name:           campName,
+    type:           campType,
+    regType:        regType,
+    location:       cityState,
+    ages:           ages,
+    ageMin:         ageMin,
+    ageMax:         ageMax,
+    priceNum:       priceNum,
+    price:          formatPrice(priceNum),
+    ratingNum:      0,
+    rating:         '',
+    tags:           subject ? [subject] : [campType],
+    beforeAfterCare: beforeAfter,
+    mealsAvailable: meals,
+    overnight:      overnight,
+    imgClass:       style.imgClass,
+    icon:           style.icon,
+    week:           week,
+    dates:          parsedDates || 'TBD',
+    time:           '9am–3pm',
+    desc:           f['Notes'] || f['Description'] || '',
+    website:        website ? website.replace(/^https?:\/\//, '') : null,
+    phone:          phone || null,
+    displayType:    displayType,
+    parentId:       parentId,
+    subject:        subject,
+  };
+
+  // Umbrella camp extras
+  if (displayType === 'umbrella') {
+    camp.umbrella        = true;
+    camp.programCount    = 0; // will be counted after all records parsed
+    camp.umbrellaSummary = 'Multiple programs across subjects for ages ' + ages;
+  }
+
+  return camp;
+}
+
+// After parsing all records, count sub-programs per umbrella
+function linkUmbrellaPrograms(campsArr) {
+  // Build airtableId → index map
+  var idMap = {};
+  campsArr.forEach(function(c, i){ idMap[c.airtableId] = i; });
+
+  campsArr.forEach(function(c) {
+    if (c.displayType === 'sub-program' && c.parentId) {
+      // Find parent by airtable record id or by row number
+      var parent = campsArr.find(function(p){
+        return p.airtableId === c.parentId || String(p.id) === String(c.parentId);
+      });
+      if (parent) {
+        parent.programCount = (parent.programCount || 0) + 1;
+        c.parentIndex = parent.id;
+      }
+    }
+  });
+}
+
+// Show/hide loading overlay
+function showLoadingState() {
+  var grid = document.getElementById('camps-grid');
+  if (grid) {
+    grid.innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:5rem 2rem;color:var(--muted);">' +
+        '<div style="font-size:2.5rem;margin-bottom:1rem;animation:spin 1s linear infinite;display:inline-block;">⏳</div>' +
+        '<div style="font-weight:600;font-size:1rem;color:var(--forest);">Loading camps...</div>' +
+        '<div style="font-size:.82rem;margin-top:.4rem;">Fetching live data from CampQuest database</div>' +
+      '</div>';
+  }
+}
+
+function showLoadError(msg) {
+  var grid = document.getElementById('camps-grid');
+  if (grid) {
+    grid.innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:4rem 2rem;color:var(--muted);">' +
+        '<div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>' +
+        '<div style="font-weight:600;font-size:1rem;color:#9a2a2a;">Could not load camp data</div>' +
+        '<div style="font-size:.82rem;margin-top:.4rem;">' + (msg || 'Please try refreshing the page.') + '</div>' +
+      '</div>';
+  }
+}
+
+// Main fetch — pages through all Airtable records (100 per page max)
+async function fetchAllAirtableRecords(offset) {
+  var url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE_ID + '/' + encodeURIComponent(AIRTABLE_TABLE);
+  url += '?pageSize=100';
+  if (offset) url += '&offset=' + encodeURIComponent(offset);
+
+  var response = await fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
+  });
+
+  if (!response.ok) {
+    throw new Error('Airtable API error: ' + response.status + ' ' + response.statusText);
+  }
+
+  return response.json();
+}
+
+async function loadCampsFromAirtable() {
+  showLoadingState();
+
+  try {
+    var allRecords = [];
+    var offset = null;
+
+    // Page through all records (Airtable returns max 100 at a time)
+    do {
+      var data = await fetchAllAirtableRecords(offset);
+      allRecords = allRecords.concat(data.records || []);
+      offset = data.offset || null;
+    } while (offset);
+
+    // DEBUG — log first record's field names to console so we can verify column mapping
+    if (allRecords.length > 0) {
+      console.log('✅ Airtable connected. Total records fetched:', allRecords.length);
+      console.log('📋 Field names in your table:', Object.keys(allRecords[0].fields));
+      console.log('📄 First record sample:', JSON.stringify(allRecords[0].fields, null, 2));
+    }
+
+    // Filter out blank/header rows (rows where Camp Name is empty or starts with ←)
+    var validRecords = allRecords.filter(function(r) {
+      var name = r.fields['Camp Name'] || '';
+      return name && !name.startsWith('←') && !name.startsWith('EXAMPLE');
+    });
+
+    console.log('🏕️ Valid camp records after filtering:', validRecords.length);
+
+    // Parse into camp objects
+    var parsed = validRecords.map(function(record, i) {
+      return parseAirtableRecord(record, i);
+    });
+
+    // Link sub-programs to their umbrella parents
+    linkUmbrellaPrograms(parsed);
+
+    // Filter out sub-programs from main grid (they appear inside umbrella browsers)
+    camps = parsed.filter(function(c){ return c.displayType !== 'sub-program'; });
+
+    // Store sub-programs separately for umbrella browsers
+    window.subPrograms = parsed.filter(function(c){ return c.displayType === 'sub-program'; });
+
+    console.log('Loaded ' + camps.length + ' camps (' + window.subPrograms.length + ' sub-programs) from Airtable');
+
+    // Render
+    applyFilters();
+
+  } catch (err) {
+    console.error('Airtable load error:', err);
+    showLoadError(err.message);
+  }
+}
+
 const camps = [
   {id:0,name:"Wildwood Sports Camp",type:"Sports",regType:"external",location:"Zilker Park, Austin",ages:"6–14",ageMin:6,ageMax:14,priceNum:275,price:"$275",ratingNum:4.9,rating:"⭐ 4.9",tags:["Soccer","Basketball","Swimming"],beforeAfterCare:true,mealsAvailable:true,imgClass:"img-sports",icon:"⚽",week:"Jun 9",dates:["Jun 9–13","Jun 23–27","Jul 14–18"],time:"8am–3pm",desc:"Austin's top multi-sport camp. Kids rotate through soccer, basketball, and swimming with certified coaches in a safe, inclusive environment. All skill levels welcome.",website:null,phone:null},
   {id:1,name:"Art Explorers Camp",type:"Arts",regType:"external",location:"Austin Arts Center",ages:"5–12",ageMin:5,ageMax:12,priceNum:320,price:"$320",ratingNum:4.7,rating:"⭐ 4.7",tags:["Painting","Sculpture","Mixed Media"],beforeAfterCare:false,mealsAvailable:true,imgClass:"img-arts",icon:"🎨",week:"Jun 16",dates:"Jun 16–20",time:"9am–3pm",desc:"A week-long immersive arts program where kids explore painting, clay sculpture, and digital art with professional Austin artists as mentors.",website:null,phone:null},
@@ -3164,9 +3419,11 @@ function showErr(el, msg) {
 // Auto-render camps on page load so Search page shows results immediately
 window.addEventListener('DOMContentLoaded', function() {
   var s = document.getElementById('results-section');
-  if (s) { s.style.display = 'block'; applyFilters(); }
+  if (s) { s.style.display = 'block'; }
   renderProfileChildren();
   updateNavForUser();
+  // Load live data from Airtable (replaces static camps array on success)
+  loadCampsFromAirtable();
 
   document.addEventListener('click', function(e) {
     var menu = document.getElementById('mob-menu');
