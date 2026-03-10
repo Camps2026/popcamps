@@ -138,8 +138,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .camp-tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.7rem;}
 .tag{background:var(--sky);color:var(--moss);font-size:.7rem;font-weight:500;padding:.18rem .45rem;border-radius:6px;}
 .camp-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.7rem;border-top:1px solid #f0f4f1;}
-.camp-price{font-weight:700;font-size:.95rem;color:var(--forest);}
-.camp-price span{font-size:.72rem;font-weight:400;color:var(--muted);}
 .camp-rating{font-size:.78rem;color:var(--muted);}
 .card-reg-btn{border:none;padding:.35rem .8rem;border-radius:20px;font-size:.72rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .card-reg-btn.native{background:var(--moss);color:#fff;}
@@ -173,7 +171,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .router-camp-icon{font-size:2.5rem;flex-shrink:0;}
 .router-camp-name{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;}
 .router-camp-meta{font-size:.82rem;color:rgba(255,255,255,.7);margin-top:.2rem;}
-.router-camp-price{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--sun);font-weight:900;margin-left:auto;flex-shrink:0;}
 
 /* The route type explainer card */
 .route-type-card{border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;border:2px solid;}
@@ -304,8 +301,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .detail-hero h1{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;font-weight:900;line-height:1.15;margin-bottom:.4rem;}
 .detail-hero-loc{color:rgba(255,255,255,.75);font-size:.9rem;}
 .detail-sidebar{background:var(--forest);padding:2rem;display:flex;flex-direction:column;justify-content:space-between;}
-.detail-price-big{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--sun);font-weight:900;}
-.detail-price-sub{color:rgba(255,255,255,.6);font-size:.82rem;margin-bottom:1.2rem;}
 .quick-fact{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.85);font-size:.85rem;}
 .quick-fact:last-child{border-bottom:none;margin-bottom:1rem;}
 .quick-fact-label{color:rgba(255,255,255,.5);font-size:.72rem;display:block;}
@@ -431,7 +426,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .pi-name{font-weight:700;color:var(--forest);font-size:.88rem;line-height:1.3;margin-bottom:.2rem;}
 .pi-meta{font-size:.72rem;color:var(--muted);display:flex;gap:.55rem;flex-wrap:wrap;}
 .pi-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;}
-.pi-price{font-weight:700;color:var(--forest);font-size:.88rem;}
 .pi-avail{font-size:.65rem;font-weight:600;padding:.14rem .42rem;border-radius:6px;}
 .pi-avail.open{background:#d4ead8;color:var(--moss);}
 .pi-avail.limited{background:#fff0d4;color:#8a6010;}
@@ -546,14 +540,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
         </div>
         <div class="filter-divider"></div>
 
-        <div class="filter-group">
-          <label>Max Price / Week: $<span id="price-val">800</span></label>
-          <input type="range" class="range-slider" min="0" max="5000" value="5000" step="250" id="price-slider"
-            oninput="document.getElementById('price-val').textContent=this.value;applyFilters()">
-          <div class="range-labels"><span>$0</span><span>$5,000</span></div>
-        </div>
-        <div class="filter-divider"></div>
-
         <!-- AMENITIES FILTERS -->
         <div class="filter-group">
           <label>Amenities</label>
@@ -582,7 +568,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
           <div class="results-controls">
             <select class="sort-select" id="sort-select" onchange="applyFilters()">
               <option value="match">Best Match</option>
-              <option value="price-asc">Price: Low → High</option>
             </select>
           </div>
         </div>
@@ -611,9 +596,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
     </div>
     <div class="detail-sidebar">
       <div>
-        <div style="color:rgba(255,255,255,.5);font-size:.75rem;margin-bottom:.3rem;">STARTING FROM</div>
-        <div class="detail-price-big" id="detail-price">$275</div>
-        <div class="detail-price-sub">per week · multiple sessions</div>
         <div class="reg-route-pill external" id="detail-reg-pill">🔵 Visit Camp Website</div>
       </div>
       <div>
@@ -654,8 +636,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
         <div id="umb-summary" style="color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.6;max-width:520px;"></div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
-        <div style="color:rgba(255,255,255,.6);font-size:.72rem;margin-bottom:.2rem;">Starting from</div>
-        <div style="color:var(--sun);font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;" id="umb-price"></div>
         <div style="color:rgba(255,255,255,.6);font-size:.72rem;margin-top:.2rem;" id="umb-ages"></div>
         <a id="umb-website-btn" href="#" target="_blank" rel="noopener"
            style="display:inline-block;margin-top:.8rem;background:var(--sun);color:var(--forest);font-weight:700;font-size:.8rem;padding:.45rem 1rem;border-radius:8px;text-decoration:none;">
@@ -709,7 +689,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       <div class="router-camp-name" id="router-name">Camp Name</div>
       <div class="router-camp-meta" id="router-meta">📍 Location · Session dates</div>
     </div>
-    <div class="router-camp-price" id="router-price">$275</div>
   </div>
 
   <!-- All 4 flows injected here -->
@@ -794,7 +773,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       <div style="font-size:1.8rem;">🏷️</div>
       <div>
         <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--forest);margin-bottom:.2rem;">Already listed? Claim your camp</h2>
-        <p style="color:var(--muted);font-size:.85rem;">We may have created a listing for your camp from public information. Claim it to take control — update photos, prices, dates, and respond to families directly.</p>
+        <p style="color:var(--muted);font-size:.85rem;">We may have created a listing for your camp from public information. Claim it to take control — update photos, dates, and respond to families directly.</p>
       </div>
     </div>
 
@@ -951,14 +930,7 @@ function parseBoolean(val) {
   return v === 'yes' || v === 'true' || v === '1' || v === 'checked';
 }
 
-function parsePrice(val) {
-  if (!val) return 0;
-  return parseInt(String(val).replace(/[^0-9]/g, '')) || 0;
-}
 
-function formatPrice(num) {
-  return num ? '$' + num.toLocaleString() : 'Contact';
-}
 
 // Convert one Airtable record → camp object the UI expects
 function parseAirtableRecord(record, index) {
@@ -971,7 +943,6 @@ function parseAirtableRecord(record, index) {
   var phone       = f['Phone Number']      || null;
   var ageMin      = parseInt(f['Age Min']) || 0;
   var ageMax      = parseInt(f['Age Max']) || 99;
-  var priceNum    = parsePrice(f['Price Per Week ($)']);
   var regTypeRaw  = f['Registration Type'] || '';
   var dates       = f['Session Dates']     || '';
   var beforeAfter = parseBoolean(f['Before & After Care']);
@@ -1007,8 +978,6 @@ function parseAirtableRecord(record, index) {
     ages:           ages,
     ageMin:         ageMin,
     ageMax:         ageMax,
-    priceNum:       priceNum,
-    price:          formatPrice(priceNum),
     ratingNum:      0,
     rating:         '',
     tags:           subject ? [subject] : [campType],
@@ -1083,15 +1052,37 @@ function showLoadError(msg) {
   }
 }
 
+// Auto-discover the real table name (handles renames after reimport)
+async function discoverTableName() {
+  var metaUrl = 'https://api.airtable.com/v0/meta/bases/' + AIRTABLE_BASE_ID + '/tables';
+  try {
+    var res = await fetch(metaUrl, { headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN } });
+    if (!res.ok) return null;
+    var data = await res.json();
+    var tables = data.tables || [];
+    console.log('📋 Tables in base:', tables.map(function(t){ return t.name; }));
+    // Prefer exact match, then fallback to first table
+    var match = tables.find(function(t){ return t.name === AIRTABLE_TABLE; });
+    return match ? match.name : (tables[0] ? tables[0].name : null);
+  } catch(e) {
+    return null;
+  }
+}
+
 // Main fetch — pages through all Airtable records (100 per page max)
 async function fetchAllAirtableRecords(offset) {
   var url = 'https://api.airtable.com/v0/' + AIRTABLE_BASE_ID + '/' + encodeURIComponent(AIRTABLE_TABLE);
   url += '?pageSize=100';
   if (offset) url += '&offset=' + encodeURIComponent(offset);
 
-  var response = await fetch(url, {
+  var fetchPromise = fetch(url, {
     headers: { 'Authorization': 'Bearer ' + AIRTABLE_TOKEN }
   });
+  var timeoutPromise = new Promise(function(_, reject) {
+    setTimeout(function() { reject(new Error('Request timed out')); }, 8000);
+  });
+
+  var response = await Promise.race([fetchPromise, timeoutPromise]);
 
   if (!response.ok) {
     throw new Error('Airtable API error: ' + response.status + ' ' + response.statusText);
@@ -1101,9 +1092,21 @@ async function fetchAllAirtableRecords(offset) {
 }
 
 async function loadCampsFromAirtable() {
-  showLoadingState();
+  // Cannot fetch from file:// or sandboxed about: contexts — use demo data silently
+  var proto = window.location.protocol;
+  if (proto === 'file:' || proto === 'about:' || proto === 'blob:') {
+    console.log('ℹ️ Sandboxed context (' + proto + ') — using demo data. Open file directly in browser or deploy to GitHub Pages to load live Airtable data.');
+    return;
+  }
 
   try {
+    // Auto-discover real table name in case it changed after reimport
+    var discovered = await discoverTableName();
+    if (discovered && discovered !== AIRTABLE_TABLE) {
+      console.log('ℹ️ Table name updated: "' + AIRTABLE_TABLE + '" → "' + discovered + '"');
+      AIRTABLE_TABLE = discovered;
+    }
+
     var allRecords = [];
     var offset = null;
 
@@ -1114,12 +1117,11 @@ async function loadCampsFromAirtable() {
       offset = data.offset || null;
     } while (offset);
 
-    // DEBUG — log first record's field names to console so we can verify column mapping
-    if (allRecords.length > 0) {
-      console.log('✅ Airtable connected. Total records fetched:', allRecords.length);
-      console.log('📋 Field names in your table:', Object.keys(allRecords[0].fields));
-      console.log('📄 First record sample:', JSON.stringify(allRecords[0].fields, null, 2));
-    }
+    if (allRecords.length === 0) return;
+
+    console.log('✅ Airtable connected. Total records fetched:', allRecords.length);
+    console.log('📋 Field names in your table:', Object.keys(allRecords[0].fields));
+    console.log('📄 First record sample:', JSON.stringify(allRecords[0].fields, null, 2));
 
     // Filter out blank/header rows (rows where Camp Name is empty or starts with ←)
     var validRecords = allRecords.filter(function(r) {
@@ -1143,28 +1145,33 @@ async function loadCampsFromAirtable() {
     // Store sub-programs separately for umbrella browsers
     window.subPrograms = parsed.filter(function(c){ return c.displayType === 'sub-program'; });
 
-    console.log('Loaded ' + camps.length + ' camps (' + window.subPrograms.length + ' sub-programs) from Airtable');
+    console.log('✅ Loaded ' + camps.length + ' camps (' + window.subPrograms.length + ' sub-programs) from Airtable');
 
-    // Render
+    // Re-render with live data
     applyFilters();
 
   } catch (err) {
-    console.error('Airtable load error:', err);
-    showLoadError(err.message);
+    // Demo data is already rendered — log detail to help diagnose
+    console.warn('⚠️ Airtable unavailable, using demo data.');
+    console.warn('  Error:', err.message);
+    console.warn('  Protocol:', window.location.protocol);
+    console.warn('  Base ID:', AIRTABLE_BASE_ID);
+    console.warn('  Table:', AIRTABLE_TABLE);
+    console.warn('  Token (first 20 chars):', AIRTABLE_TOKEN.substring(0, 20) + '...');
   }
 }
 
 let camps = [
-  {id:0,name:"Wildwood Sports Camp",type:"Sports",regType:"external",location:"Zilker Park, Austin",ages:"6–14",ageMin:6,ageMax:14,priceNum:275,price:"$275",ratingNum:4.9,rating:"⭐ 4.9",tags:["Soccer","Basketball","Swimming"],beforeAfterCare:true,mealsAvailable:true,imgClass:"img-sports",icon:"⚽",week:"Jun 9",dates:["Jun 9–13","Jun 23–27","Jul 14–18"],time:"8am–3pm",desc:"Austin's top multi-sport camp. Kids rotate through soccer, basketball, and swimming with certified coaches in a safe, inclusive environment. All skill levels welcome.",website:null,phone:null},
-  {id:1,name:"Art Explorers Camp",type:"Arts",regType:"external",location:"Austin Arts Center",ages:"5–12",ageMin:5,ageMax:12,priceNum:320,price:"$320",ratingNum:4.7,rating:"⭐ 4.7",tags:["Painting","Sculpture","Mixed Media"],beforeAfterCare:false,mealsAvailable:true,imgClass:"img-arts",icon:"🎨",week:"Jun 16",dates:"Jun 16–20",time:"9am–3pm",desc:"A week-long immersive arts program where kids explore painting, clay sculpture, and digital art with professional Austin artists as mentors.",website:null,phone:null},
-  {id:2,name:"Code Galaxy",type:"STEM",regType:"external",location:"UT Austin Campus",ages:"8–15",ageMin:8,ageMax:15,priceNum:495,price:"$495",ratingNum:4.8,rating:"⭐ 4.8",tags:["Python","Robotics","Game Design"],beforeAfterCare:true,mealsAvailable:false,imgClass:"img-stem",icon:"💻",week:"Jun 23",dates:"Jun 23–27",time:"9am–4pm",desc:"Hands-on coding camp where kids build games, learn Python, and assemble robots. Hosted at UT Austin. Register directly on their university portal.",website:"codegalaxy.utexas.edu/summer-registration",phone:null},
-  {id:3,name:"Trail Blazers Outdoor",type:"Outdoor",regType:"contact",location:"Barton Creek Greenbelt",ages:"9–16",ageMin:9,ageMax:16,priceNum:380,price:"$380",ratingNum:4.6,rating:"⭐ 4.6",tags:["Hiking","Kayaking","Survival"],overnight:true,beforeAfterCare:true,mealsAvailable:true,imgClass:"img-outdoor",icon:"🏕️",week:"Jun 30",dates:"Jun 30–Jul 4",time:"All Day",desc:"Adventure-packed outdoor camp in Austin's Greenbelt. Small family-run operation — they prefer to speak with parents before enrolling kids to ensure a great fit.",website:null,phone:null},
-  {id:4,name:"Aqua Stars Swim Camp",type:"Sports",regType:"external",location:"Deep Eddy Pool",ages:"4–12",ageMin:4,ageMax:12,priceNum:240,price:"$240",ratingNum:4.9,rating:"⭐ 4.9",tags:["Swimming","Diving","Water Safety"],beforeAfterCare:false,mealsAvailable:false,imgClass:"img-water",icon:"🏊",week:"Jul 7",dates:["Jul 7–11","Jul 21–25"],time:"8am–12pm",desc:"Learn-to-swim and competitive training at Austin's historic Deep Eddy Pool. All skill levels, certified USA Swimming coaches.",website:null,phone:null},
-  {id:5,name:"Rockstar Music Camp",type:"Music",regType:"phone",location:"South Congress, Austin",ages:"7–17",ageMin:7,ageMax:17,priceNum:440,price:"$440",ratingNum:4.7,rating:"⭐ 4.7",tags:["Guitar","Drums","Songwriting"],overnight:true,beforeAfterCare:true,mealsAvailable:true,imgClass:"img-music",icon:"🎸",week:"Jul 14",dates:"Jul 14–18",time:"9am–12pm",desc:"Aspiring rock stars learn their instrument and perform a live showcase on Friday. This family-run studio prefers phone registration to discuss instrument level and preferences.",website:null,phone:"(512) 867-5309"},
-  {id:6,name:"Sunshine Dance Academy",type:"Dance",regType:"external",location:"Mueller, Austin",ages:"5–14",ageMin:5,ageMax:14,priceNum:360,price:"$360",ratingNum:4.8,rating:"⭐ 4.8",tags:["Ballet","Hip-Hop","Contemporary"],beforeAfterCare:false,mealsAvailable:true,imgClass:"img-dance",icon:"💃",week:"Jul 21",dates:"Jul 21–25",time:"9am–3pm",desc:"Professional dance instruction covering ballet, hip-hop, and contemporary. Culminates in a Friday performance. Registration through their studio portal.",website:"sunshinedance.com/enroll",phone:null},
-  {id:7,name:"MasterChef Junior Camp",type:"Cooking",regType:"contact",location:"North Austin",ages:"7–14",ageMin:7,ageMax:14,priceNum:420,price:"$420",ratingNum:4.5,rating:"⭐ 4.5",tags:["Cooking","Baking","Nutrition"],beforeAfterCare:true,mealsAvailable:false,imgClass:"img-cooking",icon:"🍳",week:"Jul 28",dates:"Jul 28–Aug 1",time:"9am–3pm",desc:"Young chefs learn knife skills, international cuisines, and baking fundamentals. Limited to 8 kids per session — send an inquiry to check availability.",website:null,phone:null},
-  {id:8,name:"Chess Masters Camp",type:"Academic",regType:"phone",location:"Westlake, Austin",ages:"6–17",ageMin:6,ageMax:17,priceNum:290,price:"$290",ratingNum:4.6,rating:"⭐ 4.6",tags:["Chess","Strategy","Critical Thinking"],beforeAfterCare:true,mealsAvailable:true,imgClass:"img-chess",icon:"♟️",week:"Aug 4",dates:"Aug 4–8",time:"9am–1pm",desc:"From first moves to advanced strategy, certified instructors guide every level. This established program uses phone registration to place kids at the right skill tier.",website:null,phone:"(512) 555-0192"},
-  {id:9,name:"UW Youth & Teen Programs",type:"STEM",regType:"external",location:"University of Washington, Seattle",ages:"9–18",ageMin:9,ageMax:18,priceNum:385,price:"$385",ratingNum:4.8,rating:"⭐ 4.8",tags:["STEM","Arts","Writing","Science","+8 more"],beforeAfterCare:false,mealsAvailable:false,imgClass:"img-stem",icon:"🎓",week:"Jun 15",dates:["Jun 15–19","Jun 22–26","Jun 29–Jul 3","Jul 6–10","Jul 13–17","Jul 20–24","Jul 27–31","Aug 3–7","Aug 10–14","Aug 17–21"],time:"9am–3pm",desc:"60+ courses for grades 4–12 on the UW Seattle campus. Marine biology, game design, creative writing, film, debate and much more. Registration opened Jan 27, 2026.",website:"uwpce.uw.edu/youth",phone:null,umbrella:true,programCount:60,umbrellaSummary:"In-person & online programs across 12+ subject areas for grades 4–12"},
+  {id:0,name:"Wildwood Sports Camp",type:"Sports",regType:"external",location:"Zilker Park, Austin",ages:"6–14",ageMin:6,ageMax:14,ratingNum:4.9,rating:"⭐ 4.9",tags:["Soccer","Basketball","Swimming"],beforeAfterCare:true,mealsAvailable:true,imgClass:"img-sports",icon:"⚽",week:"Jun 9",dates:["Jun 9–13","Jun 23–27","Jul 14–18"],time:"8am–3pm",desc:"Austin's top multi-sport camp. Kids rotate through soccer, basketball, and swimming with certified coaches in a safe, inclusive environment. All skill levels welcome.",website:null,phone:null},
+  {id:1,name:"Art Explorers Camp",type:"Arts",regType:"external",location:"Austin Arts Center",ages:"5–12",ageMin:5,ageMax:12,ratingNum:4.7,rating:"⭐ 4.7",tags:["Painting","Sculpture","Mixed Media"],beforeAfterCare:false,mealsAvailable:true,imgClass:"img-arts",icon:"🎨",week:"Jun 16",dates:"Jun 16–20",time:"9am–3pm",desc:"A week-long immersive arts program where kids explore painting, clay sculpture, and digital art with professional Austin artists as mentors.",website:null,phone:null},
+  {id:2,name:"Code Galaxy",type:"STEM",regType:"external",location:"UT Austin Campus",ages:"8–15",ageMin:8,ageMax:15,ratingNum:4.8,rating:"⭐ 4.8",tags:["Python","Robotics","Game Design"],beforeAfterCare:true,mealsAvailable:false,imgClass:"img-stem",icon:"💻",week:"Jun 23",dates:"Jun 23–27",time:"9am–4pm",desc:"Hands-on coding camp where kids build games, learn Python, and assemble robots. Hosted at UT Austin. Register directly on their university portal.",website:"codegalaxy.utexas.edu/summer-registration",phone:null},
+  {id:3,name:"Trail Blazers Outdoor",type:"Outdoor",regType:"contact",location:"Barton Creek Greenbelt",ages:"9–16",ageMin:9,ageMax:16,ratingNum:4.6,rating:"⭐ 4.6",tags:["Hiking","Kayaking","Survival"],overnight:true,beforeAfterCare:true,mealsAvailable:true,imgClass:"img-outdoor",icon:"🏕️",week:"Jun 30",dates:"Jun 30–Jul 4",time:"All Day",desc:"Adventure-packed outdoor camp in Austin's Greenbelt. Small family-run operation — they prefer to speak with parents before enrolling kids to ensure a great fit.",website:null,phone:null},
+  {id:4,name:"Aqua Stars Swim Camp",type:"Sports",regType:"external",location:"Deep Eddy Pool",ages:"4–12",ageMin:4,ageMax:12,ratingNum:4.9,rating:"⭐ 4.9",tags:["Swimming","Diving","Water Safety"],beforeAfterCare:false,mealsAvailable:false,imgClass:"img-water",icon:"🏊",week:"Jul 7",dates:["Jul 7–11","Jul 21–25"],time:"8am–12pm",desc:"Learn-to-swim and competitive training at Austin's historic Deep Eddy Pool. All skill levels, certified USA Swimming coaches.",website:null,phone:null},
+  {id:5,name:"Rockstar Music Camp",type:"Music",regType:"phone",location:"South Congress, Austin",ages:"7–17",ageMin:7,ageMax:17,ratingNum:4.7,rating:"⭐ 4.7",tags:["Guitar","Drums","Songwriting"],overnight:true,beforeAfterCare:true,mealsAvailable:true,imgClass:"img-music",icon:"🎸",week:"Jul 14",dates:"Jul 14–18",time:"9am–12pm",desc:"Aspiring rock stars learn their instrument and perform a live showcase on Friday. This family-run studio prefers phone registration to discuss instrument level and preferences.",website:null,phone:"(512) 867-5309"},
+  {id:6,name:"Sunshine Dance Academy",type:"Dance",regType:"external",location:"Mueller, Austin",ages:"5–14",ageMin:5,ageMax:14,ratingNum:4.8,rating:"⭐ 4.8",tags:["Ballet","Hip-Hop","Contemporary"],beforeAfterCare:false,mealsAvailable:true,imgClass:"img-dance",icon:"💃",week:"Jul 21",dates:"Jul 21–25",time:"9am–3pm",desc:"Professional dance instruction covering ballet, hip-hop, and contemporary. Culminates in a Friday performance. Registration through their studio portal.",website:"sunshinedance.com/enroll",phone:null},
+  {id:7,name:"MasterChef Junior Camp",type:"Cooking",regType:"contact",location:"North Austin",ages:"7–14",ageMin:7,ageMax:14,ratingNum:4.5,rating:"⭐ 4.5",tags:["Cooking","Baking","Nutrition"],beforeAfterCare:true,mealsAvailable:false,imgClass:"img-cooking",icon:"🍳",week:"Jul 28",dates:"Jul 28–Aug 1",time:"9am–3pm",desc:"Young chefs learn knife skills, international cuisines, and baking fundamentals. Limited to 8 kids per session — send an inquiry to check availability.",website:null,phone:null},
+  {id:8,name:"Chess Masters Camp",type:"Academic",regType:"phone",location:"Westlake, Austin",ages:"6–17",ageMin:6,ageMax:17,ratingNum:4.6,rating:"⭐ 4.6",tags:["Chess","Strategy","Critical Thinking"],beforeAfterCare:true,mealsAvailable:true,imgClass:"img-chess",icon:"♟️",week:"Aug 4",dates:"Aug 4–8",time:"9am–1pm",desc:"From first moves to advanced strategy, certified instructors guide every level. This established program uses phone registration to place kids at the right skill tier.",website:null,phone:"(512) 555-0192"},
+  {id:9,name:"UW Youth & Teen Programs",type:"STEM",regType:"external",location:"University of Washington, Seattle",ages:"9–18",ageMin:9,ageMax:18,ratingNum:4.8,rating:"⭐ 4.8",tags:["STEM","Arts","Writing","Science","+8 more"],beforeAfterCare:false,mealsAvailable:false,imgClass:"img-stem",icon:"🎓",week:"Jun 15",dates:["Jun 15–19","Jun 22–26","Jun 29–Jul 3","Jul 6–10","Jul 13–17","Jul 20–24","Jul 27–31","Aug 3–7","Aug 10–14","Aug 17–21"],time:"9am–3pm",desc:"60+ courses for grades 4–12 on the UW Seattle campus. Marine biology, game design, creative writing, film, debate and much more. Registration opened Jan 27, 2026.",website:"uwpce.uw.edu/youth",phone:null,umbrella:true,programCount:60,umbrellaSummary:"In-person & online programs across 12+ subject areas for grades 4–12"},
 ];
 
 const regTypeConfig = {
@@ -1180,7 +1187,6 @@ function var_purple(){return '#7a4a8a';}
 
 /* ─── FILTER STATE ─── */
 let activeFilters = {type:[],regType:[]};
-let maxPrice = 5000;
 let savedCamps = new Set();
 let currentCamp = null;
 let currentFilteredData = null;
@@ -1214,7 +1220,7 @@ function renderCamps(data) {
           '<div class="umbrella-summary">' + c.umbrellaSummary + '</div>' +
           '<div class="camp-tags">' + c.tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
           '<div class="camp-footer">' +
-            '<div><div class="camp-price">' + c.price + ' <span>/ program</span></div><div class="camp-rating">Ages ' + c.ages + '</div></div>' +
+            '<div><div class="camp-rating">Ages ' + c.ages + '</div></div>' +
           '</div>' +
           '<div style="margin-top:.6rem;">' +
             '<button class="browse-programs-btn">Browse Programs →</button>' +
@@ -1235,7 +1241,7 @@ function renderCamps(data) {
         '<div class="camp-location">📍 ' + c.location + '</div>' +
         '<div class="camp-tags">' + c.tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
         '<div class="camp-footer">' +
-          '<div><div class="camp-price">' + c.price + ' <span>/ week</span></div><div class="camp-rating">Ages ' + c.ages + '</div></div>' +
+          '<div><div class="camp-rating">Ages ' + c.ages + '</div></div>' +
           '<button class="card-reg-btn ' + rt + '" onclick="event.stopPropagation();openDetail(' + c.id + ')">' + labels[rt] + '</button>' +
         '</div>' +
       '</div>' +
@@ -1267,9 +1273,6 @@ function applyFilters() {
   }
 
   // Price
-  const sliderEl = document.getElementById('price-slider');
-  maxPrice = sliderEl ? parseInt(sliderEl.value) : 1500;
-  data = data.filter(c => c.priceNum <= maxPrice);
 
   // Chip filters
   if (activeFilters.type.length) data = data.filter(c => activeFilters.type.includes(c.type));
@@ -1285,8 +1288,7 @@ function applyFilters() {
   // Sort
   const sortEl = document.getElementById('sort-select');
   const sort = sortEl ? sortEl.value : 'match';
-  if (sort === 'price-asc') data.sort((a,b) => a.priceNum - b.priceNum);
-  else if (sort === 'rating') data.sort((a,b) => b.ratingNum - a.ratingNum);
+  if (sort === 'rating') data.sort((a,b) => b.ratingNum - a.ratingNum);
 
   // Update count label
   const countEl = document.getElementById('results-count');
@@ -1311,7 +1313,7 @@ function toggleChip(btn) {
 }
 
 function updateFilterCount() {
-  const n=activeFilters.type.length+activeFilters.regType.length+(maxPrice<1500?1:0);
+  const n=activeFilters.type.length+activeFilters.regType.length;
   const fc=document.getElementById('filter-count');
   const cb=document.getElementById('clear-btn');
   if(fc){fc.textContent=n;fc.style.display=n?'':'none';}
@@ -1321,8 +1323,6 @@ function updateFilterCount() {
 function clearFilters() {
   activeFilters={type:[],regType:[]};
   document.querySelectorAll('.chip.selected').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('price-slider').value=5000;
-  document.getElementById('price-val').textContent='5000';
   var bac=document.getElementById('filter-before-after-care'); if(bac) bac.checked=false;
   var mal=document.getElementById('filter-meals'); if(mal) mal.checked=false;
   var ovn=document.getElementById('filter-overnight'); if(ovn) ovn.checked=false;
@@ -1430,26 +1430,26 @@ function showResults() {
 
 /* ─── UW PROGRAMS DATA ─── */
 var uwPrograms = [
-  {id:'uw01',name:'Marine Biology Discovery',subject:'Science',grades:'Gr 4–7',dates:'Jun 15–19',time:'9am–12pm',price:'$395',priceNum:395,avail:'open',online:false,desc:'Explore Puget Sound ecosystems, dissect specimens, and tour UW marine labs.'},
-  {id:'uw02',name:'Game Design with Unity',subject:'STEM',grades:'Gr 6–10',dates:'Jun 15–19',time:'9am–3pm',price:'$485',priceNum:485,avail:'open',online:false,desc:'Build a 2D platformer game from scratch using Unity and C# scripting.'},
-  {id:'uw03',name:'Creative Writing Intensive',subject:'Writing',grades:'Gr 5–9',dates:'Jun 22–26',time:'9am–12pm',price:'$345',priceNum:345,avail:'open',online:false,desc:'Short stories, poetry, and worldbuilding with UW creative writing faculty.'},
-  {id:'uw04',name:'Robotics & AI Foundations',subject:'STEM',grades:'Gr 7–12',dates:'Jun 22–26',time:'9am–4pm',price:'$550',priceNum:550,avail:'limited',online:false,desc:'Build autonomous robots and intro to machine learning concepts.'},
-  {id:'uw05',name:'Filmmaking & Storytelling',subject:'Media',grades:'Gr 6–10',dates:'Jun 29–Jul 3',time:'9am–3pm',price:'$465',priceNum:465,avail:'open',online:false,desc:'Script, shoot, and edit a short film using professional camera equipment.'},
-  {id:'uw06',name:'Architecture & Urban Design',subject:'STEM',grades:'Gr 8–12',dates:'Jun 29–Jul 3',time:'9am–3pm',price:'$495',priceNum:495,avail:'open',online:false,desc:'Design buildings and neighborhoods using CAD software and physical models.'},
-  {id:'uw07',name:'Astronomy & Space Science',subject:'Science',grades:'Gr 5–9',dates:'Jul 6–10',time:'9am–12pm',price:'$375',priceNum:375,avail:'open',online:false,desc:'Telescope observation, planetary science, and tour UW astronomy facilities.'},
-  {id:'uw08',name:'Debate & Public Speaking',subject:'Writing',grades:'Gr 7–12',dates:'Jul 6–10',time:'9am–3pm',price:'$385',priceNum:385,avail:'open',online:false,desc:'Competitive debate formats, argumentation theory, and persuasive speaking.'},
-  {id:'uw09',name:'Digital Photography & Editing',subject:'Media',grades:'Gr 6–10',dates:'Jul 13–17',time:'9am–12pm',price:'$355',priceNum:355,avail:'open',online:false,desc:'Composition, lighting, and Lightroom editing on the UW campus.'},
-  {id:'uw10',name:'Chemistry Lab Experience',subject:'Science',grades:'Gr 8–12',dates:'Jul 13–17',time:'9am–3pm',price:'$495',priceNum:495,avail:'limited',online:false,desc:'Real lab experiments in UW chemistry facilities with graduate student mentors.'},
-  {id:'uw11',name:'Graphic Novel Workshop',subject:'Arts',grades:'Gr 5–9',dates:'Jul 20–24',time:'9am–12pm',price:'$345',priceNum:345,avail:'open',online:false,desc:'Character design, panel layout, inking, and digital coloring techniques.'},
-  {id:'uw12',name:'Environmental Science Field Camp',subject:'Outdoor',grades:'Gr 6–10',dates:'Jul 20–24',time:'9am–4pm',price:'$475',priceNum:475,avail:'open',online:false,desc:'Field work in UW forests and shorelines, water quality testing, species ID.'},
-  {id:'uw13',name:'Pre-Med: Human Anatomy',subject:'Health',grades:'Gr 9–12',dates:'Jul 27–31',time:'9am–3pm',price:'$525',priceNum:525,avail:'limited',online:false,desc:'Dissection labs, diagnostic imaging review, and hospital simulation in UW Medical.'},
-  {id:'uw14',name:'Music Production & Mixing',subject:'Media',grades:'Gr 7–12',dates:'Jul 27–31',time:'9am–3pm',price:'$445',priceNum:445,avail:'open',online:false,desc:'DAW fundamentals, beat production, mixing, and mastering in UW recording studios.'},
-  {id:'uw15',name:'App Development (Swift)',subject:'STEM',grades:'Gr 8–12',dates:'Aug 3–7',time:'9am–4pm',price:'$550',priceNum:550,avail:'open',online:false,desc:'Build an iPhone app from concept to submission using Swift and Xcode.'},
-  {id:'uw16',name:'Watercolor & Mixed Media',subject:'Arts',grades:'Gr 4–8',dates:'Aug 3–7',time:'9am–12pm',price:'$325',priceNum:325,avail:'open',online:false,desc:'Wet-on-wet techniques, layering, and collage with professional instruction.'},
-  {id:'uw17',name:'Biomedical Engineering Intro',subject:'Science',grades:'Gr 9–12',dates:'Aug 10–14',time:'9am–4pm',price:'$555',priceNum:555,avail:'limited',online:false,desc:'3D-print prosthetic designs and explore tissue engineering in UW Bioengineering labs.'},
-  {id:'uw18',name:'Creative Nonfiction Writing',subject:'Writing',grades:'Gr 7–11',dates:'Aug 10–14',time:'9am–12pm',price:'$355',priceNum:355,avail:'open',online:false,desc:'Personal essay, memoir, and journalism techniques with professional writers.'},
-  {id:'uw19',name:'Psychology & Neuroscience',subject:'Health',grades:'Gr 9–12',dates:'Aug 17–21',time:'9am–3pm',price:'$495',priceNum:495,avail:'open',online:false,desc:'Cognitive experiments, brain anatomy, and behavioral psychology research methods.'},
-  {id:'uw20',name:'Illustration & Concept Art (Online)',subject:'Arts',grades:'Gr 6–10',dates:'Jun 15–19',time:'1–4pm',price:'$285',priceNum:285,avail:'open',online:true,desc:'Digital illustration fundamentals using Procreate — live instruction, fully remote.'},
+  {id:'uw01',name:'Marine Biology Discovery',subject:'Science',grades:'Gr 4–7',dates:'Jun 15–19',time:'9am–12pm',avail:'open',online:false,desc:'Explore Puget Sound ecosystems, dissect specimens, and tour UW marine labs.'},
+  {id:'uw02',name:'Game Design with Unity',subject:'STEM',grades:'Gr 6–10',dates:'Jun 15–19',time:'9am–3pm',avail:'open',online:false,desc:'Build a 2D platformer game from scratch using Unity and C# scripting.'},
+  {id:'uw03',name:'Creative Writing Intensive',subject:'Writing',grades:'Gr 5–9',dates:'Jun 22–26',time:'9am–12pm',avail:'open',online:false,desc:'Short stories, poetry, and worldbuilding with UW creative writing faculty.'},
+  {id:'uw04',name:'Robotics & AI Foundations',subject:'STEM',grades:'Gr 7–12',dates:'Jun 22–26',time:'9am–4pm',avail:'limited',online:false,desc:'Build autonomous robots and intro to machine learning concepts.'},
+  {id:'uw05',name:'Filmmaking & Storytelling',subject:'Media',grades:'Gr 6–10',dates:'Jun 29–Jul 3',time:'9am–3pm',avail:'open',online:false,desc:'Script, shoot, and edit a short film using professional camera equipment.'},
+  {id:'uw06',name:'Architecture & Urban Design',subject:'STEM',grades:'Gr 8–12',dates:'Jun 29–Jul 3',time:'9am–3pm',avail:'open',online:false,desc:'Design buildings and neighborhoods using CAD software and physical models.'},
+  {id:'uw07',name:'Astronomy & Space Science',subject:'Science',grades:'Gr 5–9',dates:'Jul 6–10',time:'9am–12pm',avail:'open',online:false,desc:'Telescope observation, planetary science, and tour UW astronomy facilities.'},
+  {id:'uw08',name:'Debate & Public Speaking',subject:'Writing',grades:'Gr 7–12',dates:'Jul 6–10',time:'9am–3pm',avail:'open',online:false,desc:'Competitive debate formats, argumentation theory, and persuasive speaking.'},
+  {id:'uw09',name:'Digital Photography & Editing',subject:'Media',grades:'Gr 6–10',dates:'Jul 13–17',time:'9am–12pm',avail:'open',online:false,desc:'Composition, lighting, and Lightroom editing on the UW campus.'},
+  {id:'uw10',name:'Chemistry Lab Experience',subject:'Science',grades:'Gr 8–12',dates:'Jul 13–17',time:'9am–3pm',avail:'limited',online:false,desc:'Real lab experiments in UW chemistry facilities with graduate student mentors.'},
+  {id:'uw11',name:'Graphic Novel Workshop',subject:'Arts',grades:'Gr 5–9',dates:'Jul 20–24',time:'9am–12pm',avail:'open',online:false,desc:'Character design, panel layout, inking, and digital coloring techniques.'},
+  {id:'uw12',name:'Environmental Science Field Camp',subject:'Outdoor',grades:'Gr 6–10',dates:'Jul 20–24',time:'9am–4pm',avail:'open',online:false,desc:'Field work in UW forests and shorelines, water quality testing, species ID.'},
+  {id:'uw13',name:'Pre-Med: Human Anatomy',subject:'Health',grades:'Gr 9–12',dates:'Jul 27–31',time:'9am–3pm',avail:'limited',online:false,desc:'Dissection labs, diagnostic imaging review, and hospital simulation in UW Medical.'},
+  {id:'uw14',name:'Music Production & Mixing',subject:'Media',grades:'Gr 7–12',dates:'Jul 27–31',time:'9am–3pm',avail:'open',online:false,desc:'DAW fundamentals, beat production, mixing, and mastering in UW recording studios.'},
+  {id:'uw15',name:'App Development (Swift)',subject:'STEM',grades:'Gr 8–12',dates:'Aug 3–7',time:'9am–4pm',avail:'open',online:false,desc:'Build an iPhone app from concept to submission using Swift and Xcode.'},
+  {id:'uw16',name:'Watercolor & Mixed Media',subject:'Arts',grades:'Gr 4–8',dates:'Aug 3–7',time:'9am–12pm',avail:'open',online:false,desc:'Wet-on-wet techniques, layering, and collage with professional instruction.'},
+  {id:'uw17',name:'Biomedical Engineering Intro',subject:'Science',grades:'Gr 9–12',dates:'Aug 10–14',time:'9am–4pm',avail:'limited',online:false,desc:'3D-print prosthetic designs and explore tissue engineering in UW Bioengineering labs.'},
+  {id:'uw18',name:'Creative Nonfiction Writing',subject:'Writing',grades:'Gr 7–11',dates:'Aug 10–14',time:'9am–12pm',avail:'open',online:false,desc:'Personal essay, memoir, and journalism techniques with professional writers.'},
+  {id:'uw19',name:'Psychology & Neuroscience',subject:'Health',grades:'Gr 9–12',dates:'Aug 17–21',time:'9am–3pm',avail:'open',online:false,desc:'Cognitive experiments, brain anatomy, and behavioral psychology research methods.'},
+  {id:'uw20',name:'Illustration & Concept Art (Online)',subject:'Arts',grades:'Gr 6–10',dates:'Jun 15–19',time:'1–4pm',avail:'open',online:true,desc:'Digital illustration fundamentals using Procreate — live instruction, fully remote.'},
 ];
 
 // Lookup helper for both main camps and UW sub-programs
@@ -1468,8 +1468,6 @@ function getCampById(id) {
     imgClass: subjImgClass[prog.subject] || 'img-stem',
     dates:    prog.dates,
     time:     prog.time,
-    price:    prog.price,
-    priceNum: prog.priceNum,
     week:     prog.dates.split('–')[0],
     regType:  'external',
     website:  'uwpce.uw.edu/youth',
@@ -1490,7 +1488,6 @@ function openUmbrellaDetail(id) {
   document.getElementById('umb-name').textContent = c.name;
   document.getElementById('umb-loc').textContent = c.location;
   document.getElementById('umb-summary').textContent = c.umbrellaSummary;
-  document.getElementById('umb-price').textContent = c.price;
   document.getElementById('umb-ages').textContent = 'Ages ' + c.ages;
   var wb = document.getElementById('umb-website-btn');
   if (c.website) { wb.href = 'https://' + c.website; wb.style.display = 'inline-block'; }
@@ -1550,8 +1547,7 @@ function pbRender() {
         '<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem;line-height:1.4;">' + p.desc + '</div>' +
       '</div>' +
       '<div class="pi-right">' +
-        '<div class="pi-price">' + p.price + '</div>' +
-        '<button class="pi-save-btn' + (saved ? ' saved' : '') + '" onclick="pbToggleSave(\'' + p.id + '\')">' +
+                '<button class="pi-save-btn' + (saved ? ' saved' : '') + '" onclick="pbToggleSave(\'' + p.id + '\')">' +
           (saved ? '♥' : '♡') +
         '</button>' +
       '</div>' +
@@ -1607,7 +1603,7 @@ function renderShortlist() {
     return '<div class="sl-item">' +
       '<div style="flex:1;">' +
         '<div class="sl-item-name">' + p.name + '</div>' +
-        '<div class="sl-item-meta">' + p.dates + ' · ' + p.price + '</div>' +
+        '<div class="sl-item-meta">' + p.dates + '</div>' +
       '</div>' +
       '<button onclick="pbToggleSave(\'' + p.id + '\')" style="background:none;border:none;cursor:pointer;font-size:.8rem;color:var(--muted);padding:.1rem .3rem;">✕</button>' +
     '</div>';
@@ -1661,8 +1657,6 @@ function openUWProgramDetail(pid) {
     regType: 'external',
     location: p.online ? 'Online (Live)' : 'University of Washington, Seattle',
     ages: p.grades,
-    price: p.price,
-    priceNum: p.priceNum,
     dates: p.dates,
     time: p.time,
     desc: p.desc,
@@ -1684,7 +1678,6 @@ function openUWProgramDetail(pid) {
   document.getElementById('detail-type').textContent = c.type;
   document.getElementById('detail-name').textContent = c.name;
   document.getElementById('detail-loc').textContent = '📍 ' + c.location;
-  document.getElementById('detail-price').textContent = c.price;
   document.getElementById('detail-ages').textContent = c.ages;
   document.getElementById('detail-hero-img').className = 'detail-hero-img ' + c.imgClass;
 
@@ -1725,7 +1718,6 @@ function buildUWProgramCTA(c, p) {
       'This program registers through the UW Youth & Teen Programs portal. Click below to visit the official registration page.' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:1rem;color:var(--muted)">' +
-      '<span>Program fee</span><strong style="color:var(--forest)">' + p.price + '</strong>' +
     '</div>';
 
   var regBtn = document.createElement('a');
@@ -1797,7 +1789,6 @@ function openDetail(id) {
   document.getElementById('detail-type').textContent = c.type;
   document.getElementById('detail-name').textContent = c.name;
   document.getElementById('detail-loc').textContent = '\uD83D\uDCCD ' + c.location;
-  document.getElementById('detail-price').textContent = c.price;
   document.getElementById('detail-ages').textContent = c.ages + ' years';
   // Dates — support single string or array of sessions
   var datesEl = document.getElementById('detail-dates');
@@ -1858,7 +1849,6 @@ function buildDetailCTA(c) {
     '<h4>How to Register</h4>' +
     '<div class="cta-reg-explainer ' + type + '" style="font-size:.84rem;line-height:1.6;margin-bottom:1rem;">' + explainerText + '</div>' +
     '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:1rem;color:var(--muted)">' +
-      '<span>Starting from</span><strong style="color:var(--forest)">' + c.price + '/week</strong>' +
     '</div>';
 
   // Primary action button
@@ -1906,7 +1896,6 @@ function openRegFlow(type) {
   document.getElementById('router-icon').textContent = c.icon;
   document.getElementById('router-name').textContent = c.name;
   document.getElementById('router-meta').textContent = '📍 ' + c.location + ' · Jun 9–13, 2025';
-  document.getElementById('router-price').textContent = c.price;
 
   const container = document.getElementById('reg-flow-container');
 
@@ -2103,7 +2092,7 @@ function completeNative() {
           <div class="conf-row"><span>Session</span><strong>Jun 9 – Jun 13</strong></div>
           <div class="conf-row"><span>Drop-off</span><strong>8:00am · ${currentCamp.location}</strong></div>
           <div class="conf-row"><span>Confirmation #</span><strong>CQ-2025-${Math.floor(Math.random()*90000+10000)}</strong></div>
-          <div class="conf-row"><span>Total Paid</span><strong>$328</strong></div>
+          
         </div>
         <div class="conf-actions">
           <button class="btn-primary" onclick="showPage('schedule')">View in My Schedule →</button>
@@ -2210,8 +2199,7 @@ function renderFavorites() {
           '<div style="font-weight:700;color:var(--forest);font-size:.92rem;margin-bottom:.25rem;">' + c.name + '</div>' +
           '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem;">📍 ' + c.location + '</div>' +
           '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<span style="font-size:.8rem;color:var(--moss);font-weight:600;">' + c.price + '</span>' +
-            '<span style="font-size:.78rem;color:var(--muted);">Ages ' + c.ages + '</span>' +
+                        '<span style="font-size:.78rem;color:var(--muted);">Ages ' + c.ages + '</span>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -2703,7 +2691,7 @@ function renderSchedule() {
     panelItems +=
       '<div style="padding:.7rem 0;border-bottom:1px solid #f0f4f1;">' +
         '<div class="saved-name">' + c.icon + ' ' + c.name + '</div>' +
-        '<div class="saved-dates">' + (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week))) + ' \u00b7 ' + c.price + '</div>' +
+        '<div class="saved-dates">' + (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week))) + '</div>' +
         '<div style="display:flex;gap:.4rem;margin-top:.5rem;align-items:center;">' +
           btn +
           '<button onclick="removeFromSchedule(' + c.id + ')" class="panel-remove-btn" title="Remove">\u2715</button>' +
@@ -3422,7 +3410,20 @@ window.addEventListener('DOMContentLoaded', function() {
   if (s) { s.style.display = 'block'; }
   renderProfileChildren();
   updateNavForUser();
-  // Load live data from Airtable (replaces static camps array on success)
+  // Render demo data immediately so the page works right away
+  applyFilters();
+
+  // Show a banner if running in a sandboxed context where Airtable can't load
+  var proto = window.location.protocol;
+  if (proto === 'file:' || proto === 'about:' || proto === 'blob:') {
+    var banner = document.createElement('div');
+    banner.id = 'demo-banner';
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a3a2a;color:#a8d5b5;font-size:.78rem;text-align:center;padding:.55rem 1rem;z-index:9999;letter-spacing:.01em;';
+    banner.innerHTML = '🔌 <strong>Preview mode</strong> — showing sample data. Open this file directly in your browser or deploy to GitHub Pages to load your live Airtable camps.  <button onclick="this.parentNode.remove()" style="margin-left:1rem;background:none;border:1px solid #a8d5b5;color:#a8d5b5;border-radius:4px;padding:.15rem .5rem;cursor:pointer;font-size:.75rem;">Dismiss</button>';
+    document.body.appendChild(banner);
+  }
+
+  // Then try to load live data from Airtable in the background (replaces demo data on success)
   loadCampsFromAirtable();
 
   document.addEventListener('click', function(e) {
