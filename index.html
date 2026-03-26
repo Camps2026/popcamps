@@ -2717,12 +2717,17 @@ function renderSchedule() {
   sorted.forEach(function(item) {
     var c = getCampById(item.campId);
     if (!c) return;
-    var datesVal = item.session || (Array.isArray(c.dates) ? c.dates[0] : c.dates);
-    var range = parseDateRange(datesVal);
-    if (!range) {
-      // fallback: use week field
-      var fb = parseDate(c.week);
-      range = fb ? {start: fb, end: addDays(fb, 4)} : null;
+    var range;
+    if (item.customStart && item.customEnd) {
+      // Parent picked specific dates — use those
+      range = {start: new Date(item.customStart + 'T12:00:00'), end: new Date(item.customEnd + 'T12:00:00')};
+    } else {
+      var datesVal = item.session || (Array.isArray(c.dates) ? c.dates[0] : c.dates);
+      range = parseDateRange(datesVal);
+      if (!range) {
+        var fb = parseDate(c.week);
+        range = fb ? {start: fb, end: addDays(fb, 4)} : null;
+      }
     }
     campRanges.push({item: item, camp: c, range: range});
     if (!range) return;
@@ -2939,6 +2944,7 @@ function showAddToScheduleModal() {
   var selectedChild = null;
   var selectedSession = Array.isArray(c.dates) ? null : (c.dates || c.week);
   var hasSessions = Array.isArray(c.dates) && c.dates.length > 1;
+  var customStart = null, customEnd = null;
 
   // Step 1: Session picker
   if (hasSessions) {
@@ -2991,7 +2997,8 @@ function showAddToScheduleModal() {
           childGrid.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='#fff'; });
           cbtn.style.borderColor = 'var(--moss)'; cbtn.style.background = '#f0f8f2';
           selectedChild = child.id;
-          regSection.style.display = 'block';
+          if (hasSessions) { regSection.style.display = 'block'; }
+          else { dateSection.style.display = 'block'; }
         };
       }
       childGrid.appendChild(cbtn);
@@ -3002,9 +3009,53 @@ function showAddToScheduleModal() {
   }
   box.appendChild(childSection);
 
+  // Step 2.5: Date picker (for camps without discrete sessions)
+  var dateSection = document.createElement('div');
+  dateSection.style.display = (!hasSessions && children.length <= 1) ? 'block' : 'none';
+  if (!hasSessions) {
+    var datePickLabel = document.createElement('div');
+    datePickLabel.style.cssText = 'font-size:.88rem;font-weight:700;color:var(--forest);margin-bottom:.4rem;';
+    datePickLabel.textContent = 'Which specific dates will your child attend?';
+    var datePickSub = document.createElement('div');
+    datePickSub.style.cssText = 'font-size:.78rem;color:var(--muted);margin-bottom:.9rem;';
+    datePickSub.textContent = 'Enter the week or session you are signing up for.';
+    var dateRow = document.createElement('div');
+    dateRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem;';
+    function mkDateField(labelText, inputId) {
+      var wrap = document.createElement('div');
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;letter-spacing:.06em;';
+      lbl.textContent = labelText;
+      var inp = document.createElement('input');
+      inp.type = 'date'; inp.id = inputId;
+      inp.style.cssText = 'width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.5rem .6rem;font-family:"DM Sans",sans-serif;font-size:.85rem;outline:none;color:var(--text);box-sizing:border-box;';
+      wrap.appendChild(lbl); wrap.appendChild(inp);
+      return wrap;
+    }
+    var startWrap = mkDateField('Start Date', 'custom-start-date');
+    var endWrap   = mkDateField('End Date',   'custom-end-date');
+    dateRow.appendChild(startWrap); dateRow.appendChild(endWrap);
+    var confirmDatesBtn = document.createElement('button');
+    confirmDatesBtn.style.cssText = 'width:100%;padding:.8rem;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;';
+    confirmDatesBtn.textContent = 'Confirm Dates →';
+    confirmDatesBtn.onclick = function() {
+      customStart = document.getElementById('custom-start-date').value;
+      customEnd   = document.getElementById('custom-end-date').value;
+      if (!customStart || !customEnd) { showToast('Please enter both a start and end date'); return; }
+      if (customEnd < customStart) { showToast('End date must be after start date'); return; }
+      dateSection.style.display = 'none';
+      regSection.style.display = 'block';
+    };
+    dateSection.appendChild(datePickLabel);
+    dateSection.appendChild(datePickSub);
+    dateSection.appendChild(dateRow);
+    dateSection.appendChild(confirmDatesBtn);
+  }
+  box.appendChild(dateSection);
+
   // Step 3: Registration status
   var regSection = document.createElement('div');
-  regSection.style.display = (!hasSessions && children.length <= 1) ? 'block' : 'none';
+  regSection.style.display = 'none';
 
   var qEl = document.createElement('div');
   qEl.style.cssText = 'font-size:.88rem;font-weight:700;color:var(--forest);margin-bottom:.7rem;';
@@ -3013,13 +3064,14 @@ function showAddToScheduleModal() {
   function doAdd(registered) {
     if (!selectedChild) { showToast('Please select a child first'); return; }
     if (!selectedSession) { showToast('Please select a session first'); return; }
+    if (!hasSessions && (!customStart || !customEnd)) { showToast('Please confirm your dates first'); return; }
     var campId = c.id;
     if (scheduleItems.some(function(i){ return i.campId===campId && i.child===selectedChild && i.session===selectedSession; })) {
       showToast('Already in schedule for this session'); closeOverlay('add-sched-modal'); return;
     }
     var prev = activeChild;
     activeChild = selectedChild;
-    scheduleItems.push({campId: campId, registered: registered, child: selectedChild, session: selectedSession});
+    scheduleItems.push({campId: campId, registered: registered, child: selectedChild, session: selectedSession, customStart: customStart, customEnd: customEnd});
     renderSchedule();
     activeChild = prev;
     closeOverlay('add-sched-modal');
