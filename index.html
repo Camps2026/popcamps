@@ -2942,39 +2942,12 @@ function showAddToScheduleModal() {
   box.appendChild(header);
 
   var selectedChild = null;
-  var selectedSession = Array.isArray(c.dates) ? null : (c.dates || c.week);
-  var hasSessions = Array.isArray(c.dates) && c.dates.length > 1;
+  var selectedSession = Array.isArray(c.dates) ? (c.dates[0] || null) : (c.dates || c.week);
   var customStart = null, customEnd = null;
 
-  // Step 1: Session picker
-  if (hasSessions) {
-    var sessLabel = document.createElement('div');
-    sessLabel.style.cssText = 'font-size:.88rem;font-weight:700;color:var(--forest);margin-bottom:.7rem;';
-    sessLabel.textContent = 'Which session?';
-    box.appendChild(sessLabel);
-
-    var sessGrid = document.createElement('div');
-    sessGrid.style.cssText = 'display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.2rem;';
-
-    c.dates.forEach(function(dateStr) {
-      var sbtn = document.createElement('button');
-      sbtn.style.cssText = 'display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;text-align:left;transition:all .15s;font-size:.88rem;';
-      sbtn.innerHTML = '<span>\uD83D\uDCC5</span><span style="font-weight:600;color:var(--forest);">' + dateStr + '</span>';
-      sbtn.onclick = function() {
-        sessGrid.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='#fff'; });
-        sbtn.style.borderColor = 'var(--moss)'; sbtn.style.background = '#f0f8f2';
-        selectedSession = dateStr;
-        if (children.length > 1) { childSection.style.display = 'block'; }
-        else { selectedChild = children[0] ? children[0].id : 'emma'; regSection.style.display = 'block'; }
-      };
-      sessGrid.appendChild(sbtn);
-    });
-    box.appendChild(sessGrid);
-  }
-
-  // Step 2: Child picker
+  // Step 1: Child picker
   var childSection = document.createElement('div');
-  childSection.style.display = (children.length > 1 && !hasSessions) ? 'block' : 'none';
+  childSection.style.display = children.length > 1 ? 'block' : 'none';
 
   if (children.length > 1) {
     var pickLabel = document.createElement('div');
@@ -2997,8 +2970,7 @@ function showAddToScheduleModal() {
           childGrid.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='#fff'; });
           cbtn.style.borderColor = 'var(--moss)'; cbtn.style.background = '#f0f8f2';
           selectedChild = child.id;
-          if (hasSessions) { regSection.style.display = 'block'; }
-          else { dateSection.style.display = 'block'; }
+          dateSection.style.display = 'block';
         };
       }
       childGrid.appendChild(cbtn);
@@ -3011,8 +2983,8 @@ function showAddToScheduleModal() {
 
   // Step 2.5: Date picker (for camps without discrete sessions)
   var dateSection = document.createElement('div');
-  dateSection.style.display = (!hasSessions && children.length <= 1) ? 'block' : 'none';
-  if (!hasSessions) {
+  dateSection.style.display = children.length <= 1 ? 'block' : 'none';
+  {
     var datePickLabel = document.createElement('div');
     datePickLabel.style.cssText = 'font-size:.88rem;font-weight:700;color:var(--forest);margin-bottom:.4rem;';
     datePickLabel.textContent = 'Which specific dates will your child attend?';
@@ -3063,7 +3035,6 @@ function showAddToScheduleModal() {
 
   function doAdd(registered) {
     if (!selectedChild) { showToast('Please select a child first'); return; }
-    if (hasSessions && !selectedSession) { showToast('Please select a session first'); return; }
     if (!hasSessions && (!customStart || !customEnd)) { showToast('Please confirm your dates first'); return; }
     var campId = c.id;
     if (scheduleItems.some(function(i){ return i.campId===campId && i.child===selectedChild; })) {
