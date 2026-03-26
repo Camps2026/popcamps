@@ -479,7 +479,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
     <a onclick="showPage('portal')" id="nav-portal">List Your Camp</a>
   </div>
   <div style="display:flex;align-items:center;gap:.6rem;">
-    <button class="nav-btn" id="nav-signup-btn" onclick="goToSignUp()" style="background:#fff;color:var(--forest);font-size:.8rem;padding:.4rem .9rem;">Sign Up</button>
+    <button class="nav-btn" id="nav-signup-btn" onclick="goToSignUp()" style="background:#fff;color:var(--forest);font-size:.8rem;padding:.4rem .9rem;">Sign Up / Log In</button>
     <div class="hamburger" onclick="document.getElementById('mob-menu').classList.toggle('open')">
       <span></span><span></span><span></span>
     </div>
@@ -3395,7 +3395,7 @@ function updateNavForUser() {
     btn.onclick = showAccountModal;
     btn.style.background = 'var(--sun)';
   } else {
-    btn.textContent = 'Sign Up';
+    btn.textContent = 'Sign Up / Log In';
     btn.onclick = function(){ goToSignUp(); };
     btn.style.background = '#fff';
   }
