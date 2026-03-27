@@ -363,7 +363,8 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .sched-event-regtype{font-size:.62rem;opacity:.8;margin-top:.15rem;}
 .sched-event-dates{font-size:.68rem;opacity:.95;margin-top:.1rem;font-weight:600;letter-spacing:.01em;}
 .sched-event-note-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.75);margin-left:3px;vertical-align:middle;}
-.conflict-banner{background:#fff3e0;border:1.5px solid #e8901a;border-radius:10px;padding:.75rem 1rem;margin:.75rem .75rem 0;font-size:.82rem;color:#7a3f00;display:flex;align-items:flex-start;gap:.5rem;line-height:1.4;}
+.sched-event-conflict{background:repeating-linear-gradient(45deg,rgba(255,255,255,.13) 0,rgba(255,255,255,.13) 5px,transparent 5px,transparent 12px),#c0392b !important;}
+.conflict-banner{background:#fff0f0;border:1.5px solid #c0392b;border-radius:10px;padding:.75rem 1rem;margin:.75rem .75rem 0;font-size:.82rem;color:#7a1a1a;display:flex;align-items:flex-start;gap:.5rem;line-height:1.4;}
 .empty-cell{display:flex;align-items:center;justify-content:center;color:#cdd8cf;font-size:1.2rem;cursor:pointer;transition:color .15s;height:100%;min-height:75px;}
 .empty-cell:hover{color:var(--sage);}
 .saved-camps-panel{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.06);position:sticky;top:80px;}
@@ -2851,7 +2852,7 @@ function renderSchedule() {
 
   // ── Build grid: one row per week ──────────────────────────────
   var conflictBanner = conflictCampIds.size > 0
-    ? '<div class="conflict-banner"><span style="font-size:1.1rem;flex-shrink:0;">⚠️</span><span><strong>Scheduling conflict:</strong> Two or more of your camps overlap. Overlapping camps are shown in orange.</span></div>'
+    ? '<div class="conflict-banner"><span style="font-size:1.1rem;flex-shrink:0;">⚠️</span><span><strong>Scheduling conflict:</strong> Two or more of your camps overlap. Overlapping camps are shown in red with stripes.</span></div>'
     : '';
   var rows = conflictBanner + '<div class="week-header"><div>Week of</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>';
 
@@ -2910,9 +2911,9 @@ function renderSchedule() {
           var childIdx = children.findIndex(function(ch){ return ch.id === item.child; });
           var childColor = CHILD_COLORS[childIdx >= 0 ? childIdx % CHILD_COLORS.length : 0];
           var bg, opacity;
-          if (isConflict)      { bg = '#e8901a'; opacity = '1'; }
-          else if (isAllKids)  { bg = childColor; opacity = item.registered ? '1' : '0.62'; }
-          else                 { bg = item.registered ? 'var(--moss)' : '#8fa89a'; opacity = '1'; }
+          if (isConflict)      { bg = ''; opacity = '1'; }
+          else if (isAllKids)  { bg = 'background:' + childColor + ';'; opacity = item.registered ? '1' : '0.62'; }
+          else                 { bg = 'background:' + (item.registered ? 'var(--moss)' : '#8fa89a') + ';'; opacity = '1'; }
           var lbl = isConflict ? '⚠️ Conflict' : (item.registered ? 'Registered' : 'Not yet registered');
           var span = found.endIdx - found.startIdx + 1;
           var remaining = 7 - d; if (span > remaining) span = remaining;
@@ -2920,7 +2921,7 @@ function renderSchedule() {
           var dateLabel = (item.customStart && item.customEnd)
             ? '<div class="sched-event-dates">' + fmtDateRange(item.customStart, item.customEnd) + '</div>' : '';
           var evHtml =
-            '<div class="sched-event" style="background:' + bg + ';opacity:' + opacity + ';cursor:pointer;' +
+            '<div class="sched-event' + (isConflict ? ' sched-event-conflict' : '') + '" style="' + bg + 'opacity:' + opacity + ';cursor:pointer;' +
             (span > 1 ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
             '" onclick="openEventPopup(\'' + item.localId + '\')">' +
               '<div class="sched-event-name">' + c.icon + ' ' + c.name + noteDot + '</div>' +
@@ -2951,7 +2952,7 @@ function renderSchedule() {
         var col = CHILD_COLORS[idx % CHILD_COLORS.length];
         legendHtml += '<div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:' + col + ';display:inline-block;flex-shrink:0;"></span>' + child.emoji + ' ' + child.name + '</div>';
       });
-      legendHtml += '<div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:#e8901a;display:inline-block;flex-shrink:0;"></span>Conflict</div>';
+      legendHtml += '<div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0,rgba(255,255,255,.18) 5px,transparent 5px,transparent 12px),#c0392b;display:inline-block;flex-shrink:0;"></span>Conflict</div>';
       legendHtml += '<div style="font-size:.76rem;color:var(--muted);margin-left:auto;font-style:italic;">Faded = not yet registered</div>';
       legendEl.innerHTML = legendHtml;
     } else {
@@ -3111,7 +3112,7 @@ function openEventPopup(localId) {
     });
     if (conflictNames.length > 0) {
       conflictWarn = document.createElement('div');
-      conflictWarn.style.cssText = 'background:#fff3e0;border:1.5px solid #e8901a;border-radius:10px;padding:.8rem;margin-bottom:1rem;font-size:.82rem;color:#7a3f00;line-height:1.4;';
+      conflictWarn.style.cssText = 'background:#fff0f0;border:1.5px solid #c0392b;border-radius:10px;padding:.8rem;margin-bottom:1rem;font-size:.82rem;color:#7a1a1a;line-height:1.4;';
       conflictWarn.innerHTML = '<strong>⚠️ Scheduling conflict</strong><br>This camp overlaps with: ' + conflictNames.join(', ') + '.';
     }
   }
