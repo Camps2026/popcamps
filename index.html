@@ -2887,14 +2887,68 @@ function openEventPopup(campId) {
   // Header
   var hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem;';
+  var hdrDateEl = document.createElement('div');
+  hdrDateEl.style.cssText = 'font-size:.8rem;color:var(--muted);';
+  hdrDateEl.textContent = (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : c.dates) + ' \u00b7 ' + c.time;
   hdr.innerHTML =
     '<div style="width:48px;height:48px;border-radius:12px;background:#eef7f0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">' + c.icon + '</div>' +
-    '<div><div style="font-weight:700;color:var(--forest);font-size:1rem;">' + c.name + '</div>' +
-    '<div style="font-size:.8rem;color:var(--muted);">' + (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : c.dates) + ' \u00b7 ' + c.time + '</div></div>';
+    '<div><div style="font-weight:700;color:var(--forest);font-size:1rem;">' + c.name + '</div></div>';
+  hdr.querySelector('div:last-child').appendChild(hdrDateEl);
+
+  // Date editor
+  var dateSection = document.createElement('div');
+  dateSection.style.cssText = 'background:var(--sky);border-radius:10px;padding:.9rem;margin-bottom:1rem;';
+  var dateInputStyle = 'flex:1;padding:.55rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-family:"DM Sans",sans-serif;background:#fff;outline:none;';
+  var saveDateBtn = document.createElement('button');
+  saveDateBtn.style.cssText = 'width:100%;margin-top:.7rem;padding:.65rem;border:none;border-radius:8px;background:var(--forest);color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;display:none;';
+  saveDateBtn.textContent = 'Save dates';
+  dateSection.innerHTML =
+    '<div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:.55rem;">Your attendance dates</div>' +
+    '<div style="display:flex;gap:.5rem;align-items:center;">' +
+      '<input type="date" id="ep-start" style="' + dateInputStyle + '" value="' + (item.customStart || '') + '">' +
+      '<span style="color:var(--muted);font-size:.8rem;">to</span>' +
+      '<input type="date" id="ep-end" style="' + dateInputStyle + '" value="' + (item.customEnd || '') + '">' +
+    '</div>';
+  dateSection.appendChild(saveDateBtn);
+
+  var epStart = dateSection.querySelector('#ep-start');
+  var epEnd   = dateSection.querySelector('#ep-end');
+
+  function onDateChange() {
+    var s = epStart.value, e = epEnd.value;
+    var changed = (s !== (item.customStart || '')) || (e !== (item.customEnd || ''));
+    saveDateBtn.style.display = (s && e && changed) ? 'block' : 'none';
+  }
+  epStart.addEventListener('change', function() {
+    // auto-advance end date if needed
+    if (epStart.value && (!epEnd.value || epEnd.value <= epStart.value)) {
+      var next = new Date(epStart.value + 'T12:00:00');
+      next.setDate(next.getDate() + 1);
+      epEnd.value = next.toISOString().split('T')[0];
+    }
+    onDateChange();
+  });
+  epEnd.addEventListener('change', onDateChange);
+
+  saveDateBtn.onclick = function() {
+    var s = epStart.value, e = epEnd.value;
+    if (!s || !e) { showToast('Please fill in both dates'); return; }
+    if (e < s) { showToast('End date must be after start date'); return; }
+    item.customStart = s;
+    item.customEnd   = e;
+    // update Supabase
+    if (currentUser && item.dbId) {
+      sbClient.from('user_schedules').update({custom_dates: s + '|' + e}).eq('id', item.dbId);
+    }
+    hdrDateEl.textContent = fmtDateRange(s, e) + ' \u00b7 ' + c.time;
+    saveDateBtn.style.display = 'none';
+    renderSchedule();
+    showToast('Dates updated');
+  };
 
   // Status box
   var statusBox = document.createElement('div');
-  statusBox.style.cssText = 'background:var(--sky);border-radius:10px;padding:.9rem;margin-bottom:1.2rem;font-size:.84rem;color:var(--muted);line-height:1.5;';
+  statusBox.style.cssText = 'background:#f5f8f5;border-radius:10px;padding:.9rem;margin-bottom:1rem;font-size:.84rem;color:var(--muted);line-height:1.5;';
   statusBox.innerHTML =
     '<strong style="display:block;color:var(--forest);margin-bottom:.2rem;">Registration status</strong>' +
     (item.registered
@@ -2926,6 +2980,7 @@ function openEventPopup(campId) {
   removeBtn.onclick = function() { removeFromSchedule(campId); closeOverlay('event-popup'); };
 
   box.appendChild(hdr);
+  box.appendChild(dateSection);
   box.appendChild(statusBox);
   box.appendChild(primaryBtn);
   box.appendChild(detailBtn);
