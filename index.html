@@ -906,6 +906,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 
     <div class="children-tabs">
       <button class="add-child-tab" onclick="requireAccount(showAddChildModal)">+ Add Child</button>
+      <button class="child-tab" id="all-kids-tab" onclick="switchToAllKids(this)" style="display:none;">All Kids</button>
       <button class="child-tab" id="saved-tab" onclick="switchToSaved(this)" style="font-size:.78rem;padding:.35rem .85rem;">♥ Saved Camps</button>
     </div>
 
@@ -921,7 +922,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
     <div class="schedule-layout" id="sched-layout" style="display:none;">
       <div>
         <div class="schedule-grid" id="sched-calendar"></div>
-        <div style="background:#fff;border-radius:12px;padding:1rem;margin-top:1rem;box-shadow:0 2px 10px rgba(0,0,0,.05);display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;">
+        <div id="sched-legend" style="background:#fff;border-radius:12px;padding:1rem;margin-top:1rem;box-shadow:0 2px 10px rgba(0,0,0,.05);display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center;">
           <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;">Status</div>
           <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:var(--moss);display:inline-block;flex-shrink:0;"></span>Registered</div>
           <div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:#8fa89a;display:inline-block;flex-shrink:0;"></span>Not yet registered</div>
@@ -2352,6 +2353,17 @@ function switchChild(tab, child) {
   renderSchedule();
 }
 
+function switchToAllKids(tab) {
+  document.querySelectorAll('.child-tab').forEach(function(t){ t.classList.remove('active'); });
+  tab.classList.add('active');
+  activeChild = '__all__';
+  var favEl = document.getElementById('sched-favorites');
+  if (favEl) favEl.style.display = 'none';
+  var emptyH3 = document.querySelector('#sched-empty h3');
+  if (emptyH3) emptyH3.textContent = 'No camps added yet';
+  renderSchedule();
+}
+
 function setStatus(campId, registered) {
   var item = scheduleItems.find(function(i){ return i.campId === campId; });
   if (item) { item.registered = registered; renderSchedule(); showToast(registered ? "\u2705 Marked as Registered" : "Marked as Not Yet Registered"); }
@@ -2377,6 +2389,8 @@ function showToast(msg) {
 
 
 /* ─── SCHEDULE STATE ─── */
+var CHILD_COLORS = ['#2d7a6a','#c8562a','#3a62a0','#8040a0','#a04040','#3d8c50'];
+
 function downloadICS(item, camp) {
   var s = item.customStart, e = item.customEnd;
   if (!s || !e) { showToast('No dates set for this camp'); return; }
@@ -2501,7 +2515,15 @@ function addChildTab(childId, name, age, emoji) {
   tab.textContent = emoji + ' ' + name + (age ? ', ' + age : '');
   tab.onclick = function(){ switchChild(tab, childId); };
   tabsEl.insertBefore(tab, addBtn);
+  updateAllKidsTab();
   renderProfileChildren();
+}
+
+function updateAllKidsTab() {
+  var tabsEl = document.querySelector('.children-tabs');
+  var count = tabsEl ? tabsEl.querySelectorAll('[data-child-id]').length : 0;
+  var allTab = document.getElementById('all-kids-tab');
+  if (allTab) allTab.style.display = count >= 2 ? '' : 'none';
 }
 
 function renderProfileChildren() {
@@ -2596,10 +2618,11 @@ function showEditChildModal(index) {
       var schedTab = document.querySelector('[data-child-id="' + child.id + '"]');
       if (schedTab) schedTab.remove();
       children.splice(index, 1);
-      if (activeChild === child.id) {
+      updateAllKidsTab();
+      if (activeChild === child.id || activeChild === '__all__') {
         activeChild = children.length > 0 ? children[0].id : 'emma';
-        var firstTab = document.querySelector('.child-tab');
-        if (firstTab) { firstTab.classList.add('active'); }
+        var firstTab = document.querySelector('[data-child-id]');
+        if (firstTab) { document.querySelectorAll('.child-tab').forEach(function(t){t.classList.remove('active');}); firstTab.classList.add('active'); }
         renderSchedule();
       }
       renderProfileChildren();
@@ -2647,8 +2670,9 @@ async function addToSchedule(campId, registered) {
   renderSchedule();
 }
 
-async function toggleRegistered(campId) {
-  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === activeChild; });
+async function toggleRegistered(campId, childId) {
+  var targetChild = childId || activeChild;
+  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === targetChild; });
   if (!item) return;
   item.registered = !item.registered;
   if (currentUser && item.dbId) await sbClient.from('user_schedules').update({registered: item.registered}).eq('id', item.dbId);
@@ -2656,10 +2680,11 @@ async function toggleRegistered(campId) {
   showToast(item.registered ? '\u2705 Marked as Registered' : 'Marked as Not Yet Registered');
 }
 
-async function removeFromSchedule(campId) {
-  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === activeChild; });
+async function removeFromSchedule(campId, childId) {
+  var targetChild = childId || activeChild;
+  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === targetChild; });
   if (currentUser && item && item.dbId) await sbClient.from('user_schedules').delete().eq('id', item.dbId);
-  scheduleItems = scheduleItems.filter(function(i){ return !(i.campId === campId && i.child === activeChild); });
+  scheduleItems = scheduleItems.filter(function(i){ return !(i.campId === campId && i.child === targetChild); });
   renderSchedule();
   showToast('Removed from schedule');
 }
@@ -2676,7 +2701,8 @@ function renderSchedule() {
   var panelEl  = document.getElementById('sched-panel');
   if (!calEl) return;
 
-  var childItems = scheduleItems.filter(function(i){ return i.child === activeChild; });
+  var isAllKids = activeChild === '__all__';
+  var childItems = isAllKids ? scheduleItems.slice() : scheduleItems.filter(function(i){ return i.child === activeChild; });
 
   if (childItems.length === 0) {
     if (layoutEl) layoutEl.style.display = 'none';
@@ -2787,16 +2813,17 @@ function renderSchedule() {
     return;
   }
 
-  // ── Detect scheduling conflicts ───────────────────────────────
+  // ── Detect scheduling conflicts (within same child only) ─────
   var conflictCampIds = new Set();
   for (var ci = 0; ci < campRanges.length; ci++) {
     if (!campRanges[ci].range) continue;
     for (var cj = ci + 1; cj < campRanges.length; cj++) {
       if (!campRanges[cj].range) continue;
+      if (campRanges[ci].item.child !== campRanges[cj].item.child) continue;
       if (campRanges[ci].range.start <= campRanges[cj].range.end &&
           campRanges[cj].range.start <= campRanges[ci].range.end) {
-        conflictCampIds.add(campRanges[ci].item.campId);
-        conflictCampIds.add(campRanges[cj].item.campId);
+        conflictCampIds.add(campRanges[ci].item.campId + '_' + campRanges[ci].item.child);
+        conflictCampIds.add(campRanges[cj].item.campId + '_' + campRanges[cj].item.child);
       }
     }
   }
@@ -2815,8 +2842,17 @@ function renderSchedule() {
       if (!cr.range) return;
       var item = cr.item;
       var c    = cr.camp;
-      var isConflict = conflictCampIds.has(c.id);
-      var bg   = isConflict ? '#e8901a' : (item.registered ? 'var(--moss)' : '#8fa89a');
+      var isConflict = conflictCampIds.has(c.id + '_' + item.child);
+      var childIdx = children.findIndex(function(ch){ return ch.id === item.child; });
+      var childColor = CHILD_COLORS[childIdx >= 0 ? childIdx % CHILD_COLORS.length : 0];
+      var bg, opacity;
+      if (isConflict) {
+        bg = '#e8901a'; opacity = '1';
+      } else if (isAllKids) {
+        bg = childColor; opacity = item.registered ? '1' : '0.62';
+      } else {
+        bg = item.registered ? 'var(--moss)' : '#8fa89a'; opacity = '1';
+      }
       var lbl  = isConflict ? '⚠️ Conflict' : (item.registered ? 'Registered' : 'Not yet registered');
 
       // Clamp range to this week (Mon–Sun)
@@ -2842,9 +2878,9 @@ function renderSchedule() {
         : '';
       var noteDot = item.notes ? '<span class="sched-event-note-dot" title="Has note"></span>' : '';
       var eventHtml =
-        '<div class="sched-event" style="background:' + bg + ';cursor:pointer;' +
+        '<div class="sched-event" style="background:' + bg + ';opacity:' + opacity + ';cursor:pointer;' +
         (isMultiDay ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
-        '" onclick="openEventPopup(' + c.id + ')" data-span="' + span + '">' +
+        '" onclick="openEventPopup(' + c.id + ',\'' + item.child + '\')" data-span="' + span + '">' +
           '<div class="sched-event-name">' + c.icon + ' ' + c.name + noteDot + '</div>' +
           dateLabel +
           '<div class="sched-event-time">' + c.time + '</div>' +
@@ -2885,28 +2921,72 @@ function renderSchedule() {
 
   calEl.innerHTML = rows;
 
+  // ── Legend ───────────────────────────────────
+  var legendEl = document.getElementById('sched-legend');
+  if (legendEl) {
+    if (isAllKids && children.length >= 2) {
+      var legendHtml = '<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;">Children</div>';
+      children.forEach(function(child, idx) {
+        var col = CHILD_COLORS[idx % CHILD_COLORS.length];
+        legendHtml += '<div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:' + col + ';display:inline-block;flex-shrink:0;"></span>' + child.emoji + ' ' + child.name + '</div>';
+      });
+      legendHtml += '<div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:#e8901a;display:inline-block;flex-shrink:0;"></span>Conflict</div>';
+      legendHtml += '<div style="font-size:.76rem;color:var(--muted);margin-left:auto;font-style:italic;">Faded = not yet registered</div>';
+      legendEl.innerHTML = legendHtml;
+    } else {
+      legendEl.innerHTML =
+        '<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;">Status</div>' +
+        '<div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:var(--moss);display:inline-block;flex-shrink:0;"></span>Registered</div>' +
+        '<div style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;"><span style="width:14px;height:14px;border-radius:4px;background:#8fa89a;display:inline-block;flex-shrink:0;"></span>Not yet registered</div>' +
+        '<div style="font-size:.76rem;color:var(--muted);margin-left:auto;font-style:italic;">Click any block to update</div>';
+    }
+  }
+
   // ── Right panel ────────────────────────────
   var regCount = childItems.filter(function(i){ return i.registered; }).length;
   var total    = childItems.length;
 
   var panelItems = '';
-  sorted.forEach(function(item) {
-    var c   = getCampById(item.campId);
-    if (!c) return;
-    var reg = item.registered;
-    var btn = reg
-      ? '<button onclick="toggleRegistered(' + c.id + ')" class="panel-reg-btn panel-reg-on">\u2705 Registered</button>'
-      : '<button onclick="toggleRegistered(' + c.id + ')" class="panel-reg-btn panel-reg-off">Mark Registered</button>';
-    panelItems +=
-      '<div style="padding:.7rem 0;border-bottom:1px solid #f0f4f1;">' +
-        '<div class="saved-name">' + c.icon + ' ' + c.name + '</div>' +
-        '<div class="saved-dates">' + (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week)))) + '</div>' +
-        '<div style="display:flex;gap:.4rem;margin-top:.5rem;align-items:center;">' +
-          btn +
-          '<button onclick="removeFromSchedule(' + c.id + ')" class="panel-remove-btn" title="Remove">\u2715</button>' +
-        '</div>' +
-      '</div>';
-  });
+  if (isAllKids) {
+    // Grouped by child
+    children.forEach(function(child, idx) {
+      var childColor = CHILD_COLORS[idx % CHILD_COLORS.length];
+      var items = scheduleItems.filter(function(i){ return i.child === child.id; });
+      if (items.length === 0) return;
+      panelItems += '<div style="margin-bottom:.5rem;padding-top:.6rem;">' +
+        '<div style="display:flex;align-items:center;gap:.45rem;margin-bottom:.35rem;">' +
+          '<span style="width:10px;height:10px;border-radius:50%;background:' + childColor + ';flex-shrink:0;"></span>' +
+          '<span style="font-size:.8rem;font-weight:700;color:var(--forest);">' + child.emoji + ' ' + child.name + '</span>' +
+        '</div>';
+      items.forEach(function(item) {
+        var c = getCampById(item.campId);
+        if (!c) return;
+        panelItems += '<div style="padding:.5rem 0 .5rem .9rem;border-bottom:1px solid #f0f4f1;font-size:.82rem;">' +
+          '<div class="saved-name" style="font-size:.82rem;">' + c.icon + ' ' + c.name + '</div>' +
+          '<div class="saved-dates">' + (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week)))) + '</div>' +
+        '</div>';
+      });
+      panelItems += '</div>';
+    });
+  } else {
+    sorted.forEach(function(item) {
+      var c   = getCampById(item.campId);
+      if (!c) return;
+      var reg = item.registered;
+      var btn = reg
+        ? '<button onclick="toggleRegistered(' + c.id + ',\'' + item.child + '\')" class="panel-reg-btn panel-reg-on">\u2705 Registered</button>'
+        : '<button onclick="toggleRegistered(' + c.id + ',\'' + item.child + '\')" class="panel-reg-btn panel-reg-off">Mark Registered</button>';
+      panelItems +=
+        '<div style="padding:.7rem 0;border-bottom:1px solid #f0f4f1;">' +
+          '<div class="saved-name">' + c.icon + ' ' + c.name + '</div>' +
+          '<div class="saved-dates">' + (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week)))) + '</div>' +
+          '<div style="display:flex;gap:.4rem;margin-top:.5rem;align-items:center;">' +
+            btn +
+            '<button onclick="removeFromSchedule(' + c.id + ',\'' + item.child + '\')" class="panel-remove-btn" title="Remove">\u2715</button>' +
+          '</div>' +
+        '</div>';
+    });
+  }
 
   panelEl.innerHTML =
     '<h3 class="sched-panel-title">My Camps</h3>' +
@@ -2915,8 +2995,9 @@ function renderSchedule() {
     '<button class="find-more-btn" onclick="showPage(\'search\')">+ Find More Camps</button>';
 }
 
-function openEventPopup(campId) {
-  var item = scheduleItems.find(function(i){ return i.campId === campId; });
+function openEventPopup(campId, childId) {
+  var targetChild = childId || activeChild;
+  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === targetChild; });
   var c    = getCampById(campId);
   if (!item || !c) return;
   closeOverlay('event-popup');
@@ -3058,7 +3139,7 @@ function openEventPopup(campId) {
     primaryBtn.style.cssText += 'border:none;background:var(--moss);color:#fff;';
     primaryBtn.textContent = '\u2705 Mark as Registered';
   }
-  primaryBtn.onclick = function() { toggleRegistered(campId); closeOverlay('event-popup'); };
+  primaryBtn.onclick = function() { toggleRegistered(campId, item.child); closeOverlay('event-popup'); };
 
   // Add to calendar button
   var icsBtn = document.createElement('button');
@@ -3076,7 +3157,7 @@ function openEventPopup(campId) {
   var removeBtn = document.createElement('button');
   removeBtn.style.cssText = 'width:100%;padding:.6rem;border:none;background:none;font-size:.8rem;cursor:pointer;color:var(--muted);';
   removeBtn.textContent = 'Remove from schedule';
-  removeBtn.onclick = function() { removeFromSchedule(campId); closeOverlay('event-popup'); };
+  removeBtn.onclick = function() { removeFromSchedule(campId, item.child); closeOverlay('event-popup'); };
 
   box.appendChild(hdr);
   if (conflictWarn) box.appendChild(conflictWarn);
