@@ -1317,9 +1317,10 @@ function campHasSessionInRange(camp, startDate, endDate) {
   if (!dates || dates === 'TBD') return true;
   if (!Array.isArray(dates)) dates = [dates];
   return dates.some(function(dateStr) {
-    var parts = dateStr.split('–');
+    var cleaned = dateStr.replace(/^[^:]+:\s*/, ''); // strip "Week 1: ", "Session A: " etc.
+    var parts = cleaned.split('–');
     var sessStart = parseSessionDate(parts[0]);
-    if (!sessStart) return true;
+    if (!sessStart) return false;
     var sessEnd = sessStart;
     if (parts[1]) {
       var endStr = parts[1].trim();
