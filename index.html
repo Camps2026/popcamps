@@ -2655,7 +2655,7 @@ async function addToSchedule(campId, registered) {
     showToast('Already in ' + (ac ? ac.name + "'s" : 'this') + ' schedule');
     return;
   }
-  var newItem = {campId: campId, registered: registered || false, child: activeChild};
+  var newItem = {campId: campId, registered: registered || false, child: activeChild, localId: Date.now() + '_' + Math.floor(Math.random() * 99999)};
   scheduleItems.push(newItem);
   if (currentUser) {
     var camp = camps.find(function(c){ return c.id === campId; });
@@ -2664,7 +2664,7 @@ async function addToSchedule(campId, registered) {
         user_id: currentUser.id, child_id: activeChild,
         camp_supabase_id: camp.supabaseId, registered: registered || false
       }).select().single();
-      if (insResp.data) newItem.dbId = insResp.data.id;
+      if (insResp.data) { newItem.dbId = insResp.data.id; newItem.localId = String(insResp.data.id); }
     }
   }
   renderSchedule();
@@ -2685,6 +2685,25 @@ async function removeFromSchedule(campId, childId) {
   var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === targetChild; });
   if (currentUser && item && item.dbId) await sbClient.from('user_schedules').delete().eq('id', item.dbId);
   scheduleItems = scheduleItems.filter(function(i){ return !(i.campId === campId && i.child === targetChild); });
+  renderSchedule();
+  showToast('Removed from schedule');
+}
+
+// Item-specific versions (by localId) — used when multiple sessions of same camp exist
+async function toggleRegisteredById(localId) {
+  var item = scheduleItems.find(function(i){ return i.localId === localId; });
+  if (!item) return;
+  item.registered = !item.registered;
+  if (currentUser && item.dbId) await sbClient.from('user_schedules').update({registered: item.registered}).eq('id', item.dbId);
+  renderSchedule();
+  showToast(item.registered ? '\u2705 Marked as Registered' : 'Marked as Not Yet Registered');
+}
+
+async function removeFromScheduleById(localId) {
+  var item = scheduleItems.find(function(i){ return i.localId === localId; });
+  if (!item) return;
+  if (currentUser && item.dbId) await sbClient.from('user_schedules').delete().eq('id', item.dbId);
+  scheduleItems = scheduleItems.filter(function(i){ return i.localId !== localId; });
   renderSchedule();
   showToast('Removed from schedule');
 }
@@ -2880,7 +2899,7 @@ function renderSchedule() {
       var eventHtml =
         '<div class="sched-event" style="background:' + bg + ';opacity:' + opacity + ';cursor:pointer;' +
         (isMultiDay ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
-        '" onclick="openEventPopup(' + c.id + ',\'' + item.child + '\')" data-span="' + span + '">' +
+        '" onclick="openEventPopup(\'' + item.localId + '\')" data-span="' + span + '">' +
           '<div class="sched-event-name">' + c.icon + ' ' + c.name + noteDot + '</div>' +
           dateLabel +
           '<div class="sched-event-time">' + c.time + '</div>' +
@@ -2974,15 +2993,15 @@ function renderSchedule() {
       if (!c) return;
       var reg = item.registered;
       var btn = reg
-        ? '<button onclick="toggleRegistered(' + c.id + ',\'' + item.child + '\')" class="panel-reg-btn panel-reg-on">\u2705 Registered</button>'
-        : '<button onclick="toggleRegistered(' + c.id + ',\'' + item.child + '\')" class="panel-reg-btn panel-reg-off">Mark Registered</button>';
+        ? '<button onclick="toggleRegisteredById(\'' + item.localId + '\')" class="panel-reg-btn panel-reg-on">\u2705 Registered</button>'
+        : '<button onclick="toggleRegisteredById(\'' + item.localId + '\')" class="panel-reg-btn panel-reg-off">Mark Registered</button>';
       panelItems +=
         '<div style="padding:.7rem 0;border-bottom:1px solid #f0f4f1;">' +
           '<div class="saved-name">' + c.icon + ' ' + c.name + '</div>' +
           '<div class="saved-dates">' + (item.customStart && item.customEnd ? fmtDateRange(item.customStart, item.customEnd) : (item.session || (Array.isArray(c.dates) ? c.dates[0] : (c.dates || c.week)))) + '</div>' +
           '<div style="display:flex;gap:.4rem;margin-top:.5rem;align-items:center;">' +
             btn +
-            '<button onclick="removeFromSchedule(' + c.id + ',\'' + item.child + '\')" class="panel-remove-btn" title="Remove">\u2715</button>' +
+            '<button onclick="removeFromScheduleById(\'' + item.localId + '\')" class="panel-remove-btn" title="Remove">\u2715</button>' +
           '</div>' +
         '</div>';
     });
@@ -2995,11 +3014,12 @@ function renderSchedule() {
     '<button class="find-more-btn" onclick="showPage(\'search\')">+ Find More Camps</button>';
 }
 
-function openEventPopup(campId, childId) {
-  var targetChild = childId || activeChild;
-  var item = scheduleItems.find(function(i){ return i.campId === campId && i.child === targetChild; });
-  var c    = getCampById(campId);
-  if (!item || !c) return;
+function openEventPopup(localId) {
+  var item = scheduleItems.find(function(i){ return i.localId === localId; });
+  if (!item) return;
+  var campId = item.campId;
+  var c = getCampById(campId);
+  if (!c) return;
   closeOverlay('event-popup');
 
   var overlay = document.createElement('div');
@@ -3139,7 +3159,7 @@ function openEventPopup(campId, childId) {
     primaryBtn.style.cssText += 'border:none;background:var(--moss);color:#fff;';
     primaryBtn.textContent = '\u2705 Mark as Registered';
   }
-  primaryBtn.onclick = function() { toggleRegistered(campId, item.child); closeOverlay('event-popup'); };
+  primaryBtn.onclick = function() { toggleRegisteredById(item.localId); closeOverlay('event-popup'); };
 
   // Add to calendar button
   var icsBtn = document.createElement('button');
@@ -3157,7 +3177,7 @@ function openEventPopup(campId, childId) {
   var removeBtn = document.createElement('button');
   removeBtn.style.cssText = 'width:100%;padding:.6rem;border:none;background:none;font-size:.8rem;cursor:pointer;color:var(--muted);';
   removeBtn.textContent = 'Remove from schedule';
-  removeBtn.onclick = function() { removeFromSchedule(campId, item.child); closeOverlay('event-popup'); };
+  removeBtn.onclick = function() { removeFromScheduleById(item.localId); closeOverlay('event-popup'); };
 
   box.appendChild(hdr);
   if (conflictWarn) box.appendChild(conflictWarn);
@@ -3212,20 +3232,18 @@ function showAddToScheduleModal() {
     childGrid.style.cssText = 'display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;';
 
     children.forEach(function(child) {
-      var alreadyAdded = scheduleItems.some(function(i){ return i.campId === c.id && i.child === child.id; });
+      var sessionCount = scheduleItems.filter(function(i){ return i.campId === c.id && i.child === child.id; }).length;
       var cbtn = document.createElement('button');
-      cbtn.style.cssText = 'display:flex;align-items:center;gap:.8rem;padding:.75rem 1rem;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;text-align:left;transition:all .15s;' + (alreadyAdded ? 'opacity:.5;cursor:default;' : '');
+      cbtn.style.cssText = 'display:flex;align-items:center;gap:.8rem;padding:.75rem 1rem;border:2px solid var(--border);border-radius:12px;background:#fff;cursor:pointer;text-align:left;transition:all .15s;';
       cbtn.innerHTML = '<span style="font-size:1.4rem;">' + child.emoji + '</span>' +
         '<div><div style="font-weight:600;color:var(--forest);font-size:.9rem;">' + child.name + ', ' + child.age + '</div>' +
-        (alreadyAdded ? '<div style="font-size:.75rem;color:var(--muted);">Already in schedule</div>' : '') + '</div>';
-      if (!alreadyAdded) {
-        cbtn.onclick = function() {
-          childGrid.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='#fff'; });
-          cbtn.style.borderColor = 'var(--moss)'; cbtn.style.background = '#f0f8f2';
-          selectedChild = child.id;
-          dateSection.style.display = 'block';
-        };
-      }
+        (sessionCount > 0 ? '<div style="font-size:.75rem;color:var(--muted);">' + sessionCount + ' session' + (sessionCount > 1 ? 's' : '') + ' already added</div>' : '') + '</div>';
+      cbtn.onclick = function() {
+        childGrid.querySelectorAll('button').forEach(function(b){ b.style.borderColor='var(--border)'; b.style.background='#fff'; });
+        cbtn.style.borderColor = 'var(--moss)'; cbtn.style.background = '#f0f8f2';
+        selectedChild = child.id;
+        dateSection.style.display = 'block';
+      };
       childGrid.appendChild(cbtn);
     });
     childSection.appendChild(childGrid);
@@ -3300,10 +3318,8 @@ function showAddToScheduleModal() {
     if (!selectedChild) { showToast('Please select a child first'); return; }
     if (!customStart || !customEnd) { showToast('Please confirm your dates first'); return; }
     var campId = c.id;
-    if (scheduleItems.some(function(i){ return i.campId===campId && i.child===selectedChild; })) {
-      showToast('Already in this child\'s schedule'); closeOverlay('add-sched-modal'); return;
-    }
-    var newItem = {campId: campId, registered: registered, child: selectedChild, session: selectedSession, customStart: customStart, customEnd: customEnd};
+    var newLocalId = Date.now() + '_' + Math.floor(Math.random() * 99999);
+    var newItem = {campId: campId, registered: registered, child: selectedChild, session: selectedSession, customStart: customStart, customEnd: customEnd, localId: newLocalId};
     scheduleItems.push(newItem);
     if (currentUser) {
       var campObj = camps.find(function(cc){ return cc.id === campId; });
@@ -3645,7 +3661,7 @@ async function loadUserData(userId) {
     schedResp.data.forEach(function(r) {
       var camp = camps.find(function(c){ return c.supabaseId === r.camp_supabase_id; });
       if (camp) {
-          var item = {campId: camp.id, registered: r.registered, child: r.child_id, dbId: r.id};
+          var item = {campId: camp.id, registered: r.registered, child: r.child_id, dbId: r.id, localId: String(r.id)};
           if (r.custom_dates) {
             var parts = r.custom_dates.split('|');
             if (parts.length === 2) { item.customStart = parts[0]; item.customEnd = parts[1]; }
