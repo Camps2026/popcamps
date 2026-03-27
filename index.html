@@ -3639,7 +3639,9 @@ function requireAccount(callback) {
 async function loadUserData(userId) {
   var childrenResp = await sbClient.from('user_children').select('*').eq('user_id', userId).order('sort_order');
   children = [];
-  document.querySelectorAll('.children-tabs .child-tab').forEach(function(t){ if (t.id !== 'saved-tab') t.remove(); });
+  document.querySelectorAll('.children-tabs .child-tab').forEach(function(t){ if (t.id !== 'saved-tab' && t.id !== 'all-kids-tab') t.remove(); });
+  var allKidsTabEl = document.getElementById('all-kids-tab');
+  if (allKidsTabEl) { allKidsTabEl.style.display = 'none'; allKidsTabEl.classList.remove('active'); }
   if (childrenResp.data && childrenResp.data.length > 0) {
     childrenResp.data.forEach(function(row) {
       children.push({id: row.id, name: row.name, age: row.age || '?', emoji: row.emoji || '🧒'});
@@ -3702,8 +3704,10 @@ async function logOut() {
   activeChild = null;
   savedCamps = new Set();
   document.querySelectorAll('.children-tabs .child-tab').forEach(function(t){
-    if (t.id !== 'saved-tab') t.remove();
+    if (t.id !== 'saved-tab' && t.id !== 'all-kids-tab') t.remove();
   });
+  var allKidsTabReset = document.getElementById('all-kids-tab');
+  if (allKidsTabReset) { allKidsTabReset.style.display = 'none'; allKidsTabReset.classList.remove('active'); }
   renderProfileChildren();
   renderSchedule();
   renderProfileAccount();
