@@ -360,6 +360,8 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .sched-event-time{opacity:.8;font-size:.68rem;}
 .sched-event-regtype{font-size:.62rem;opacity:.8;margin-top:.15rem;}
 .sched-event-dates{font-size:.68rem;opacity:.95;margin-top:.1rem;font-weight:600;letter-spacing:.01em;}
+.sched-event-note-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.75);margin-left:3px;vertical-align:middle;}
+.conflict-banner{background:#fff3e0;border:1.5px solid #e8901a;border-radius:10px;padding:.75rem 1rem;margin:.75rem .75rem 0;font-size:.82rem;color:#7a3f00;display:flex;align-items:flex-start;gap:.5rem;line-height:1.4;}
 .empty-cell{display:flex;align-items:center;justify-content:center;color:#cdd8cf;font-size:1.2rem;cursor:pointer;transition:color .15s;height:100%;min-height:75px;}
 .empty-cell:hover{color:var(--sage);}
 .saved-camps-panel{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.06);position:sticky;top:80px;}
@@ -2375,6 +2377,29 @@ function showToast(msg) {
 
 
 /* ─── SCHEDULE STATE ─── */
+function downloadICS(item, camp) {
+  var s = item.customStart, e = item.customEnd;
+  if (!s || !e) { showToast('No dates set for this camp'); return; }
+  var endExcl = new Date(e + 'T12:00:00');
+  endExcl.setDate(endExcl.getDate() + 1);
+  function fmtD(d) { return d.toISOString().split('T')[0].replace(/-/g,''); }
+  var desc = 'Added via CampQuest' + (item.notes ? '\\n' + item.notes.replace(/\n/g,'\\n') : '');
+  var ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CampQuest//EN',
+    'BEGIN:VEVENT',
+    'DTSTART;VALUE=DATE:' + fmtD(new Date(s + 'T12:00:00')),
+    'DTEND;VALUE=DATE:'   + fmtD(endExcl),
+    'SUMMARY:'  + camp.name,
+    'DESCRIPTION:' + desc,
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  var blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = camp.name.replace(/[^a-z0-9]/gi,'_') + '.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
 function fmtDateRange(startStr, endStr) {
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var s = new Date(startStr + 'T12:00:00');
@@ -2762,8 +2787,25 @@ function renderSchedule() {
     return;
   }
 
+  // ── Detect scheduling conflicts ───────────────────────────────
+  var conflictCampIds = new Set();
+  for (var ci = 0; ci < campRanges.length; ci++) {
+    if (!campRanges[ci].range) continue;
+    for (var cj = ci + 1; cj < campRanges.length; cj++) {
+      if (!campRanges[cj].range) continue;
+      if (campRanges[ci].range.start <= campRanges[cj].range.end &&
+          campRanges[cj].range.start <= campRanges[ci].range.end) {
+        conflictCampIds.add(campRanges[ci].item.campId);
+        conflictCampIds.add(campRanges[cj].item.campId);
+      }
+    }
+  }
+
   // ── Build grid: one row per week ──────────────────────────────
-  var rows = '<div class="week-header"><div>Week of</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>';
+  var conflictBanner = conflictCampIds.size > 0
+    ? '<div class="conflict-banner"><span style="font-size:1.1rem;flex-shrink:0;">⚠️</span><span><strong>Scheduling conflict:</strong> Two or more of your camps overlap. Overlapping camps are shown in orange.</span></div>'
+    : '';
+  var rows = conflictBanner + '<div class="week-header"><div>Week of</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>';
 
   weekMondays.forEach(function(mon) {
     // cells[0..6] = Mon..Sun, each is array of event html
@@ -2773,8 +2815,9 @@ function renderSchedule() {
       if (!cr.range) return;
       var item = cr.item;
       var c    = cr.camp;
-      var bg   = item.registered ? 'var(--moss)' : '#8fa89a';
-      var lbl  = item.registered ? 'Registered' : 'Not yet registered';
+      var isConflict = conflictCampIds.has(c.id);
+      var bg   = isConflict ? '#e8901a' : (item.registered ? 'var(--moss)' : '#8fa89a');
+      var lbl  = isConflict ? '⚠️ Conflict' : (item.registered ? 'Registered' : 'Not yet registered');
 
       // Clamp range to this week (Mon–Sun)
       var weekStart = mon;           // Monday
@@ -2797,11 +2840,12 @@ function renderSchedule() {
       var dateLabel = (item.customStart && item.customEnd)
         ? '<div class="sched-event-dates">' + fmtDateRange(item.customStart, item.customEnd) + '</div>'
         : '';
+      var noteDot = item.notes ? '<span class="sched-event-note-dot" title="Has note"></span>' : '';
       var eventHtml =
         '<div class="sched-event" style="background:' + bg + ';cursor:pointer;' +
         (isMultiDay ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
         '" onclick="openEventPopup(' + c.id + ')" data-span="' + span + '">' +
-          '<div class="sched-event-name">' + c.icon + ' ' + c.name + '</div>' +
+          '<div class="sched-event-name">' + c.icon + ' ' + c.name + noteDot + '</div>' +
           dateLabel +
           '<div class="sched-event-time">' + c.time + '</div>' +
           '<div class="sched-event-regtype" style="font-size:.68rem;opacity:.8;">' + lbl + '</div>' +
@@ -2879,10 +2923,10 @@ function openEventPopup(campId) {
 
   var overlay = document.createElement('div');
   overlay.id = 'event-popup';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem;overflow-y:auto;';
 
   var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:20px;padding:1.8rem;max-width:380px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.25);';
+  box.style.cssText = 'background:#fff;border-radius:20px;padding:1.8rem;max-width:400px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.25);margin:auto;';
 
   // Header
   var hdr = document.createElement('div');
@@ -2946,6 +2990,55 @@ function openEventPopup(campId) {
     showToast('Dates updated');
   };
 
+  // Conflict warning
+  var conflictWarn = null;
+  if (item.customStart && item.customEnd) {
+    var myStart = new Date(item.customStart + 'T12:00:00');
+    var myEnd   = new Date(item.customEnd   + 'T12:00:00');
+    var conflictNames = [];
+    scheduleItems.forEach(function(other) {
+      if (other.campId === campId || other.child !== item.child) return;
+      if (!other.customStart || !other.customEnd) return;
+      var os = new Date(other.customStart + 'T12:00:00');
+      var oe = new Date(other.customEnd   + 'T12:00:00');
+      if (myStart <= oe && os <= myEnd) {
+        var oc = getCampById(other.campId);
+        if (oc) conflictNames.push(oc.name);
+      }
+    });
+    if (conflictNames.length > 0) {
+      conflictWarn = document.createElement('div');
+      conflictWarn.style.cssText = 'background:#fff3e0;border:1.5px solid #e8901a;border-radius:10px;padding:.8rem;margin-bottom:1rem;font-size:.82rem;color:#7a3f00;line-height:1.4;';
+      conflictWarn.innerHTML = '<strong>⚠️ Scheduling conflict</strong><br>This camp overlaps with: ' + conflictNames.join(', ') + '.';
+    }
+  }
+
+  // Notes section
+  var notesSection = document.createElement('div');
+  notesSection.style.cssText = 'margin-bottom:1rem;';
+  var saveNoteBtn = document.createElement('button');
+  saveNoteBtn.style.cssText = 'margin-top:.5rem;padding:.5rem .9rem;border:none;border-radius:7px;background:var(--forest);color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;display:none;';
+  saveNoteBtn.textContent = 'Save note';
+  var noteTA = document.createElement('textarea');
+  noteTA.placeholder = 'Add a note… (e.g. bring sunscreen, carpool with Smith family)';
+  noteTA.value = item.notes || '';
+  noteTA.style.cssText = 'width:100%;box-sizing:border-box;padding:.6rem .75rem;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-family:"DM Sans",sans-serif;resize:vertical;min-height:64px;outline:none;color:var(--text);';
+  notesSection.innerHTML = '<div style="font-size:.78rem;font-weight:700;color:var(--forest);margin-bottom:.4rem;">📝 Notes</div>';
+  notesSection.appendChild(noteTA);
+  notesSection.appendChild(saveNoteBtn);
+  noteTA.addEventListener('input', function() {
+    saveNoteBtn.style.display = (noteTA.value !== (item.notes || '')) ? 'block' : 'none';
+  });
+  saveNoteBtn.onclick = function() {
+    item.notes = noteTA.value.trim();
+    if (currentUser && item.dbId) {
+      sbClient.from('user_schedules').update({notes: item.notes || null}).eq('id', item.dbId);
+    }
+    saveNoteBtn.style.display = 'none';
+    renderSchedule();
+    showToast('Note saved');
+  };
+
   // Status box
   var statusBox = document.createElement('div');
   statusBox.style.cssText = 'background:#f5f8f5;border-radius:10px;padding:.9rem;margin-bottom:1rem;font-size:.84rem;color:var(--muted);line-height:1.5;';
@@ -2967,6 +3060,12 @@ function openEventPopup(campId) {
   }
   primaryBtn.onclick = function() { toggleRegistered(campId); closeOverlay('event-popup'); };
 
+  // Add to calendar button
+  var icsBtn = document.createElement('button');
+  icsBtn.style.cssText = 'width:100%;padding:.75rem;border:1.5px solid var(--border);border-radius:10px;background:#fff;font-size:.85rem;cursor:pointer;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;justify-content:center;gap:.4rem;';
+  icsBtn.innerHTML = '<span>📅</span><span>Add to Google / Apple Calendar</span>';
+  icsBtn.onclick = function() { downloadICS(item, c); };
+
   // View details
   var detailBtn = document.createElement('button');
   detailBtn.style.cssText = 'width:100%;padding:.75rem;border:1.5px solid var(--border);border-radius:10px;background:#fff;font-size:.85rem;cursor:pointer;color:var(--text);margin-bottom:.6rem;';
@@ -2980,9 +3079,12 @@ function openEventPopup(campId) {
   removeBtn.onclick = function() { removeFromSchedule(campId); closeOverlay('event-popup'); };
 
   box.appendChild(hdr);
+  if (conflictWarn) box.appendChild(conflictWarn);
   box.appendChild(dateSection);
+  box.appendChild(notesSection);
   box.appendChild(statusBox);
   box.appendChild(primaryBtn);
+  box.appendChild(icsBtn);
   box.appendChild(detailBtn);
   box.appendChild(removeBtn);
   overlay.appendChild(box);
@@ -3467,6 +3569,7 @@ async function loadUserData(userId) {
             var parts = r.custom_dates.split('|');
             if (parts.length === 2) { item.customStart = parts[0]; item.customEnd = parts[1]; }
           }
+          if (r.notes) item.notes = r.notes;
           scheduleItems.push(item);
         }
     });
