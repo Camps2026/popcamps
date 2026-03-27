@@ -3015,6 +3015,16 @@ function showAddToScheduleModal() {
     }
     var startWrap = mkDateField('Start Date', 'custom-start-date');
     var endWrap   = mkDateField('End Date',   'custom-end-date');
+    startWrap.querySelector('input').onchange = function() {
+      var startVal = this.value;
+      if (!startVal) return;
+      var endInp = document.getElementById('custom-end-date');
+      if (endInp && (!endInp.value || endInp.value <= startVal)) {
+        var next = new Date(startVal + 'T00:00:00');
+        next.setDate(next.getDate() + 1);
+        endInp.value = next.toISOString().split('T')[0];
+      }
+    };
     dateRow.appendChild(startWrap); dateRow.appendChild(endWrap);
     var confirmDatesBtn = document.createElement('button');
     confirmDatesBtn.style.cssText = 'width:100%;padding:.8rem;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;';
