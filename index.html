@@ -370,8 +370,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .saved-name{font-weight:600;font-size:.82rem;color:var(--forest);}
 .saved-dates{font-size:.72rem;color:var(--muted);}
 .saved-reg-type{font-size:.66rem;font-weight:700;padding:.1rem .35rem;border-radius:5px;margin-top:.15rem;display:inline-block;}
-.progress-bar{background:#eef2ef;border-radius:20px;height:7px;overflow:hidden;margin-top:.4rem;}
-.progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--moss),var(--sage));}
+
 
 .panel-reg-btn{flex:1;padding:.35rem .55rem;border-radius:20px;font-size:.72rem;font-weight:700;cursor:pointer;border:none;}
 .panel-reg-on{background:#d4ead8;color:#2d5a3d;}
@@ -380,8 +379,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .panel-remove-btn:hover{color:var(--coral);}
 .sched-panel-title{font-size:.95rem;color:var(--forest);margin-bottom:.3rem;}
 .sched-panel-sub{font-size:.75rem;color:var(--muted);margin-bottom:.9rem;}
-.sched-panel-footer{margin-top:1.2rem;padding-top:1rem;border-top:1px solid #f0f4f1;}
-.sched-panel-prog-row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;}
+
 .find-more-btn{width:100%;margin-top:1rem;padding:.65rem;background:var(--moss);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;}
 
 /* TOAST */
@@ -2843,10 +2841,9 @@ function renderSchedule() {
 
   calEl.innerHTML = rows;
 
-  // ── Right panel (unchanged logic) ────────────────────────────
+  // ── Right panel ────────────────────────────
   var regCount = childItems.filter(function(i){ return i.registered; }).length;
   var total    = childItems.length;
-  var pct      = total > 0 ? Math.round(regCount / total * 100) : 0;
 
   var panelItems = '';
   sorted.forEach(function(item) {
@@ -2871,10 +2868,6 @@ function renderSchedule() {
     '<h3 class="sched-panel-title">\uD83D\uDCCB My Camps</h3>' +
     '<p class="sched-panel-sub">' + regCount + ' of ' + total + ' registered</p>' +
     panelItems +
-    '<div class="sched-panel-footer">' +
-      '<div class="sched-panel-prog-row"><span>Registration progress</span><span>' + pct + '%</span></div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
-    '</div>' +
     '<button class="find-more-btn" onclick="showPage(\'search\')">+ Find More Camps</button>';
 }
 
