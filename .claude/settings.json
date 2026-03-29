@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path'); REPO=\"/Users/phannipasathiennoppakao/documents/campquest\"; if [[ \"$FILE\" == \"$REPO\"* ]]; then cd \"$REPO\" && git add -A && git diff --cached --quiet || (git commit -m \"Auto-save: update $(basename $FILE)\" && git push); fi 2>/dev/null || true",
+            "statusMessage": "Pushing to GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}
