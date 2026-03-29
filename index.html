@@ -528,6 +528,27 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .photo-add:hover{border-color:var(--moss);color:var(--moss);}
 @media(max-width:900px){.owner-page{padding:1rem;}.owner-header{padding:1.2rem 1rem;}}
 
+/* ── ADMIN REVIEW ── */
+.admin-page{max-width:900px;margin:0 auto;padding:2rem;}
+.review-card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:1.5rem;border-left:4px solid var(--amber);}
+.review-card h4{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--forest);margin-bottom:.25rem;}
+.diff-table{width:100%;border-collapse:collapse;font-size:.84rem;margin:.8rem 0;}
+.diff-table th{text-align:left;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:.4rem .7rem;background:var(--sky);}
+.diff-table td{padding:.5rem .7rem;border-bottom:1px solid #f0f4f1;vertical-align:top;word-break:break-word;}
+.diff-old{color:#9a2a2a;opacity:.75;}
+.diff-new{color:var(--moss);font-weight:600;}
+.review-photos{display:flex;gap:.6rem;flex-wrap:wrap;margin:.5rem 0;}
+.review-photo{border-radius:8px;overflow:hidden;width:100px;height:75px;position:relative;flex-shrink:0;}
+.review-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.review-photo-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:.58rem;font-weight:700;text-align:center;padding:.15rem;text-transform:uppercase;letter-spacing:.04em;}
+.review-actions{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap;}
+.btn-approve{flex:1;min-width:120px;padding:.75rem;background:var(--moss);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s;}
+.btn-approve:hover{background:var(--forest);}
+.btn-reject{padding:.75rem 1.5rem;background:#fff;color:#9a2a2a;border:2px solid #f0d0d0;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .15s;}
+.btn-reject:hover{background:#fde8e8;}
+.pending-notice{background:#fff8e8;border:1.5px solid var(--sun);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:.87rem;color:#7a5a00;display:none;align-items:center;gap:.6rem;line-height:1.5;}
+@media(max-width:900px){.admin-page{padding:1rem;}}
+
 </style>
 </head>
 <body>
@@ -840,6 +861,24 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 </div>
 
 <!-- ═══════════════════════════════
+     ADMIN REVIEW PAGE
+═══════════════════════════════ -->
+<div id="page-admin" class="page">
+  <div class="admin-page">
+    <div class="owner-header">
+      <div>
+        <div style="font-size:.8rem;opacity:.65;margin-bottom:.3rem;">PopCamps Admin</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;">Review Pending Edits</div>
+      </div>
+      <button onclick="ownerLogout()" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);padding:.6rem 1.3rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;">Log Out</button>
+    </div>
+    <div id="admin-requests-list">
+      <div style="text-align:center;padding:3rem;color:var(--muted);">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
      OWNER DASHBOARD
 ═══════════════════════════════ -->
 <div id="page-owner" class="page">
@@ -861,6 +900,10 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 
     <!-- Edit form -->
     <div id="owner-edit-area" style="display:none;">
+      <div id="owner-pending-notice" class="pending-notice">
+        <span style="font-size:1.2rem;">⏳</span>
+        <span>You have changes under review (submitted <span class="pending-notice-date"></span>). You can update and resubmit anytime.</span>
+      </div>
       <div class="owner-section">
         <h3>Basic Information</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
@@ -914,7 +957,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       </div>
 
       <div class="owner-section">
-        <h3>Photos <span style="font-size:.8rem;font-weight:400;color:var(--muted);">(up to 5)</span></h3>
+        <h3>Photos <span style="font-size:.8rem;font-weight:400;color:var(--muted);">(up to 5 · reviewed before going live)</span></h3>
         <div class="photo-grid" id="owner-photo-grid"></div>
         <div id="owner-photo-add" class="photo-add" onclick="document.getElementById('owner-photo-input').click()">
           <span style="font-size:1.5rem;">+</span>
@@ -923,8 +966,9 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
         <input type="file" id="owner-photo-input" accept="image/*" style="display:none;" onchange="uploadOwnerPhoto(this)">
       </div>
 
-      <div style="display:flex;justify-content:flex-end;padding-bottom:2rem;">
-        <button id="owner-save-btn" onclick="saveOwnerChanges()" style="padding:.9rem 2.5rem;background:var(--forest);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;">Save Changes →</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:2rem;flex-wrap:wrap;gap:.7rem;">
+        <div style="font-size:.82rem;color:var(--muted);">All changes are reviewed before going live.</div>
+        <button id="owner-save-btn" onclick="submitOwnerEdits()" style="padding:.9rem 2.5rem;background:var(--forest);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;">Submit for Review →</button>
       </div>
     </div>
   </div>
@@ -3805,6 +3849,9 @@ async function submitClaim() {
 /* ─── OWNER PORTAL ─── */
 var ownerCampId = null;
 var ownerCampData = null;
+var pendingPhotosToAdd = [];
+var pendingPhotosToRemove = [];
+var isAdminUser = false;
 
 async function sendOwnerLoginLink() {
   var email = (document.getElementById('owner-email-input').value || '').trim();
@@ -3838,9 +3885,14 @@ async function checkOwnerSession() {
     var session = resp.data && resp.data.session;
     if (!session) return false;
     var userId = session.user.id;
+    // Admin check first
+    var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
+    if (!adminResp.error && adminResp.data) {
+      isAdminUser = true; showPage('admin'); loadAdminRequests(); return true;
+    }
+    // Camp owner check
     var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
     if (ownerResp.error || !ownerResp.data) {
-      // Logged in but not approved yet — show pending state
       showPage('owner');
       document.getElementById('owner-pending-msg').style.display = 'block';
       document.getElementById('owner-edit-area').style.display = 'none';
@@ -3851,13 +3903,13 @@ async function checkOwnerSession() {
     var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
     if (campResp.error || !campResp.data) return false;
     ownerCampData = campResp.data;
-    populateOwnerForm(campResp.data);
+    await populateOwnerForm(campResp.data);
     showPage('owner');
     return true;
   } catch(e) { return false; }
 }
 
-function populateOwnerForm(camp) {
+async function populateOwnerForm(camp) {
   document.getElementById('owner-camp-name-title').textContent = camp.camp_name || 'Your Camp';
   document.getElementById('edit-camp-name').value = camp.camp_name || '';
   document.getElementById('edit-camp-type').value = camp.camp_type || 'Sports';
@@ -3870,20 +3922,62 @@ function populateOwnerForm(camp) {
   document.getElementById('edit-sessions').value = camp.session_dates || '';
   document.getElementById('owner-pending-msg').style.display = 'none';
   document.getElementById('owner-edit-area').style.display = 'block';
+  pendingPhotosToAdd = []; pendingPhotosToRemove = [];
   renderOwnerPhotos(camp.photos || []);
+  // Check for existing pending request
+  var { data: pendingReq } = await sbClient.from('camp_edit_requests').select('id,created_at').eq('camp_id', ownerCampId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single();
+  var noticeEl = document.getElementById('owner-pending-notice');
+  if (noticeEl) {
+    if (pendingReq) {
+      noticeEl.style.display = 'flex';
+      noticeEl.querySelector('.pending-notice-date').textContent = new Date(pendingReq.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } else {
+      noticeEl.style.display = 'none';
+    }
+  }
 }
 
-function renderOwnerPhotos(photos) {
+function renderOwnerPhotos(livePhotos) {
   var grid = document.getElementById('owner-photo-grid');
   if (!grid) return;
-  grid.innerHTML = (photos || []).map(function(url, i) {
-    return '<div class="photo-thumb">' +
+  var html = '';
+  (livePhotos || []).forEach(function(url, i) {
+    var removing = pendingPhotosToRemove.indexOf(url) !== -1;
+    html += '<div class="photo-thumb" style="' + (removing ? 'opacity:.45;' : '') + '">' +
       '<img src="' + url + '" alt="Camp photo">' +
-      '<button class="photo-thumb-del" onclick="deleteOwnerPhoto(' + i + ')">✕</button>' +
+      (removing
+        ? '<button class="photo-thumb-del" style="background:var(--moss);" onclick="unmarkPhotoForRemoval(' + i + ')" title="Keep photo">↩</button>'
+        : '<button class="photo-thumb-del" onclick="markPhotoForRemoval(' + i + ')" title="Remove photo">✕</button>') +
+      (removing ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(154,42,42,.75);color:#fff;font-size:.58rem;text-align:center;padding:.15rem;font-weight:700;">REMOVE</div>' : '') +
     '</div>';
-  }).join('');
+  });
+  pendingPhotosToAdd.forEach(function(url, i) {
+    html += '<div class="photo-thumb" style="outline:2px solid var(--moss);">' +
+      '<img src="' + url + '" alt="New photo">' +
+      '<button class="photo-thumb-del" onclick="removePendingPhoto(' + i + ')">✕</button>' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(45,90,61,.8);color:#fff;font-size:.58rem;text-align:center;padding:.15rem;font-weight:700;">NEW</div>' +
+    '</div>';
+  });
+  grid.innerHTML = html;
   var addBtn = document.getElementById('owner-photo-add');
-  if (addBtn) addBtn.style.display = (photos || []).length >= 5 ? 'none' : 'flex';
+  if (addBtn) addBtn.style.display = (livePhotos || []).length + pendingPhotosToAdd.length >= 5 ? 'none' : 'flex';
+}
+
+function markPhotoForRemoval(index) {
+  var url = (ownerCampData.photos || [])[index];
+  if (url && pendingPhotosToRemove.indexOf(url) === -1) pendingPhotosToRemove.push(url);
+  renderOwnerPhotos(ownerCampData.photos || []);
+}
+
+function unmarkPhotoForRemoval(index) {
+  var url = (ownerCampData.photos || [])[index];
+  pendingPhotosToRemove = pendingPhotosToRemove.filter(function(u){ return u !== url; });
+  renderOwnerPhotos(ownerCampData.photos || []);
+}
+
+function removePendingPhoto(index) {
+  pendingPhotosToAdd.splice(index, 1);
+  renderOwnerPhotos(ownerCampData.photos || []);
 }
 
 async function uploadOwnerPhoto(input) {
@@ -3892,58 +3986,130 @@ async function uploadOwnerPhoto(input) {
   if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB'); return; }
   showToast('Uploading photo...');
   var ext = file.name.split('.').pop().toLowerCase();
-  var path = ownerCampId + '/' + Date.now() + '.' + ext;
+  var path = 'pending/' + ownerCampId + '/' + Date.now() + '.' + ext;
   var upResp = await sbClient.storage.from('camp-photos').upload(path, file, { upsert: true });
   if (upResp.error) { showToast('Upload failed. Please try again.'); return; }
-  var urlData = sbClient.storage.from('camp-photos').getPublicUrl(path);
-  var publicUrl = urlData.data.publicUrl;
-  var currentPhotos = (ownerCampData.photos || []).concat([publicUrl]);
-  await sbClient.from('camps').update({ photos: currentPhotos }).eq('id', ownerCampId);
-  ownerCampData.photos = currentPhotos;
-  renderOwnerPhotos(currentPhotos);
+  var publicUrl = sbClient.storage.from('camp-photos').getPublicUrl(path).data.publicUrl;
+  pendingPhotosToAdd.push(publicUrl);
+  renderOwnerPhotos(ownerCampData.photos || []);
   input.value = '';
-  showToast('Photo uploaded!');
+  showToast('Photo added — submit for review to save.');
 }
 
-async function deleteOwnerPhoto(index) {
-  var currentPhotos = (ownerCampData.photos || []).slice();
-  currentPhotos.splice(index, 1);
-  await sbClient.from('camps').update({ photos: currentPhotos }).eq('id', ownerCampId);
-  ownerCampData.photos = currentPhotos;
-  renderOwnerPhotos(currentPhotos);
-  showToast('Photo removed.');
-}
-
-async function saveOwnerChanges() {
+async function submitOwnerEdits() {
   var btn = document.getElementById('owner-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-  var updates = {
-    camp_name:       (document.getElementById('edit-camp-name').value || '').trim(),
-    camp_type:       document.getElementById('edit-camp-type').value,
-    website_url:     (document.getElementById('edit-website').value || '').trim(),
-    city_state:      (document.getElementById('edit-city').value || '').trim(),
-    description:     (document.getElementById('edit-description').value || '').trim(),
-    hours:           (document.getElementById('edit-hours').value || '').trim(),
-    age_min:         parseInt(document.getElementById('edit-age-min').value) || null,
-    age_max:         parseInt(document.getElementById('edit-age-max').value) || null,
-    session_dates:   (document.getElementById('edit-sessions').value || '').trim(),
-    owner_updated_at: new Date().toISOString()
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  var edits = {
+    camp_name:     (document.getElementById('edit-camp-name').value || '').trim(),
+    camp_type:     document.getElementById('edit-camp-type').value,
+    website_url:   (document.getElementById('edit-website').value || '').trim(),
+    city_state:    (document.getElementById('edit-city').value || '').trim(),
+    description:   (document.getElementById('edit-description').value || '').trim(),
+    hours:         (document.getElementById('edit-hours').value || '').trim(),
+    age_min:       parseInt(document.getElementById('edit-age-min').value) || null,
+    age_max:       parseInt(document.getElementById('edit-age-max').value) || null,
+    session_dates: (document.getElementById('edit-sessions').value || '').trim()
   };
-  var saveResp = await sbClient.from('camps').update(updates).eq('id', ownerCampId);
-  if (saveResp.error) {
-    showToast('Error saving. Please try again.');
+  var { data: { session } } = await sbClient.auth.getSession();
+  if (!session) { showToast('Please log in again.'); btn.disabled = false; btn.textContent = 'Submit for Review →'; return; }
+  var { error } = await sbClient.from('camp_edit_requests').insert({
+    camp_id: ownerCampId, user_id: session.user.id, status: 'pending',
+    edits: edits, photos_to_add: pendingPhotosToAdd, photos_to_remove: pendingPhotosToRemove
+  });
+  if (error) {
+    showToast('Error submitting. Please try again.');
   } else {
-    document.getElementById('owner-camp-name-title').textContent = updates.camp_name || 'Your Camp';
-    showToast('Your listing has been updated!');
+    showToast('Changes submitted for review!');
+    var noticeEl = document.getElementById('owner-pending-notice');
+    if (noticeEl) {
+      noticeEl.style.display = 'flex';
+      noticeEl.querySelector('.pending-notice-date').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    pendingPhotosToAdd = []; pendingPhotosToRemove = [];
+    renderOwnerPhotos(ownerCampData.photos || []);
   }
-  btn.disabled = false; btn.textContent = 'Save Changes →';
+  btn.disabled = false; btn.textContent = 'Submit for Review →';
 }
 
 function ownerLogout() {
   sbClient.auth.signOut();
-  ownerCampId = null;
-  ownerCampData = null;
+  ownerCampId = null; ownerCampData = null; isAdminUser = false;
+  pendingPhotosToAdd = []; pendingPhotosToRemove = [];
   showPage('portal');
+}
+
+/* ─── ADMIN REVIEW ─── */
+async function loadAdminRequests() {
+  var el = document.getElementById('admin-requests-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--muted);">Loading...</div>';
+  var { data: requests, error } = await sbClient.from('camp_edit_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+  if (error || !requests || requests.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:3rem;background:#fff;border-radius:16px;color:var(--muted);box-shadow:0 2px 16px rgba(0,0,0,.06);"><div style="font-size:3rem;margin-bottom:1rem;">✅</div><h3 style="font-family:\'Playfair Display\',serif;color:var(--forest);margin-bottom:.5rem;">All caught up!</h3><p>No pending edit requests.</p></div>';
+    return;
+  }
+  var campIds = requests.map(function(r){ return r.camp_id; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+  var { data: campsData } = await sbClient.from('camps').select('id,camp_name,camp_type,website_url,city_state,description,hours,age_min,age_max,session_dates,photos').in('id', campIds);
+  var campsMap = {};
+  (campsData || []).forEach(function(c){ campsMap[c.id] = c; });
+  var fieldLabels = { camp_name:'Camp Name', camp_type:'Type', website_url:'Website', city_state:'City', description:'Description', hours:'Hours', age_min:'Min Age', age_max:'Max Age', session_dates:'Session Dates' };
+  el.innerHTML = requests.map(function(req) {
+    var camp = campsMap[req.camp_id] || {};
+    var edits = req.edits || {};
+    var diffRows = '';
+    Object.keys(fieldLabels).forEach(function(key) {
+      var oldVal = String(camp[key] || '');
+      var newVal = String(edits[key] !== undefined ? (edits[key] === null ? '' : edits[key]) : oldVal);
+      if (oldVal !== newVal) {
+        diffRows += '<tr><td style="color:var(--muted);font-weight:600;white-space:nowrap;font-size:.78rem;">' + fieldLabels[key] + '</td>' +
+          '<td class="diff-old">' + (oldVal || '—') + '</td>' +
+          '<td class="diff-new">' + (newVal || '—') + '</td></tr>';
+      }
+    });
+    if (!diffRows) diffRows = '<tr><td colspan="3" style="color:var(--muted);font-style:italic;font-size:.83rem;">No text changes</td></tr>';
+    var photosAddHtml = '';
+    if ((req.photos_to_add || []).length) {
+      photosAddHtml = '<div style="margin-top:.9rem;"><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--moss);letter-spacing:.07em;margin-bottom:.4rem;">New Photos to Add</div>' +
+        '<div class="review-photos">' + req.photos_to_add.map(function(url){ return '<div class="review-photo"><img src="' + url + '" alt="New photo"><div class="review-photo-label" style="background:rgba(45,90,61,.8);">New</div></div>'; }).join('') + '</div></div>';
+    }
+    var photosRemoveHtml = '';
+    if ((req.photos_to_remove || []).length) {
+      photosRemoveHtml = '<div style="margin-top:.9rem;"><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:#9a2a2a;letter-spacing:.07em;margin-bottom:.4rem;">Photos to Remove</div>' +
+        '<div class="review-photos">' + req.photos_to_remove.map(function(url){ return '<div class="review-photo" style="opacity:.6;"><img src="' + url + '" alt="Remove"><div class="review-photo-label" style="background:rgba(154,42,42,.8);">Remove</div></div>'; }).join('') + '</div></div>';
+    }
+    var submitted = new Date(req.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+    return '<div class="review-card">' +
+      '<h4>' + (camp.camp_name || 'Camp #' + req.camp_id) + '</h4>' +
+      '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem;">Submitted ' + submitted + '</div>' +
+      '<table class="diff-table"><thead><tr><th>Field</th><th>Current (live)</th><th>Proposed</th></tr></thead><tbody>' + diffRows + '</tbody></table>' +
+      photosAddHtml + photosRemoveHtml +
+      '<div class="review-actions">' +
+        '<button class="btn-approve" onclick="approveEditRequest(\'' + req.id + '\',' + req.camp_id + ',this)">✓ Approve &amp; Publish</button>' +
+        '<button class="btn-reject" onclick="rejectEditRequest(\'' + req.id + '\',this)">✕ Reject</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+async function approveEditRequest(requestId, campId, btn) {
+  btn.disabled = true; btn.textContent = 'Approving...';
+  var { data: req } = await sbClient.from('camp_edit_requests').select('*').eq('id', requestId).single();
+  if (!req) { showToast('Request not found.'); btn.disabled = false; btn.textContent = '✓ Approve & Publish'; return; }
+  var { data: camp } = await sbClient.from('camps').select('photos').eq('id', campId).single();
+  var livePhotos = (camp && camp.photos) || [];
+  var newPhotos = livePhotos.filter(function(url){ return (req.photos_to_remove || []).indexOf(url) === -1; }).concat(req.photos_to_add || []);
+  var updates = Object.assign({}, req.edits, { photos: newPhotos, owner_updated_at: new Date().toISOString() });
+  var { error } = await sbClient.from('camps').update(updates).eq('id', campId);
+  if (error) { showToast('Error updating camp. Please try again.'); btn.disabled = false; btn.textContent = '✓ Approve & Publish'; return; }
+  await sbClient.from('camp_edit_requests').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', requestId);
+  showToast('Changes approved and published!');
+  loadAdminRequests();
+}
+
+async function rejectEditRequest(requestId, btn) {
+  btn.disabled = true; btn.textContent = 'Rejecting...';
+  await sbClient.from('camp_edit_requests').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', requestId);
+  showToast('Edit request rejected.');
+  loadAdminRequests();
 }
 
 // ─── IMAGE UPLOADS ───
@@ -4079,30 +4245,36 @@ async function checkExistingSession() {
   var resp = await sbClient.auth.getSession();
   var session = resp.data && resp.data.session;
   if (!session) return;
-  // Check if this is a camp owner account first
-  var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', session.user.id).single();
+  var userId = session.user.id;
+  // Check admin first
+  var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
+  if (!adminResp.error && adminResp.data) {
+    isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
+  }
+  // Check camp owner
+  var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
   if (!ownerResp.error && ownerResp.data) {
     ownerCampId = ownerResp.data.camp_id;
     var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
     if (!campResp.error && campResp.data) {
       ownerCampData = campResp.data;
-      populateOwnerForm(campResp.data);
+      await populateOwnerForm(campResp.data);
       showPage('owner');
       return;
     }
   }
   // Otherwise treat as a regular parent user
-  var profileResp = await sbClient.from('user_profiles').select('*').eq('id', session.user.id).single();
+  var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
   var profile = profileResp.data;
   currentUser = {
-    id: session.user.id,
+    id: userId,
     name: profile ? profile.full_name : session.user.email,
     email: session.user.email,
     zip: profile ? profile.zip : '',
     createdAt: session.user.created_at
   };
   updateNavForUser();
-  await loadUserData(session.user.id);
+  await loadUserData(userId);
 }
 
 async function logOut() {
@@ -4439,17 +4611,22 @@ window.addEventListener('DOMContentLoaded', function() {
   // Render demo data immediately so the page works right away
   applyFilters();
 
-  // Handle password reset links and owner magic link logins
+  // Handle password reset links and owner/admin magic link logins
   sbClient.auth.onAuthStateChange(async function(event, session) {
     if (event === 'PASSWORD_RECOVERY') showPasswordUpdateModal();
     if (event === 'SIGNED_IN' && session) {
-      var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', session.user.id).single();
+      var userId = session.user.id;
+      var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
+      if (!adminResp.error && adminResp.data) {
+        isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
+      }
+      var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
       if (!ownerResp.error && ownerResp.data) {
         ownerCampId = ownerResp.data.camp_id;
         var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
         if (!campResp.error && campResp.data) {
           ownerCampData = campResp.data;
-          populateOwnerForm(campResp.data);
+          await populateOwnerForm(campResp.data);
           showPage('owner');
         }
       }
