@@ -511,7 +511,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
   <div class="logo" onclick="showPage('search')">Pop<span>Camps</span></div>
   <div class="nav-links">
     <a onclick="showPage('search')" id="nav-search" class="active">Find Camps</a>
-    <a onclick="showPage('schedule')" id="nav-schedule">My Schedule</a>
+    <a onclick="showPage('schedule')" id="nav-schedule">My Calendar</a>
     <a onclick="showPage('profile')" id="nav-profile">Profile</a>
     <a onclick="showPage('portal')" id="nav-portal">List Your Camp</a>
   </div>
@@ -524,7 +524,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 </nav>
 <div class="mobile-menu" id="mob-menu">
   <a onclick="showPage('search');document.getElementById('mob-menu').classList.remove('open')">🔍 Find Camps</a>
-  <a onclick="showPage('schedule');document.getElementById('mob-menu').classList.remove('open')">📅 My Schedule</a>
+  <a onclick="showPage('schedule');document.getElementById('mob-menu').classList.remove('open')">📅 My Calendar</a>
   <a onclick="showPage('profile');document.getElementById('mob-menu').classList.remove('open')">👤 Profile</a>
   <a onclick="showPage('portal');document.getElementById('mob-menu').classList.remove('open')">🏕️ List Your Camp</a>
 </div>
@@ -935,10 +935,13 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 <div id="page-schedule" class="page">
   <div class="schedule-page">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;">
-      <h1 style="margin:0;">My Schedule</h1>
+      <h1 style="margin:0;">My Calendar</h1>
       <button class="child-tab" id="saved-tab" onclick="switchToSaved(this)" style="font-size:.78rem;padding:.35rem .85rem;">♥ Saved Camps</button>
     </div>
-    <p style="color:var(--muted);margin-bottom:1.5rem;">Camps you add appear here. Click any camp block to update its registration status.</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;">
+      <p style="color:var(--muted);margin:0;">Camps you add appear here. Click any camp block to update its registration status.</p>
+      <button id="full-cal-toggle" onclick="toggleFullCalendar()" style="background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:.35rem .9rem;font-size:.8rem;font-weight:600;color:var(--forest);cursor:pointer;white-space:nowrap;">🗓 Show Full Summer</button>
+    </div>
 
     <div class="children-tabs">
       <button class="add-child-tab" onclick="requireAccount(showAddChildModal)">+ Add Child</button>
@@ -950,7 +953,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
     <div id="sched-empty" style="text-align:center;padding:4rem 2rem;color:var(--muted);">
       <div style="font-size:3.5rem;margin-bottom:1rem;">📅</div>
       <h3 style="font-family:'Playfair Display',serif;color:var(--forest);margin-bottom:.5rem;">No camps added yet</h3>
-      <p style="font-size:.9rem;margin-bottom:1.5rem;">Browse camps and click <strong>Add to My Schedule</strong> on any camp page.</p>
+      <p style="font-size:.9rem;margin-bottom:1.5rem;">Browse camps and click <strong>Add to My Calendar</strong> on any camp page.</p>
       <button class="btn-primary" onclick="showPage('search')">Browse Camps →</button>
     </div>
 
@@ -1892,7 +1895,7 @@ function buildSubProgramCTA(c) {
   var schedBtn = document.createElement('button');
   schedBtn.id = 'uw-sched-btn';
   schedBtn.style.cssText = 'width:100%;padding:.75rem;border-radius:10px;margin-top:.6rem;border:2px solid var(--forest);background:#fff;color:var(--forest);font-weight:600;font-size:.85rem;cursor:pointer;font-family:"DM Sans",sans-serif;';
-  schedBtn.textContent = alreadyAdded ? '✓ Added to My Schedule' : '📅 Add to My Schedule';
+  schedBtn.textContent = alreadyAdded ? '✓ Added to My Calendar' : '📅 Add to My Calendar';
   schedBtn.onclick = function(){
     requireAccount(function(){
       ensureChildThenScheduleUW(c);
@@ -2038,7 +2041,7 @@ function buildDetailCTA(c) {
   var alreadyAdded = scheduleItems.some(function(i){ return i.campId === c.id && i.child === activeChild; });
   var schedBtn = document.createElement('button');
   schedBtn.style.cssText = 'width:100%;padding:.75rem;border-radius:10px;margin-top:.6rem;border:2px solid var(--forest);background:#fff;color:var(--forest);font-weight:600;font-size:.85rem;cursor:pointer;';
-  schedBtn.textContent = alreadyAdded ? '\u2713 Added to My Schedule' : '\uD83D\uDCC5 Add to My Schedule';
+  schedBtn.textContent = alreadyAdded ? '\u2713 Added to My Calendar' : '\uD83D\uDCC5 Add to My Calendar';
   schedBtn.onclick = function(){ requireAccount(function(){ ensureChildThenSchedule(); }); };
   cta.appendChild(schedBtn);
 }
@@ -2253,7 +2256,7 @@ function completeNative() {
           
         </div>
         <div class="conf-actions">
-          <button class="btn-primary" onclick="showPage('schedule')">View in My Schedule →</button>
+          <button class="btn-primary" onclick="showPage('schedule')">View in My Calendar →</button>
           <button class="btn-outline" onclick="showPage('search')">Find More Camps</button>
         </div>
       </div>
@@ -2460,6 +2463,7 @@ function fmtDateRange(startStr, endStr) {
   return sm + ' ' + sd + ' \u2013 ' + em + ' ' + ed;
 }
 var scheduleItems = []; // [{campId, registered, child}]
+var showFullCalendar = false;
 var activeChild = null;
 var children = [];
 
@@ -2749,6 +2753,26 @@ function closeOverlay(id) {
   if (el) el.remove();
 }
 
+function toggleFullCalendar() {
+  showFullCalendar = !showFullCalendar;
+  var btn = document.getElementById('full-cal-toggle');
+  if (btn) btn.textContent = showFullCalendar ? '🗓 Hide Empty Weeks' : '🗓 Show Full Summer';
+  renderSchedule();
+}
+
+function goToSearchFromCalendar(mondayISO) {
+  // Pre-fill hero date-start with Monday of clicked week, date-end with Friday
+  var mon = new Date(mondayISO + 'T12:00:00');
+  var fri = new Date(mon); fri.setDate(fri.getDate() + 4);
+  function toISO(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  var startEl = document.getElementById('date-start');
+  var endEl   = document.getElementById('date-end');
+  if (startEl) startEl.value = toISO(mon);
+  if (endEl)   endEl.value   = toISO(fri);
+  showPage('search');
+  setTimeout(function() { applyFilters(); }, 100);
+}
+
 function renderSchedule() {
   var emptyEl  = document.getElementById('sched-empty');
   var layoutEl = document.getElementById('sched-layout');
@@ -2863,6 +2887,19 @@ function renderSchedule() {
   });
 
   var weekMondays = Object.values(weekSet).sort(function(a,b){ return a-b; });
+
+  // Full summer mode: show all weeks Jun 8 – Sep 7, 2026
+  if (showFullCalendar) {
+    var summerStart = getMondayOf(new Date(2026, 5, 8));  // week of Jun 8
+    var summerEnd   = getMondayOf(new Date(2026, 8, 7));  // week of Sep 7
+    var cur = summerStart;
+    while (cur <= summerEnd) {
+      if (!weekSet[cur.getTime()]) weekSet[cur.getTime()] = new Date(cur);
+      cur = addDays(cur, 7);
+    }
+    weekMondays = Object.values(weekSet).sort(function(a,b){ return a-b; });
+  }
+
   if (weekMondays.length === 0) {
     calEl.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">No date info available</div>';
     return;
@@ -2924,6 +2961,18 @@ function renderSchedule() {
       if (!placed) { lanes.push([wi]); laneLastEnd.push(wi.endIdx); }
     });
     if (lanes.length === 0) lanes = [[]];
+
+    // Empty week in full calendar mode — show clickable "Find a camp" row
+    if (showFullCalendar && weekItems.length === 0) {
+      var monISO = mon.getFullYear() + '-' + String(mon.getMonth()+1).padStart(2,'0') + '-' + String(mon.getDate()).padStart(2,'0');
+      rows += '<div class="week-row" onclick="goToSearchFromCalendar(\'' + monISO + '\')" style="cursor:pointer;" title="Find camps starting this week">' +
+        '<div class="week-label">' + fmtWeekLabel(mon) + '</div>' +
+        '<div style="grid-column:span 7;display:flex;align-items:center;justify-content:center;gap:.4rem;color:#aabbb0;font-size:.78rem;font-weight:500;padding:.3rem 0;border-radius:6px;transition:background .15s;" ' +
+        'onmouseover="this.style.background=\'#f0f7f3\';this.style.color=\'var(--moss)\'" onmouseout="this.style.background=\'\';this.style.color=\'#aabbb0\'">' +
+        '<span style="font-size:1rem;">+</span> Find a camp' +
+        '</div></div>';
+      return;
+    }
 
     // Render one sub-row per lane
     lanes.forEach(function(lane, laneIdx) {
