@@ -514,6 +514,20 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .sl-reg-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:.75rem;border-radius:10px;font-weight:700;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .detail-umbrella-label{display:inline-flex;align-items:center;gap:.4rem;background:var(--sun);color:var(--forest);font-size:.72rem;font-weight:800;padding:.28rem .75rem;border-radius:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.65rem;}
 
+/* ── OWNER PORTAL ── */
+.updated-badge{display:inline-flex;align-items:center;gap:.2rem;background:#d4ead8;color:var(--moss);font-size:.62rem;font-weight:700;padding:.1rem .38rem;border-radius:6px;margin-left:.35rem;vertical-align:middle;}
+.owner-page{max-width:800px;margin:0 auto;padding:2rem;}
+.owner-header{background:var(--forest);border-radius:16px;padding:1.5rem 2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+.owner-section{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:1.5rem;}
+.owner-section h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--forest);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid #f0f4f1;}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem;margin-bottom:.75rem;}
+.photo-thumb{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3;background:var(--sky);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-thumb-del{position:absolute;top:.3rem;right:.3rem;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.photo-add{border:2px dashed var(--border);border-radius:10px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:.78rem;gap:.3rem;transition:all .15s;max-width:130px;}
+.photo-add:hover{border-color:var(--moss);color:var(--moss);}
+@media(max-width:900px){.owner-page{padding:1rem;}.owner-header{padding:1.2rem 1rem;}}
+
 </style>
 </head>
 <body>
@@ -826,9 +840,122 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 </div>
 
 <!-- ═══════════════════════════════
+     OWNER DASHBOARD
+═══════════════════════════════ -->
+<div id="page-owner" class="page">
+  <div class="owner-page">
+    <div class="owner-header">
+      <div>
+        <div style="font-size:.8rem;opacity:.65;margin-bottom:.3rem;">Camp Owner Dashboard</div>
+        <div id="owner-camp-name-title" style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;">Your Camp</div>
+      </div>
+      <button onclick="ownerLogout()" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);padding:.6rem 1.3rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;">Log Out</button>
+    </div>
+
+    <!-- Pending state -->
+    <div id="owner-pending-msg" style="display:none;text-align:center;padding:3rem 1rem;background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.06);">
+      <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--forest);margin-bottom:.5rem;">Your request is pending</h3>
+      <p style="color:var(--muted);font-size:.9rem;max-width:360px;margin:0 auto;">We're reviewing your claim. You'll receive a confirmation email once approved — usually within 1–2 business days.</p>
+    </div>
+
+    <!-- Edit form -->
+    <div id="owner-edit-area" style="display:none;">
+      <div class="owner-section">
+        <h3>Basic Information</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Camp Name</div>
+            <input id="edit-camp-name" type="text" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Camp Type</div>
+            <select id="edit-camp-type" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:#fff;">
+              <option>Sports</option><option>Arts &amp; Crafts</option><option>STEM</option><option>Outdoor</option><option>Academic</option><option>Music</option><option>Dance</option><option>Cooking</option><option>Chess</option><option>Variety</option><option>Neurodiversity</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Website</div>
+            <input id="edit-website" type="url" placeholder="https://yourcamp.com" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">City, State</div>
+            <input id="edit-city" type="text" placeholder="Seattle, WA" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="grid-column:1/-1;">
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Description</div>
+            <textarea id="edit-description" placeholder="Describe your camp's philosophy and activities..." style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;min-height:100px;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="owner-section">
+        <h3>Schedule &amp; Ages</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Hours</div>
+            <input id="edit-hours" type="text" placeholder="e.g. 9am–3pm" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+            <div>
+              <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Min Age</div>
+              <input id="edit-age-min" type="number" min="1" max="18" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Max Age</div>
+              <input id="edit-age-max" type="number" min="1" max="18" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div style="font-size:.72rem;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;letter-spacing:.07em;">Session Dates <span style="font-weight:400;text-transform:none;font-size:.78rem;">(comma-separated, e.g. Jun 22–26, Jun 29–Jul 3)</span></div>
+            <textarea id="edit-sessions" placeholder="Jun 22–26, Jun 29–Jul 3, Jul 7–11" style="width:100%;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;min-height:80px;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="owner-section">
+        <h3>Photos <span style="font-size:.8rem;font-weight:400;color:var(--muted);">(up to 5)</span></h3>
+        <div class="photo-grid" id="owner-photo-grid"></div>
+        <div id="owner-photo-add" class="photo-add" onclick="document.getElementById('owner-photo-input').click()">
+          <span style="font-size:1.5rem;">+</span>
+          <span>Add photo</span>
+        </div>
+        <input type="file" id="owner-photo-input" accept="image/*" style="display:none;" onchange="uploadOwnerPhoto(this)">
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;padding-bottom:2rem;">
+        <button id="owner-save-btn" onclick="saveOwnerChanges()" style="padding:.9rem 2.5rem;background:var(--forest);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;">Save Changes →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
      PORTAL
 ═══════════════════════════════ -->
 <div id="page-portal" class="page">
+
+  <!-- OWNER LOGIN -->
+  <div id="owner-login-section" style="max-width:900px;margin:0 auto;padding:2rem 2rem 0;">
+    <div style="background:#fff;border-radius:16px;padding:2rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:0;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;">
+        <div style="font-size:1.8rem;">🔑</div>
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--forest);margin-bottom:.2rem;">Camp Owner Login</h2>
+          <p style="color:var(--muted);font-size:.85rem;">Already claimed your camp? Log in to manage your listing.</p>
+        </div>
+      </div>
+      <div id="owner-login-form">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;letter-spacing:.07em;">Your email address</div>
+        <div style="display:flex;gap:.7rem;margin-bottom:.8rem;flex-wrap:wrap;">
+          <input id="owner-email-input" type="email" placeholder="director@yourcamp.com" style="flex:1;min-width:200px;padding:.75rem 1rem;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;" onfocus="this.style.borderColor='var(--moss)'" onblur="this.style.borderColor='var(--border)'" onkeydown="if(event.key==='Enter')sendOwnerLoginLink()">
+          <button onclick="sendOwnerLoginLink()" id="owner-login-btn" style="padding:.75rem 1.4rem;background:var(--forest);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Send Login Link</button>
+        </div>
+        <div id="owner-login-msg" style="font-size:.83rem;display:none;padding:.6rem .8rem;border-radius:8px;"></div>
+      </div>
+    </div>
+  </div>
+
   <div style="max-width:900px;margin:0 auto;padding:2rem">
     <h1 style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--forest);margin-bottom:.4rem">List Your Camp</h1>
     <p style="color:var(--muted);font-size:.95rem;margin-bottom:2rem">Join 12,400+ camps on PopCamps. Reach thousands of parents actively searching.</p>
@@ -1087,6 +1214,7 @@ function parseSupabaseRecord(row, index) {
     displayType:    displayType,
     parentId:       parentId,
     subject:        subject,
+    ownerUpdatedAt: row.owner_updated_at || null,
   };
 
   // Umbrella camp extras
@@ -1273,7 +1401,7 @@ function renderCamps(data) {
           '<button class="save-btn ' + (savedCamps.has(c.id)?'saved':'') + '" onclick="event.stopPropagation();toggleSave(' + c.id + ',this)">' + (savedCamps.has(c.id)?'♥':'♡') + '</button>' +
         '</div>' +
         '<div class="umbrella-body">' +
-          '<div class="camp-name">' + c.name + '</div>' +
+          '<div class="camp-name">' + c.name + (c.ownerUpdatedAt && ((new Date()-new Date(c.ownerUpdatedAt))/86400000)<30 ? '<span class="updated-badge">Updated</span>' : '') + '</div>' +
           '<div class="camp-location">📍 ' + c.location + '</div>' +
           '<div class="umbrella-summary">' + c.umbrellaSummary + '</div>' +
           '<div class="camp-tags">' + c.tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
@@ -1295,7 +1423,7 @@ function renderCamps(data) {
         '<button class="save-btn ' + (savedCamps.has(c.id)?'saved':'') + '" onclick="event.stopPropagation();toggleSave(' + c.id + ',this)">' + (savedCamps.has(c.id)?'♥':'♡') + '</button>' +
       '</div>' +
       '<div class="camp-body">' +
-        '<div class="camp-name">' + c.name + '</div>' +
+        '<div class="camp-name">' + c.name + (c.ownerUpdatedAt && ((new Date()-new Date(c.ownerUpdatedAt))/86400000)<30 ? '<span class="updated-badge">Updated</span>' : '') + '</div>' +
         '<div class="camp-location">📍 ' + c.location + '</div>' +
         '<div class="camp-tags">' + c.tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
         '<div class="camp-footer">' +
@@ -3662,8 +3790,8 @@ async function submitClaim() {
           '<div style="background:var(--sky);border-radius:10px;padding:.9rem;font-size:.82rem;color:var(--forest);text-align:left;">' +
             '<strong>What happens next:</strong><br>' +
             '1. We verify your role at ' + campName + '<br>' +
-            '2. We reach out by email to confirm listing details<br>' +
-            '3. We update your listing based on what you send us' +
+            '2. Once approved, we\'ll send you a login link by email<br>' +
+            '3. You\'ll be able to log in and update your listing directly' +
           '</div>' +
         '</div>';
     } else {
@@ -3672,6 +3800,150 @@ async function submitClaim() {
   } catch(e) {
     showToast('Something went wrong. Please try again.');
   }
+}
+
+/* ─── OWNER PORTAL ─── */
+var ownerCampId = null;
+var ownerCampData = null;
+
+async function sendOwnerLoginLink() {
+  var email = (document.getElementById('owner-email-input').value || '').trim();
+  var msgEl = document.getElementById('owner-login-msg');
+  var btn = document.getElementById('owner-login-btn');
+  if (!email || !email.includes('@')) { showToast('Please enter a valid email address.'); return; }
+  msgEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    var redirectTo = window.location.origin + window.location.pathname;
+    var result = await sbClient.auth.signInWithOtp({ email: email, options: { shouldCreateUser: false, emailRedirectTo: redirectTo } });
+    if (result.error) {
+      msgEl.textContent = 'No owner account found for this email. Please claim your camp below first.';
+      msgEl.style.background = '#fde8e8'; msgEl.style.color = '#9a2a2a';
+    } else {
+      msgEl.textContent = '✓ Login link sent — check your email!';
+      msgEl.style.background = '#d4ead8'; msgEl.style.color = 'var(--moss)';
+    }
+    msgEl.style.display = 'block';
+  } catch(e) {
+    msgEl.textContent = 'Something went wrong. Please try again.';
+    msgEl.style.background = '#fde8e8'; msgEl.style.color = '#9a2a2a';
+    msgEl.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Send Login Link';
+}
+
+async function checkOwnerSession() {
+  try {
+    var resp = await sbClient.auth.getSession();
+    var session = resp.data && resp.data.session;
+    if (!session) return false;
+    var userId = session.user.id;
+    var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
+    if (ownerResp.error || !ownerResp.data) {
+      // Logged in but not approved yet — show pending state
+      showPage('owner');
+      document.getElementById('owner-pending-msg').style.display = 'block';
+      document.getElementById('owner-edit-area').style.display = 'none';
+      document.getElementById('owner-camp-name-title').textContent = 'Your Camp';
+      return true;
+    }
+    ownerCampId = ownerResp.data.camp_id;
+    var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
+    if (campResp.error || !campResp.data) return false;
+    ownerCampData = campResp.data;
+    populateOwnerForm(campResp.data);
+    showPage('owner');
+    return true;
+  } catch(e) { return false; }
+}
+
+function populateOwnerForm(camp) {
+  document.getElementById('owner-camp-name-title').textContent = camp.camp_name || 'Your Camp';
+  document.getElementById('edit-camp-name').value = camp.camp_name || '';
+  document.getElementById('edit-camp-type').value = camp.camp_type || 'Sports';
+  document.getElementById('edit-website').value = camp.website_url || '';
+  document.getElementById('edit-city').value = camp.city_state || '';
+  document.getElementById('edit-description').value = camp.description || '';
+  document.getElementById('edit-hours').value = camp.hours || '';
+  document.getElementById('edit-age-min').value = camp.age_min || '';
+  document.getElementById('edit-age-max').value = camp.age_max || '';
+  document.getElementById('edit-sessions').value = camp.session_dates || '';
+  document.getElementById('owner-pending-msg').style.display = 'none';
+  document.getElementById('owner-edit-area').style.display = 'block';
+  renderOwnerPhotos(camp.photos || []);
+}
+
+function renderOwnerPhotos(photos) {
+  var grid = document.getElementById('owner-photo-grid');
+  if (!grid) return;
+  grid.innerHTML = (photos || []).map(function(url, i) {
+    return '<div class="photo-thumb">' +
+      '<img src="' + url + '" alt="Camp photo">' +
+      '<button class="photo-thumb-del" onclick="deleteOwnerPhoto(' + i + ')">✕</button>' +
+    '</div>';
+  }).join('');
+  var addBtn = document.getElementById('owner-photo-add');
+  if (addBtn) addBtn.style.display = (photos || []).length >= 5 ? 'none' : 'flex';
+}
+
+async function uploadOwnerPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB'); return; }
+  showToast('Uploading photo...');
+  var ext = file.name.split('.').pop().toLowerCase();
+  var path = ownerCampId + '/' + Date.now() + '.' + ext;
+  var upResp = await sbClient.storage.from('camp-photos').upload(path, file, { upsert: true });
+  if (upResp.error) { showToast('Upload failed. Please try again.'); return; }
+  var urlData = sbClient.storage.from('camp-photos').getPublicUrl(path);
+  var publicUrl = urlData.data.publicUrl;
+  var currentPhotos = (ownerCampData.photos || []).concat([publicUrl]);
+  await sbClient.from('camps').update({ photos: currentPhotos }).eq('id', ownerCampId);
+  ownerCampData.photos = currentPhotos;
+  renderOwnerPhotos(currentPhotos);
+  input.value = '';
+  showToast('Photo uploaded!');
+}
+
+async function deleteOwnerPhoto(index) {
+  var currentPhotos = (ownerCampData.photos || []).slice();
+  currentPhotos.splice(index, 1);
+  await sbClient.from('camps').update({ photos: currentPhotos }).eq('id', ownerCampId);
+  ownerCampData.photos = currentPhotos;
+  renderOwnerPhotos(currentPhotos);
+  showToast('Photo removed.');
+}
+
+async function saveOwnerChanges() {
+  var btn = document.getElementById('owner-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  var updates = {
+    camp_name:       (document.getElementById('edit-camp-name').value || '').trim(),
+    camp_type:       document.getElementById('edit-camp-type').value,
+    website_url:     (document.getElementById('edit-website').value || '').trim(),
+    city_state:      (document.getElementById('edit-city').value || '').trim(),
+    description:     (document.getElementById('edit-description').value || '').trim(),
+    hours:           (document.getElementById('edit-hours').value || '').trim(),
+    age_min:         parseInt(document.getElementById('edit-age-min').value) || null,
+    age_max:         parseInt(document.getElementById('edit-age-max').value) || null,
+    session_dates:   (document.getElementById('edit-sessions').value || '').trim(),
+    owner_updated_at: new Date().toISOString()
+  };
+  var saveResp = await sbClient.from('camps').update(updates).eq('id', ownerCampId);
+  if (saveResp.error) {
+    showToast('Error saving. Please try again.');
+  } else {
+    document.getElementById('owner-camp-name-title').textContent = updates.camp_name || 'Your Camp';
+    showToast('Your listing has been updated!');
+  }
+  btn.disabled = false; btn.textContent = 'Save Changes →';
+}
+
+function ownerLogout() {
+  sbClient.auth.signOut();
+  ownerCampId = null;
+  ownerCampData = null;
+  showPage('portal');
 }
 
 // ─── IMAGE UPLOADS ───
@@ -3807,6 +4079,19 @@ async function checkExistingSession() {
   var resp = await sbClient.auth.getSession();
   var session = resp.data && resp.data.session;
   if (!session) return;
+  // Check if this is a camp owner account first
+  var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', session.user.id).single();
+  if (!ownerResp.error && ownerResp.data) {
+    ownerCampId = ownerResp.data.camp_id;
+    var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
+    if (!campResp.error && campResp.data) {
+      ownerCampData = campResp.data;
+      populateOwnerForm(campResp.data);
+      showPage('owner');
+      return;
+    }
+  }
+  // Otherwise treat as a regular parent user
   var profileResp = await sbClient.from('user_profiles').select('*').eq('id', session.user.id).single();
   var profile = profileResp.data;
   currentUser = {
@@ -4154,9 +4439,21 @@ window.addEventListener('DOMContentLoaded', function() {
   // Render demo data immediately so the page works right away
   applyFilters();
 
-  // Handle password reset links (Supabase fires PASSWORD_RECOVERY event)
-  sbClient.auth.onAuthStateChange(function(event) {
+  // Handle password reset links and owner magic link logins
+  sbClient.auth.onAuthStateChange(async function(event, session) {
     if (event === 'PASSWORD_RECOVERY') showPasswordUpdateModal();
+    if (event === 'SIGNED_IN' && session) {
+      var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', session.user.id).single();
+      if (!ownerResp.error && ownerResp.data) {
+        ownerCampId = ownerResp.data.camp_id;
+        var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
+        if (!campResp.error && campResp.data) {
+          ownerCampData = campResp.data;
+          populateOwnerForm(campResp.data);
+          showPage('owner');
+        }
+      }
+    }
   });
 
   // Load live data from Supabase (replaces demo data on success; then restores session)
