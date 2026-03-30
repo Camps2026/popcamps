@@ -3425,7 +3425,7 @@ function renderSchedule() {
             '<div class="sched-event' + (isConflict ? ' sched-event-conflict' : '') + '" style="' + bg + 'opacity:' + opacity + ';cursor:pointer;' +
             (span > 1 ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
             '" onclick="openEventPopup(\'' + item.localId + '\')">' +
-              '<div class="sched-event-name">' + c.icon + ' ' + c.name + noteDot + '</div>' +
+              '<div class="sched-event-name">' + c.name + noteDot + '</div>' +
               dateLabel +
               '<div class="sched-event-time">' + c.time + '</div>' +
               '<div class="sched-event-regtype" style="font-size:.68rem;opacity:.8;">' + lbl + '</div>' +
