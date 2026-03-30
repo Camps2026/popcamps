@@ -4305,6 +4305,32 @@ async function logOut() {
   showPage('search');
 }
 
+async function deleteAccount() {
+  if (!currentUser) return;
+  if (!confirm('Are you sure? This will permanently delete your account and all saved data — your children\'s profiles, your camp schedule, and your login. This cannot be undone.')) return;
+  var uid = currentUser.id;
+  await sbClient.from('user_schedules').delete().eq('user_id', uid);
+  await sbClient.from('user_children').delete().eq('user_id', uid);
+  await sbClient.from('user_profiles').delete().eq('id', uid);
+  await sbClient.auth.signOut();
+  currentUser = null;
+  scheduleItems = [];
+  children = [];
+  activeChild = null;
+  savedCamps = new Set();
+  document.querySelectorAll('.children-tabs .child-tab').forEach(function(t){
+    if (t.id !== 'saved-tab' && t.id !== 'all-kids-tab') t.remove();
+  });
+  var allKidsTabReset = document.getElementById('all-kids-tab');
+  if (allKidsTabReset) { allKidsTabReset.style.display = 'none'; allKidsTabReset.classList.remove('active'); }
+  renderProfileChildren();
+  renderSchedule();
+  renderProfileAccount();
+  updateNavForUser();
+  showPage('home');
+  showToast('Your account has been deleted. Sorry to see you go!');
+}
+
 function updateNavForUser() {
   var btn = document.getElementById('nav-signup-btn');
   if (!btn) return;
@@ -4331,7 +4357,11 @@ function renderProfileAccount() {
         '<div><div style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:.25rem">Email</div><div style="font-weight:600;color:var(--forest)">' + currentUser.email + '</div></div>' +
         '<div><div style="font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:.25rem">Member Since</div><div style="font-weight:600;color:var(--forest)">' + new Date(currentUser.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}) + '</div></div>' +
       '</div>' +
-      '<button onclick="logOut();" style="margin-top:1rem;padding:.5rem 1.2rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:.82rem;cursor:pointer;color:var(--text);">Log Out</button>';
+      '<button onclick="logOut();" style="margin-top:1rem;padding:.5rem 1.2rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:.82rem;cursor:pointer;color:var(--text);">Log Out</button>' +
+      '<div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #f0f4f1;">' +
+        '<div style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem;">Want to remove your account and all saved data from PopCamps?</div>' +
+        '<button onclick="deleteAccount();" style="padding:.45rem 1rem;border:1.5px solid #e0b4b4;border-radius:8px;background:#fff;font-size:.8rem;cursor:pointer;color:#9a2a2a;">Delete My Account</button>' +
+      '</div>';
   } else {
     box.innerHTML =
       '<div style="text-align:center;padding:1rem 0;">' +
