@@ -520,12 +520,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .owner-header{background:var(--forest);border-radius:16px;padding:1.5rem 2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
 .owner-section{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:1.5rem;}
 .owner-section h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--forest);margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid #f0f4f1;}
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem;margin-bottom:.75rem;}
-.photo-thumb{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3;background:var(--sky);}
-.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.photo-thumb-del{position:absolute;top:.3rem;right:.3rem;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
-.photo-add{border:2px dashed var(--border);border-radius:10px;aspect-ratio:4/3;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:.78rem;gap:.3rem;transition:all .15s;max-width:130px;}
-.photo-add:hover{border-color:var(--moss);color:var(--moss);}
 @media(max-width:900px){.owner-page{padding:1rem;}.owner-header{padding:1.2rem 1rem;}}
 
 /* ── ADMIN REVIEW ── */
@@ -537,10 +531,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
 .diff-table td{padding:.5rem .7rem;border-bottom:1px solid #f0f4f1;vertical-align:top;word-break:break-word;}
 .diff-old{color:#9a2a2a;opacity:.75;}
 .diff-new{color:var(--moss);font-weight:600;}
-.review-photos{display:flex;gap:.6rem;flex-wrap:wrap;margin:.5rem 0;}
-.review-photo{border-radius:8px;overflow:hidden;width:100px;height:75px;position:relative;flex-shrink:0;}
-.review-photo img{width:100%;height:100%;object-fit:cover;display:block;}
-.review-photo-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:.58rem;font-weight:700;text-align:center;padding:.15rem;text-transform:uppercase;letter-spacing:.04em;}
 .review-actions{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap;}
 .btn-approve{flex:1;min-width:120px;padding:.75rem;background:var(--moss);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s;}
 .btn-approve:hover{background:var(--forest);}
@@ -956,15 +946,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
         </div>
       </div>
 
-      <div class="owner-section">
-        <h3>Photos <span style="font-size:.8rem;font-weight:400;color:var(--muted);">(up to 5 · reviewed before going live)</span></h3>
-        <div class="photo-grid" id="owner-photo-grid"></div>
-        <div id="owner-photo-add" class="photo-add" onclick="document.getElementById('owner-photo-input').click()">
-          <span style="font-size:1.5rem;">+</span>
-          <span>Add photo</span>
-        </div>
-        <input type="file" id="owner-photo-input" accept="image/*" style="display:none;" onchange="uploadOwnerPhoto(this)">
-      </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:2rem;flex-wrap:wrap;gap:.7rem;">
         <div style="font-size:.82rem;color:var(--muted);">All changes are reviewed before going live.</div>
@@ -4099,8 +4080,6 @@ async function submitClaim() {
 /* ─── OWNER PORTAL ─── */
 var ownerCampId = null;
 var ownerCampData = null;
-var pendingPhotosToAdd = [];
-var pendingPhotosToRemove = [];
 var isAdminUser = false;
 
 async function sendOwnerLoginLink() {
@@ -4172,8 +4151,6 @@ async function populateOwnerForm(camp) {
   document.getElementById('edit-sessions').value = camp.session_dates || '';
   document.getElementById('owner-pending-msg').style.display = 'none';
   document.getElementById('owner-edit-area').style.display = 'block';
-  pendingPhotosToAdd = []; pendingPhotosToRemove = [];
-  renderOwnerPhotos(camp.photos || []);
   // Check for existing pending request
   var { data: pendingReq } = await sbClient.from('camp_edit_requests').select('id,created_at').eq('camp_id', ownerCampId).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).single();
   var noticeEl = document.getElementById('owner-pending-notice');
@@ -4187,64 +4164,6 @@ async function populateOwnerForm(camp) {
   }
 }
 
-function renderOwnerPhotos(livePhotos) {
-  var grid = document.getElementById('owner-photo-grid');
-  if (!grid) return;
-  var html = '';
-  (livePhotos || []).forEach(function(url, i) {
-    var removing = pendingPhotosToRemove.indexOf(url) !== -1;
-    html += '<div class="photo-thumb" style="' + (removing ? 'opacity:.45;' : '') + '">' +
-      '<img src="' + url + '" alt="Camp photo">' +
-      (removing
-        ? '<button class="photo-thumb-del" style="background:var(--moss);" onclick="unmarkPhotoForRemoval(' + i + ')" title="Keep photo">↩</button>'
-        : '<button class="photo-thumb-del" onclick="markPhotoForRemoval(' + i + ')" title="Remove photo">✕</button>') +
-      (removing ? '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(154,42,42,.75);color:#fff;font-size:.58rem;text-align:center;padding:.15rem;font-weight:700;">REMOVE</div>' : '') +
-    '</div>';
-  });
-  pendingPhotosToAdd.forEach(function(url, i) {
-    html += '<div class="photo-thumb" style="outline:2px solid var(--moss);">' +
-      '<img src="' + url + '" alt="New photo">' +
-      '<button class="photo-thumb-del" onclick="removePendingPhoto(' + i + ')">✕</button>' +
-      '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(45,90,61,.8);color:#fff;font-size:.58rem;text-align:center;padding:.15rem;font-weight:700;">NEW</div>' +
-    '</div>';
-  });
-  grid.innerHTML = html;
-  var addBtn = document.getElementById('owner-photo-add');
-  if (addBtn) addBtn.style.display = (livePhotos || []).length + pendingPhotosToAdd.length >= 5 ? 'none' : 'flex';
-}
-
-function markPhotoForRemoval(index) {
-  var url = (ownerCampData.photos || [])[index];
-  if (url && pendingPhotosToRemove.indexOf(url) === -1) pendingPhotosToRemove.push(url);
-  renderOwnerPhotos(ownerCampData.photos || []);
-}
-
-function unmarkPhotoForRemoval(index) {
-  var url = (ownerCampData.photos || [])[index];
-  pendingPhotosToRemove = pendingPhotosToRemove.filter(function(u){ return u !== url; });
-  renderOwnerPhotos(ownerCampData.photos || []);
-}
-
-function removePendingPhoto(index) {
-  pendingPhotosToAdd.splice(index, 1);
-  renderOwnerPhotos(ownerCampData.photos || []);
-}
-
-async function uploadOwnerPhoto(input) {
-  if (!input.files || !input.files[0]) return;
-  var file = input.files[0];
-  if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB'); return; }
-  showToast('Uploading photo...');
-  var ext = file.name.split('.').pop().toLowerCase();
-  var path = 'pending/' + ownerCampId + '/' + Date.now() + '.' + ext;
-  var upResp = await sbClient.storage.from('camp-photos').upload(path, file, { upsert: true });
-  if (upResp.error) { showToast('Upload failed. Please try again.'); return; }
-  var publicUrl = sbClient.storage.from('camp-photos').getPublicUrl(path).data.publicUrl;
-  pendingPhotosToAdd.push(publicUrl);
-  renderOwnerPhotos(ownerCampData.photos || []);
-  input.value = '';
-  showToast('Photo added — submit for review to save.');
-}
 
 async function submitOwnerEdits() {
   var btn = document.getElementById('owner-save-btn');
@@ -4264,7 +4183,7 @@ async function submitOwnerEdits() {
   if (!session) { showToast('Please log in again.'); btn.disabled = false; btn.textContent = 'Submit for Review →'; return; }
   var { error } = await sbClient.from('camp_edit_requests').insert({
     camp_id: ownerCampId, user_id: session.user.id, status: 'pending',
-    edits: edits, photos_to_add: pendingPhotosToAdd, photos_to_remove: pendingPhotosToRemove
+    edits: edits
   });
   if (error) {
     showToast('Error submitting. Please try again.');
@@ -4275,8 +4194,6 @@ async function submitOwnerEdits() {
       noticeEl.style.display = 'flex';
       noticeEl.querySelector('.pending-notice-date').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
-    pendingPhotosToAdd = []; pendingPhotosToRemove = [];
-    renderOwnerPhotos(ownerCampData.photos || []);
   }
   btn.disabled = false; btn.textContent = 'Submit for Review →';
 }
@@ -4284,7 +4201,6 @@ async function submitOwnerEdits() {
 function ownerLogout() {
   sbClient.auth.signOut();
   ownerCampId = null; ownerCampData = null; isAdminUser = false;
-  pendingPhotosToAdd = []; pendingPhotosToRemove = [];
   showPage('portal');
 }
 
@@ -4299,7 +4215,7 @@ async function loadAdminRequests() {
     return;
   }
   var campIds = requests.map(function(r){ return r.camp_id; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
-  var { data: campsData } = await sbClient.from('camps').select('id,camp_name,camp_type,website_url,city_state,description,hours,age_min,age_max,session_dates,photos').in('id', campIds);
+  var { data: campsData } = await sbClient.from('camps').select('id,camp_name,camp_type,website_url,city_state,description,hours,age_min,age_max,session_dates').in('id', campIds);
   var campsMap = {};
   (campsData || []).forEach(function(c){ campsMap[c.id] = c; });
   var fieldLabels = { camp_name:'Camp Name', camp_type:'Type', website_url:'Website', city_state:'City', description:'Description', hours:'Hours', age_min:'Min Age', age_max:'Max Age', session_dates:'Session Dates' };
@@ -4317,22 +4233,11 @@ async function loadAdminRequests() {
       }
     });
     if (!diffRows) diffRows = '<tr><td colspan="3" style="color:var(--muted);font-style:italic;font-size:.83rem;">No text changes</td></tr>';
-    var photosAddHtml = '';
-    if ((req.photos_to_add || []).length) {
-      photosAddHtml = '<div style="margin-top:.9rem;"><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--moss);letter-spacing:.07em;margin-bottom:.4rem;">New Photos to Add</div>' +
-        '<div class="review-photos">' + req.photos_to_add.map(function(url){ return '<div class="review-photo"><img src="' + url + '" alt="New photo"><div class="review-photo-label" style="background:rgba(45,90,61,.8);">New</div></div>'; }).join('') + '</div></div>';
-    }
-    var photosRemoveHtml = '';
-    if ((req.photos_to_remove || []).length) {
-      photosRemoveHtml = '<div style="margin-top:.9rem;"><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:#9a2a2a;letter-spacing:.07em;margin-bottom:.4rem;">Photos to Remove</div>' +
-        '<div class="review-photos">' + req.photos_to_remove.map(function(url){ return '<div class="review-photo" style="opacity:.6;"><img src="' + url + '" alt="Remove"><div class="review-photo-label" style="background:rgba(154,42,42,.8);">Remove</div></div>'; }).join('') + '</div></div>';
-    }
     var submitted = new Date(req.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
     return '<div class="review-card">' +
       '<h4>' + (camp.camp_name || 'Camp #' + req.camp_id) + '</h4>' +
       '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem;">Submitted ' + submitted + '</div>' +
       '<table class="diff-table"><thead><tr><th>Field</th><th>Current (live)</th><th>Proposed</th></tr></thead><tbody>' + diffRows + '</tbody></table>' +
-      photosAddHtml + photosRemoveHtml +
       '<div class="review-actions">' +
         '<button class="btn-approve" onclick="approveEditRequest(\'' + req.id + '\',' + req.camp_id + ',this)">✓ Approve &amp; Publish</button>' +
         '<button class="btn-reject" onclick="rejectEditRequest(\'' + req.id + '\',this)">✕ Reject</button>' +
@@ -4344,10 +4249,7 @@ async function approveEditRequest(requestId, campId, btn) {
   btn.disabled = true; btn.textContent = 'Approving...';
   var { data: req } = await sbClient.from('camp_edit_requests').select('*').eq('id', requestId).single();
   if (!req) { showToast('Request not found.'); btn.disabled = false; btn.textContent = '✓ Approve & Publish'; return; }
-  var { data: camp } = await sbClient.from('camps').select('photos').eq('id', campId).single();
-  var livePhotos = (camp && camp.photos) || [];
-  var newPhotos = livePhotos.filter(function(url){ return (req.photos_to_remove || []).indexOf(url) === -1; }).concat(req.photos_to_add || []);
-  var updates = Object.assign({}, req.edits, { photos: newPhotos, owner_updated_at: new Date().toISOString() });
+  var updates = Object.assign({}, req.edits, { owner_updated_at: new Date().toISOString() });
   var { error } = await sbClient.from('camps').update(updates).eq('id', campId);
   if (error) { showToast('Error updating camp. Please try again.'); btn.disabled = false; btn.textContent = '✓ Approve & Publish'; return; }
   await sbClient.from('camp_edit_requests').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', requestId);
