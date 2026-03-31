@@ -951,6 +951,52 @@ Camp listing details are for informational purposes only. Verify all information
 
 ---
 
+## Session: Mar 30–31, 2026 — UX, Bug Fixes & Marketing
+
+### My Calendar UX Improvements
+- Improved empty state: now explains the calendar is for tracking camps and what "registered" means
+- Added toast after adding a camp: "Added to calendar! Remember to register directly with the camp."
+- Legend updated: "Registered" → "Registered with camp" + explanation note
+- Sidebar: added persistent reminder "Adding a camp here doesn't sign you up..."
+- Removed icons from calendar camp blocks (cleaner, more room for text)
+- Mobile calendar: Sat/Sun now visible (was Mon–Fri only) — grid updated to 7 columns
+- Mobile calendar: camp blocks now stay within their rows (overflow:hidden, max-height, text truncation)
+
+### City Search Autocomplete Fix (Mobile)
+- Replaced native HTML `<datalist>` (broken on iOS/Android) with a custom dropdown
+- Dropdown appears as you type, shows up to 8 matching cities, works on both touch and mouse
+- Cities stored in `_allCities` global variable populated from Supabase data
+
+### Login Bug Fix (Mobile + Desktop)
+- **Root cause 1**: No try/catch on login handler — network errors left button stuck at "Logging in..." forever
+- **Root cause 2**: `onAuthStateChange` never handled regular parent users — only admins and camp owners
+- **Root cause 3**: `checkExistingSession()` only ran if camp loading succeeded
+- **Fixes**: Added try/catch to login handler, added regular user handling in `onAuthStateChange` with `if (!currentUser)` guard, added `checkExistingSession()` to catch block of `loadCampsFromSupabase()`
+
+### Page Load Fix
+- Page was showing prototype/dummy camp data for 1–2 seconds before real data loaded
+- Fixed: replaced `applyFilters()` on page load with `showLoadingState()` — now shows spinner instead
+
+### Open Graph / Social Sharing Fix
+- og:title and twitter:title updated: "Seattle & PNW Summer Camp Directory" → "Washington Summer Camp Directory"
+- og:description and twitter:description updated to match
+
+### URL Security Audit
+- Checked all 994 camp website URLs for suspicious patterns
+- Result: completely clean — all HTTPS, no shorteners, no suspicious TLDs, no malformed URLs
+- Only note: 52 City of Olympia camps share one generic ActiveCommunities URL (not a security issue)
+
+### Marketing — Facebook
+- Created PopCamps Facebook Page: "PopCamps — Washington Summer Camp Directory"
+- Wrote tailored posts for Seattle, Eastside, and general WA parent groups
+- Strategy: post in groups one or two per day, reply to every comment, message admins if group doesn't allow self-promotion
+- Facebook ads discussed — deferred, free organic posting first
+
+### CLAUDE.md Updated
+- Fully rewrote CLAUDE.md with current site state, all table columns, camp type colors, how to add/edit camps, how to check users, and planned future work
+
+---
+
 ## How We Work Together
 
 ### Roles
