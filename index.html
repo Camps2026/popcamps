@@ -4441,6 +4441,8 @@ async function loadUserData(userId) {
 
 // Check if a Supabase session already exists (e.g. returning user)
 async function checkExistingSession() {
+  // Skip if onAuthStateChange already handled this session
+  if (currentUser || isAdminUser || ownerCampId) return;
   var resp = await sbClient.auth.getSession();
   var session = resp.data && resp.data.session;
   if (!session) return;
@@ -4463,6 +4465,7 @@ async function checkExistingSession() {
     }
   }
   // Otherwise treat as a regular parent user
+  if (currentUser) return; // double-check in case onAuthStateChange ran while we were querying
   var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
   var profile = profileResp.data;
   currentUser = {
@@ -4696,7 +4699,13 @@ function showLoginModal(source) {
     var submitBtn = box.querySelector('#li-submit');
     submitBtn.disabled = true; submitBtn.textContent = 'Logging in...';
     try {
-      var signInResp = await sbClient.auth.signInWithPassword({ email: email, password: pass });
+      var loginTimeout = new Promise(function(_, reject){
+        setTimeout(function(){ reject(new Error('timeout')); }, 10000);
+      });
+      var signInResp = await Promise.race([
+        sbClient.auth.signInWithPassword({ email: email, password: pass }),
+        loginTimeout
+      ]);
       if (signInResp.error) {
         showErr(errEl, 'Email or password is incorrect.');
         submitBtn.disabled=false; submitBtn.textContent='Log In →'; return;
@@ -4715,7 +4724,10 @@ function showLoginModal(source) {
       await loadUserData(signInResp.data.user.id);
       showToast('Welcome back, ' + currentUser.name.split(' ')[0] + '! 👋');
     } catch(err) {
-      showErr(errEl, 'Connection error. Please check your internet and try again.');
+      var msg = (err && err.message === 'timeout')
+        ? 'Connection timed out. Please check your internet and try again.'
+        : 'Connection error. Please check your internet and try again.';
+      showErr(errEl, msg);
       submitBtn.disabled = false; submitBtn.textContent = 'Log In →';
     }
   };
