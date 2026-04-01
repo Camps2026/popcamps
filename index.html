@@ -1771,7 +1771,16 @@ function parseSessionDate(str) {
 
 function campHasSessionInRange(camp, startDate, endDate) {
   var dates = camp.dates;
-  if (!dates || dates === 'TBD') return true;
+  if (!dates || dates === 'TBD') {
+    // Umbrella camps: check if any sub-program falls in the date range
+    if (camp.umbrella && window.subPrograms) {
+      return window.subPrograms.some(function(sp) {
+        return sp.parentId === camp.name && campHasSessionInRange(sp, startDate, endDate);
+      });
+    }
+    // Standard camp with no dates — don't show for date searches
+    return false;
+  }
   if (!Array.isArray(dates)) dates = [dates];
   return dates.some(function(dateStr) {
     var cleaned = dateStr.replace(/^[^:]+:\s*/, ''); // strip "Week 1: ", "Session A: " etc.
