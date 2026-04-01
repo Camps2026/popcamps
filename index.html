@@ -3429,8 +3429,13 @@ function renderSchedule() {
           var span = found.endIdx - found.startIdx + 1;
           var remaining = 7 - d; if (span > remaining) span = remaining;
           var noteDot  = item.notes ? '<span class="sched-event-note-dot" title="Has note"></span>' : '';
-          var dateLabel = (item.customStart && item.customEnd)
-            ? '<div class="sched-event-dates">' + fmtDateRange(item.customStart, item.customEnd) + '</div>' : '';
+          var dateLabel;
+          if (item.customStart && item.customEnd) {
+            dateLabel = '<div class="sched-event-dates">' + fmtDateRange(item.customStart, item.customEnd) + '</div>';
+          } else {
+            var rawDate = item.session || (Array.isArray(c.dates) ? c.dates[0] : c.dates);
+            dateLabel = (rawDate && rawDate !== 'TBD') ? '<div class="sched-event-dates">' + rawDate + '</div>' : '';
+          }
           var evHtml =
             '<div class="sched-event' + (isConflict ? ' sched-event-conflict' : '') + '" style="' + bg + 'opacity:' + opacity + ';cursor:pointer;' +
             (span > 1 ? 'position:absolute;left:0;right:0;z-index:2;' : '') +
