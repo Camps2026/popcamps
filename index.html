@@ -768,7 +768,6 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
         <div id="umb-summary" style="color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.6;max-width:520px;"></div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
-        <div style="color:rgba(255,255,255,.6);font-size:.72rem;margin-top:.2rem;" id="umb-ages"></div>
         <a id="umb-website-btn" href="#" target="_blank" rel="noopener"
            style="display:inline-block;margin-top:.8rem;background:var(--sun);color:var(--forest);font-weight:700;font-size:.8rem;padding:.45rem 1rem;border-radius:8px;text-decoration:none;">
           Visit Official Site ↗
@@ -2095,7 +2094,7 @@ function openUmbrellaDetail(id) {
   document.getElementById('umb-name').textContent = c.name;
   document.getElementById('umb-loc').textContent = c.location;
   document.getElementById('umb-summary').textContent = c.umbrellaSummary;
-  document.getElementById('umb-ages').textContent = 'Ages ' + c.ages;
+
   var wb = document.getElementById('umb-website-btn');
   if (c.website) { wb.href = 'https://' + c.website; wb.style.display = 'inline-block'; }
   else { wb.style.display = 'none'; }
