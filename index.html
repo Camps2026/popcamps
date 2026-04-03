@@ -4865,11 +4865,15 @@ window.addEventListener('DOMContentLoaded', function() {
     if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
       try {
         var userId = session.user.id;
+        console.log('[AUTH] step 1: checking admin...');
         var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
+        console.log('[AUTH] step 2: admin check done, isAdmin=', !adminResp.error && !!adminResp.data);
         if (!adminResp.error && adminResp.data) {
           isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
         }
+        console.log('[AUTH] step 3: checking owner...');
         var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
+        console.log('[AUTH] step 4: owner check done, isOwner=', !ownerResp.error && !!ownerResp.data);
         if (!ownerResp.error && ownerResp.data) {
           ownerCampId = ownerResp.data.camp_id;
           var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
@@ -4881,8 +4885,10 @@ window.addEventListener('DOMContentLoaded', function() {
           return;
         }
         // Regular parent user — restore session if not already set
+        console.log('[AUTH] step 5: regular user, currentUser already set=', !!currentUser);
         if (!currentUser) {
           var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
+          console.log('[AUTH] step 6: profile fetched, hasProfile=', !!profileResp.data);
           var profile = profileResp.data;
           currentUser = {
             id: userId,
@@ -4891,11 +4897,13 @@ window.addEventListener('DOMContentLoaded', function() {
             zip: profile ? profile.zip : '',
             createdAt: session.user.created_at
           };
+          console.log('[AUTH] step 7: currentUser SET to', currentUser.email);
           updateNavForUser();
           await loadUserData(userId);
+          console.log('[AUTH] step 8: loadUserData complete');
         }
       } catch(authErr) {
-        console.warn('onAuthStateChange error, will retry via checkExistingSession:', authErr);
+        console.warn('[AUTH] ERROR in handler:', authErr);
       }
     }
   });
