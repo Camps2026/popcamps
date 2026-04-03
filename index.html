@@ -4460,15 +4460,15 @@ async function checkExistingSession() {
     ]);
     var adminResp = results[0], ownerResp = results[1];
     if (!adminResp.error && adminResp.data) {
-      isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
-    }
-    if (!ownerResp.error && ownerResp.data) {
+      isAdminUser = true; showPage('admin'); loadAdminRequests();
+    } else if (!ownerResp.error && ownerResp.data) {
       ownerCampId = ownerResp.data.camp_id;
       var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
       if (!campResp.error && campResp.data) {
-        ownerCampData = campResp.data; await populateOwnerForm(campResp.data); showPage('owner'); return;
+        ownerCampData = campResp.data; await populateOwnerForm(campResp.data); showPage('owner');
       }
     }
+    // Load profile name and personal data for all user types
     var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
     if (profileResp.data) {
       currentUser.name = profileResp.data.full_name;
@@ -4886,9 +4886,9 @@ window.addEventListener('DOMContentLoaded', function() {
         var adminResp = results[0], ownerResp = results[1];
 
         if (!adminResp.error && adminResp.data) {
-          isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
-        }
-        if (!ownerResp.error && ownerResp.data) {
+          isAdminUser = true; showPage('admin'); loadAdminRequests();
+          // fall through to also load profile name and personal data (calendar, kids)
+        } else if (!ownerResp.error && ownerResp.data) {
           ownerCampId = ownerResp.data.camp_id;
           var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
           if (!campResp.error && campResp.data) {
@@ -4896,9 +4896,9 @@ window.addEventListener('DOMContentLoaded', function() {
             await populateOwnerForm(campResp.data);
             showPage('owner');
           }
-          return;
+          // fall through to also load profile name and personal data
         }
-        // Regular parent user — update currentUser with real profile data
+        // Load profile name and personal data for all user types
         var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
         if (profileResp.data) {
           currentUser.name = profileResp.data.full_name;
