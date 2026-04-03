@@ -4441,43 +4441,46 @@ async function loadUserData(userId) {
 
 // Check if a Supabase session already exists (e.g. returning user)
 async function checkExistingSession() {
-  // Skip if onAuthStateChange already handled this session
   if (currentUser || isAdminUser || ownerCampId) return;
   var resp = await sbClient.auth.getSession();
   var session = resp.data && resp.data.session;
-  console.log('[checkExistingSession] getSession result:', session ? 'EXISTS (user=' + (session.user && session.user.email) + ')' : 'NULL');
   if (!session) return;
   var userId = session.user.id;
-  // Check admin first
-  var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
-  if (!adminResp.error && adminResp.data) {
-    isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
-  }
-  // Check camp owner
-  var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
-  if (!ownerResp.error && ownerResp.data) {
-    ownerCampId = ownerResp.data.camp_id;
-    var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
-    if (!campResp.error && campResp.data) {
-      ownerCampData = campResp.data;
-      await populateOwnerForm(campResp.data);
-      showPage('owner');
-      return;
+  try {
+    var results = await Promise.all([
+      sbClient.from('site_admins').select('user_id').eq('user_id', userId).single(),
+      sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single()
+    ]);
+    var adminResp = results[0], ownerResp = results[1];
+    if (!adminResp.error && adminResp.data) {
+      isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
+    }
+    if (!ownerResp.error && ownerResp.data) {
+      ownerCampId = ownerResp.data.camp_id;
+      var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
+      if (!campResp.error && campResp.data) {
+        ownerCampData = campResp.data; await populateOwnerForm(campResp.data); showPage('owner'); return;
+      }
+    }
+    if (currentUser) return;
+    var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
+    var profile = profileResp.data;
+    currentUser = {
+      id: userId,
+      name: profile ? profile.full_name : session.user.email,
+      email: session.user.email,
+      zip: profile ? profile.zip : '',
+      createdAt: session.user.created_at
+    };
+    updateNavForUser();
+    await loadUserData(userId);
+  } catch(e) {
+    // DB queries failed — restore from session so user isn't logged out
+    if (!currentUser && !isAdminUser && !ownerCampId) {
+      currentUser = { id: userId, name: session.user.email, email: session.user.email, zip: '', createdAt: session.user.created_at };
+      updateNavForUser();
     }
   }
-  // Otherwise treat as a regular parent user
-  if (currentUser) return; // double-check in case onAuthStateChange ran while we were querying
-  var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
-  var profile = profileResp.data;
-  currentUser = {
-    id: userId,
-    name: profile ? profile.full_name : session.user.email,
-    email: session.user.email,
-    zip: profile ? profile.zip : '',
-    createdAt: session.user.created_at
-  };
-  updateNavForUser();
-  await loadUserData(userId);
 }
 
 async function logOut() {
@@ -4701,7 +4704,7 @@ function showLoginModal(source) {
     submitBtn.disabled = true; submitBtn.textContent = 'Logging in...';
     try {
       var loginTimeout = new Promise(function(_, reject){
-        setTimeout(function(){ reject(new Error('timeout')); }, 10000);
+        setTimeout(function(){ reject(new Error('timeout')); }, 30000);
       });
       var signInResp = await Promise.race([
         sbClient.auth.signInWithPassword({ email: email, password: pass }),
@@ -4860,20 +4863,20 @@ window.addEventListener('DOMContentLoaded', function() {
 
   // Handle password reset links and owner/admin magic link logins
   sbClient.auth.onAuthStateChange(async function(event, session) {
-    console.log('[AUTH] event:', event, '| session:', session ? 'EXISTS (user=' + (session.user && session.user.email) + ')' : 'NULL');
     if (event === 'PASSWORD_RECOVERY') showPasswordUpdateModal();
     if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+      var userId = session.user.id;
       try {
-        var userId = session.user.id;
-        console.log('[AUTH] step 1: checking admin...');
-        var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
-        console.log('[AUTH] step 2: admin check done, isAdmin=', !adminResp.error && !!adminResp.data);
+        // Run admin + owner checks in parallel (faster than sequential)
+        var results = await Promise.all([
+          sbClient.from('site_admins').select('user_id').eq('user_id', userId).single(),
+          sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single()
+        ]);
+        var adminResp = results[0], ownerResp = results[1];
+
         if (!adminResp.error && adminResp.data) {
           isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
         }
-        console.log('[AUTH] step 3: checking owner...');
-        var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
-        console.log('[AUTH] step 4: owner check done, isOwner=', !ownerResp.error && !!ownerResp.data);
         if (!ownerResp.error && ownerResp.data) {
           ownerCampId = ownerResp.data.camp_id;
           var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
@@ -4884,11 +4887,9 @@ window.addEventListener('DOMContentLoaded', function() {
           }
           return;
         }
-        // Regular parent user — restore session if not already set
-        console.log('[AUTH] step 5: regular user, currentUser already set=', !!currentUser);
+        // Regular parent user
         if (!currentUser) {
           var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
-          console.log('[AUTH] step 6: profile fetched, hasProfile=', !!profileResp.data);
           var profile = profileResp.data;
           currentUser = {
             id: userId,
@@ -4897,13 +4898,15 @@ window.addEventListener('DOMContentLoaded', function() {
             zip: profile ? profile.zip : '',
             createdAt: session.user.created_at
           };
-          console.log('[AUTH] step 7: currentUser SET to', currentUser.email);
           updateNavForUser();
           await loadUserData(userId);
-          console.log('[AUTH] step 8: loadUserData complete');
         }
       } catch(authErr) {
-        console.warn('[AUTH] ERROR in handler:', authErr);
+        // DB queries failed (slow/dropped connection) — restore from session so user isn't logged out
+        if (!currentUser && !isAdminUser && !ownerCampId) {
+          currentUser = { id: userId, name: session.user.email, email: session.user.email, zip: '', createdAt: session.user.created_at };
+          updateNavForUser();
+        }
       }
     }
   });
