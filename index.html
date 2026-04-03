@@ -439,7 +439,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
   .week-cell{min-height:60px;max-height:70px;overflow:hidden;padding:.2rem;}
   .sched-event{font-size:.58rem;padding:.2rem .25rem;overflow:hidden;}
   .sched-event-name{font-size:.58rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .sched-event-time,.sched-event-regtype,.sched-event-dates{display:none;}
+  .sched-event-time,.sched-event-regtype{display:none;}
   .saved-camps-panel{position:static;width:100%;box-sizing:border-box;}
   #sched-legend{flex-wrap:wrap;gap:.75rem;font-size:.75rem;}
   #sched-legend > div:last-child{width:100%;text-align:left;margin-left:0;}
@@ -4860,7 +4860,7 @@ window.addEventListener('DOMContentLoaded', function() {
   // Handle password reset links and owner/admin magic link logins
   sbClient.auth.onAuthStateChange(async function(event, session) {
     if (event === 'PASSWORD_RECOVERY') showPasswordUpdateModal();
-    if (event === 'SIGNED_IN' && session) {
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
       var userId = session.user.id;
       var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
       if (!adminResp.error && adminResp.data) {
