@@ -4861,38 +4861,50 @@ window.addEventListener('DOMContentLoaded', function() {
   sbClient.auth.onAuthStateChange(async function(event, session) {
     if (event === 'PASSWORD_RECOVERY') showPasswordUpdateModal();
     if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-      var userId = session.user.id;
-      var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
-      if (!adminResp.error && adminResp.data) {
-        isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
-      }
-      var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
-      if (!ownerResp.error && ownerResp.data) {
-        ownerCampId = ownerResp.data.camp_id;
-        var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
-        if (!campResp.error && campResp.data) {
-          ownerCampData = campResp.data;
-          await populateOwnerForm(campResp.data);
-          showPage('owner');
+      try {
+        var userId = session.user.id;
+        var adminResp = await sbClient.from('site_admins').select('user_id').eq('user_id', userId).single();
+        if (!adminResp.error && adminResp.data) {
+          isAdminUser = true; showPage('admin'); loadAdminRequests(); return;
         }
-        return;
-      }
-      // Regular parent user — restore session if not already set
-      if (!currentUser) {
-        var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
-        var profile = profileResp.data;
-        currentUser = {
-          id: userId,
-          name: profile ? profile.full_name : session.user.email,
-          email: session.user.email,
-          zip: profile ? profile.zip : '',
-          createdAt: session.user.created_at
-        };
-        updateNavForUser();
-        await loadUserData(userId);
+        var ownerResp = await sbClient.from('camp_owners').select('camp_id').eq('user_id', userId).single();
+        if (!ownerResp.error && ownerResp.data) {
+          ownerCampId = ownerResp.data.camp_id;
+          var campResp = await sbClient.from('camps').select('*').eq('id', ownerCampId).single();
+          if (!campResp.error && campResp.data) {
+            ownerCampData = campResp.data;
+            await populateOwnerForm(campResp.data);
+            showPage('owner');
+          }
+          return;
+        }
+        // Regular parent user — restore session if not already set
+        if (!currentUser) {
+          var profileResp = await sbClient.from('user_profiles').select('*').eq('id', userId).single();
+          var profile = profileResp.data;
+          currentUser = {
+            id: userId,
+            name: profile ? profile.full_name : session.user.email,
+            email: session.user.email,
+            zip: profile ? profile.zip : '',
+            createdAt: session.user.created_at
+          };
+          updateNavForUser();
+          await loadUserData(userId);
+        }
+      } catch(authErr) {
+        console.warn('onAuthStateChange error, will retry via checkExistingSession:', authErr);
       }
     }
   });
+
+  // Safety net: if the page refreshed but onAuthStateChange silently failed (mobile network hiccup),
+  // re-check for a session after camps have had time to load.
+  setTimeout(async function() {
+    if (!currentUser && !isAdminUser && !ownerCampId) {
+      await checkExistingSession();
+    }
+  }, 3000);
 
   // Load live data from Supabase (replaces demo data on success; then restores session)
   loadCampsFromSupabase();
