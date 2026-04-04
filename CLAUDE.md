@@ -21,10 +21,11 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 ## Supabase (publishable — safe for frontend)
 - URL: `https://ikhvkrbwwnapeofqpxdb.supabase.co`
 - Publishable key: `sb_publishable_YPY0o2fRbGoDP1CBFoZb-A_11ucDenw`
-- Table: `camps` — 994 rows, RLS disabled (public read, intentional)
+- Service role key (for direct DB writes — never put in frontend code): `YOUR_SERVICE_KEY`
+- Table: `camps` — 1003 rows as of Apr 3, 2026, RLS disabled (public read, intentional)
 
 ## Supabase tables
-- `camps` — main camp listings (994 rows as of Mar 31, 2026)
+- `camps` — main camp listings (1003 rows as of Apr 3, 2026)
 - `camp_owners` — links `auth.users.id` to `camps.id` (plain integer, no FK)
 - `site_admins` — stores admin user_id; RLS disabled (publicly readable)
 - `camp_edit_requests` — staging table for owner edits pending admin review
@@ -50,14 +51,64 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 | `description` | Optional camp description (added for owner portal) |
 | `owner_updated_at` | Timestamptz — set when owner edits are approved; drives "Updated" badge |
 
-## How to add or edit camp listings
-Claude can do this directly via Supabase REST API using the publishable key. Just describe what you want:
+## How Claude works with Supabase directly
+
+Claude can read and write the database without you touching Supabase at all. Just describe what you want in plain English.
+
+### Reading data (uses publishable key — read-only, safe)
+Claude runs `curl` commands against the Supabase REST API to query any table. Examples:
+```
+curl "https://ikhvkrbwwnapeofqpxdb.supabase.co/rest/v1/camps?select=id,camp_name&city_state=eq.Seattle, WA" \
+  -H "apikey: sb_publishable_YPY0o2fRbGoDP1CBFoZb-A_11ucDenw" \
+  -H "Authorization: Bearer sb_publishable_YPY0o2fRbGoDP1CBFoZb-A_11ucDenw"
+```
+
+### Writing data (uses service role key — required for INSERT/UPDATE/DELETE)
+Claude runs `curl` commands with the service key for any change to the database:
+```bash
+# INSERT a new camp
+curl -X POST "https://ikhvkrbwwnapeofqpxdb.supabase.co/rest/v1/camps" \
+  -H "apikey: YOUR_SERVICE_KEY" \
+  -H "Authorization: Bearer YOUR_SERVICE_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
+  -d '{"camp_name":"...", "city_state":"...", ...}'
+
+# UPDATE a camp
+curl -X PATCH "https://ikhvkrbwwnapeofqpxdb.supabase.co/rest/v1/camps?id=eq.123" \
+  -H "apikey: YOUR_SERVICE_KEY" \
+  -H "Authorization: Bearer YOUR_SERVICE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"website_url":"https://..."}'
+
+# DELETE rows
+curl -X DELETE "https://ikhvkrbwwnapeofqpxdb.supabase.co/rest/v1/camps?id=in.(1,2,3)" \
+  -H "apikey: YOUR_SERVICE_KEY" \
+  -H "Authorization: Bearer YOUR_SERVICE_KEY"
+```
+
+### Supabase admin API (user management — service key required)
+```bash
+# List users
+curl "https://ikhvkrbwwnapeofqpxdb.supabase.co/auth/v1/admin/users" \
+  -H "apikey: sb_secret_..." -H "Authorization: Bearer sb_secret_..."
+
+# Delete a user
+curl -X DELETE "https://ikhvkrbwwnapeofqpxdb.supabase.co/auth/v1/admin/users/{user_id}" \
+  -H "apikey: sb_secret_..." -H "Authorization: Bearer sb_secret_..."
+```
+Note: Admin API calls must come from the terminal (server-side). Supabase blocks service key use from the browser.
+
+### What to just say to Claude
 - "Add a new camp called X in Seattle for ages 6–12, runs Jun 9–13, website is..."
 - "Update the website URL for Camp ABC to..."
 - "Change the session dates for Pedalheads Bothell to..."
-Claude will write and execute the SQL or REST call, confirm the result, and show you what changed.
+- "Delete camp ID 123"
+- "Find all camps with no session dates"
+Claude will run the curl command, confirm the result, and show you what changed.
 
-For bulk additions or schema changes, Claude will provide copy-paste SQL for the Supabase SQL Editor.
+### For bulk additions or schema changes
+Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com → project → SQL Editor).
 
 ## Formspree form endpoints
 - List Your Camp: `https://formspree.io/f/mdapagpg`
@@ -84,7 +135,7 @@ For bulk additions or schema changes, Claude will provide copy-paste SQL for the
 - Use `mcp__chrome-devtools__emulate` + `mcp__chrome-devtools__take_screenshot` to check layout
 - Use `mcp__chrome-devtools__evaluate_script` to force-show UI states
 
-## Current site state (as of Mar 31, 2026)
+## Current site state (as of Apr 3, 2026)
 - Title: `popcamps | Washington Summer Camp Directory`
 - H1: `Washington Summer Camp Directory`
 - og:title / twitter:title: `PopCamps — Washington Summer Camp Directory`
@@ -92,7 +143,7 @@ For bulk additions or schema changes, Claude will provide copy-paste SQL for the
 - og:image: `https://popcamps.one/og-image.png` (1200×630px)
 - SEO: meta description, canonical, Open Graph, Twitter Card, Schema.org, sitemap all in place
 - Footer: dark green — "Listings updated regularly for summer 2026. · © 2026 PopCamps · Privacy Policy · Terms and Conditions" + disclaimer line
-- My Calendar page: full summer toggle, Mon–Sun visible on both mobile and desktop, camp blocks stay within rows, icons removed from blocks
+- My Calendar page: full summer toggle, Mon–Sun visible on both mobile and desktop, camp blocks stay within rows, icons removed from blocks, dates show in camp blocks on mobile
 - City search: custom autocomplete dropdown (replaced native datalist — works on mobile)
 - Camp owner portal: LIVE — magic link login, edit form, admin review queue (photo upload removed)
 - Admin review page: LIVE — approve/reject edits before they go live
@@ -100,8 +151,15 @@ For bulk additions or schema changes, Claude will provide copy-paste SQL for the
 - Privacy Policy page: LIVE (`page-privacy`)
 - Terms and Conditions page: LIVE (`page-terms`)
 - Listing accuracy disclaimer: on every camp detail page and footer
-- Login bug fixed: try/catch on login handler, regular users handled in onAuthStateChange
 - Page load: shows loading spinner (not dummy data) while Supabase loads
+- Date filter: camps with no dates (null/TBD) are excluded from date searches; umbrella camps check sub-programs
+- Auth/login (as of Apr 3, 2026):
+  - Session restores immediately on refresh from stored token — no DB query needed to show logged-in state
+  - Admin/owner/profile checks run in background after nav updates
+  - Admin users also load personal profile name and calendar data (not just admin page)
+  - logOut() clears UI instantly, awaits signOut with 5s cap to release auth lock
+  - Login timeout: 30 seconds
+  - Scheduled weekly agent (trig_01Q1ngAG9dHeZhxrcgjgmQha) runs Mondays 3pm UTC to research missing session dates
 
 ## Camp type colors (imgClass)
 | Type | Class | Color |
@@ -119,9 +177,8 @@ For bulk additions or schema changes, Claude will provide copy-paste SQL for the
 
 ## Planned future work
 - Google Analytics (deferred until real traffic)
-- Remaining session_dates cleanup (~66 camps still have non-date text)
-- Facebook Page marketing (PopCamps — Washington Summer Camp Directory)
-- Facebook ads (deferred — free organic posting first)
+- Remaining session_dates cleanup: only 1 camp left (Redmond Ridge Junior Golf, ID 185 — "2026 dates not yet published")
+- Facebook ads — launching soon
 
 ## Work log
 Full history of all changes: `~/Documents/campquest/CAMPQUEST_WORK_LOG.md`
