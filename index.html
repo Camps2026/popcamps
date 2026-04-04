@@ -3952,16 +3952,14 @@ function showAddFirstChildModal(onDone) {
 
   var nameInp  = mkInput('fc-name',  'text',   'e.g. Sofia');
   var ageInp   = mkInput('fc-age',   'number', 'e.g. 8');
-  var emojiInp = mkInput('fc-emoji', 'text',   'e.g. \uD83E\uDD84');
 
   var nameWrap = document.createElement('div'); nameWrap.style.marginBottom='.8rem';
   nameWrap.appendChild(mkLbl('Child\'s Name')); nameWrap.appendChild(nameInp);
 
   var ageEmojiRow = document.createElement('div');
-  ageEmojiRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem;';
+  ageEmojiRow.style.cssText = 'margin-bottom:1.2rem;';
   var ageWrap = document.createElement('div'); ageWrap.appendChild(mkLbl('Age')); ageWrap.appendChild(ageInp);
-  var emojiWrap = document.createElement('div'); emojiWrap.appendChild(mkLbl('Emoji')); emojiWrap.appendChild(emojiInp);
-  ageEmojiRow.appendChild(ageWrap); ageEmojiRow.appendChild(emojiWrap);
+  ageEmojiRow.appendChild(ageWrap);
 
   var saveBtn = document.createElement('button');
   saveBtn.style.cssText = 'width:100%;padding:.9rem;border:none;border-radius:10px;background:var(--moss);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;margin-bottom:.5rem;';
@@ -3981,7 +3979,7 @@ function showAddFirstChildModal(onDone) {
   saveBtn.onclick = async function() {
     var name  = nameInp.value.trim();
     var age   = ageInp.value.trim();
-    var emoji = emojiInp.value.trim() || '\uD83E\uDDD2';
+    var emoji = '\uD83E\uDDD2';
     if (!name) { nameInp.style.borderColor='var(--coral)'; return; }
     var childId = name.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now();
     if (currentUser) {
