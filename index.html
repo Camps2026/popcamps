@@ -1637,8 +1637,14 @@ async function loadCampsFromSupabase() {
     // Re-render with live data
     applyFilters();
 
-    // Restore any existing login session now that camps are loaded
-    await checkExistingSession();
+    if (currentUser) {
+      // User was already restored by onAuthStateChange before camps loaded —
+      // reload their schedule/saved camps now that real camp data is available
+      await loadUserData(currentUser.id);
+    } else {
+      // No user set yet — check for a session to restore
+      await checkExistingSession();
+    }
 
   } catch (err) {
     console.warn('⚠️ Supabase unavailable, using demo data.');
