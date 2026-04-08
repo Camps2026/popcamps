@@ -1043,3 +1043,102 @@ Tell Claude:
 > "I'm working on PopCamps, a Washington state summer camp directory. Single index.html file, Supabase database, deployed at popcamps.one. See CAMPQUEST_WORK_LOG.md in ~/Documents/campquest/ for full context."
 
 Then share this file or paste the relevant section.
+
+---
+
+## Session: Apr 3–7, 2026 — Auth Fixes, UI Polish, New Camps, Scheduled Agent
+
+### Auth Bug Fixes
+
+#### Problem 1: Calendar Empty on Page Refresh
+- **Root cause**: Race condition — `onAuthStateChange` fired (from localStorage) before `loadCampsFromSupabase` finished. `loadUserData` ran against the demo/dummy camp data, not real Supabase camps. Calendar appeared empty on refresh.
+- **Fix**: Added two flags: `_campsReady` (set true after Supabase camps finish loading) and `_userDataLoaded` (set true after `loadUserData` runs, prevents double-load). `loadUserData` only runs after both auth session AND real camps are ready.
+
+#### Problem 2: Login Stuck at "Logging in..."
+- **Root cause**: Supabase holds an internal auth lock while calling `onAuthStateChange` callbacks. Any `await` inside the callback blocks `signInWithPassword` from ever acquiring the lock — so it hangs forever.
+- **Fix**: Made `onAuthStateChange` callback **synchronous** (no awaits). All async DB work moved to a new `_handleAuthSession(userId)` function that is called without await (fire-and-forget from inside the callback).
+
+#### New Function: `_handleAuthSession(userId)`
+Runs outside the auth lock. Does:
+1. Parallel check: `site_admins` (admin?) + `camp_owners` (owner?) via `Promise.all`
+2. If admin → show admin page + load review queue
+3. If owner → load owner camp data + show owner dashboard
+4. Load `user_profiles` → update nav display name
+5. If camps are ready and `loadUserData` hasn't run yet → call `loadUserData(userId)`
+
+#### logOut() reset
+- `_userDataLoaded = false` added so the guard resets and `loadUserData` can run again after next login
+
+---
+
+### UI Changes
+
+| Change | Details |
+|---|---|
+| Icons removed from My Camps panel | Both grouped-by-child and standard panel views: `c.icon + ' ' + c.name` → `c.name` |
+| Emoji removed from Add Child modal | Removed icon/emoji field entirely; hardcoded 🧒 emoji saved internally |
+| No pre-selected filters after signup | `loadUserData` now ends with `clearFilters()` instead of `applyFilters()` — prevents empty results for new users |
+| Mobile camp card banner height | Added `.camp-img{height:80px;}` to `@media(max-width:900px)` — shorter color banner, more camps visible per scroll |
+
+---
+
+### New Camps Added (Apr 3–7, 2026)
+
+| Camp | City | Type | Ages | Sessions | ID |
+|---|---|---|---|---|---|
+| Cyan Swim Camp | Kirkland, WA | Sports | 5–18 | Summer 2026 (see website) | ~1360s |
+| Renton Civic Theatre – Musical Theater (Ages 5–8) | Renton, WA | Arts | 5–8 | Jul 7–11, Aug 4–8 | added |
+| Renton Civic Theatre – Musical Theater (Ages 9–13) | Renton, WA | Arts | 9–13 | Jun 23–Jul 3, Jul 28–Aug 7 | added |
+| Renton Civic Theatre – Musical Theater (Ages 13–18) | Renton, WA | Arts | 13–18 | Jun 23–Jul 3, Jul 28–Aug 7 | added |
+| Renton Civic Theatre – Theater Arts Intensive | Renton, WA | Arts | 14–18 | Jun 16–27 | added |
+| Cedar River Montessori Summer Programs | Renton, WA | Academic | 3–12 | Jun 23–Aug 15 | added |
+| Kitsap Forest Adventure Camp | Belfair, WA | Outdoor | 6–16 | Jul 13–17, Jul 20–24, Jul 27–31 | added |
+| Kitsap Forest Theater Camp | Belfair, WA | Arts | 8–16 | Aug 3–7 | added |
+| Mountaineers Olympia – Navigation & Wilderness Skills | Olympia, WA | Outdoor | 10–17 | Jul 13–18 | added |
+| Mountaineers Olympia – Rock Climbing | Olympia, WA | Outdoor | 10–17 | Jul 20–25 | added |
+| Mountaineers Olympia – Backpacking | Olympia, WA | Outdoor | 12–17 | Aug 3–8 | added |
+| Mountaineers Tacoma – Navigation & Wilderness Skills | Tacoma, WA | Outdoor | 10–17 | Jun 22–27 | added |
+| Mountaineers Tacoma – Rock Climbing | Tacoma, WA | Outdoor | 10–17 | Jul 7–12 | added |
+| Mountaineers Tacoma – Backpacking | Tacoma, WA | Outdoor | 12–17 | Jul 27–Aug 1 | added |
+| Flight Feathers Ballet – Session 1 | Woodinville, WA | Dance | 5–18 | Jun 23–27 | added |
+| Flight Feathers Ballet – Session 2 | Woodinville, WA | Dance | 5–18 | Jul 7–11 | added |
+| Flight Feathers Ballet – Session 3 | Woodinville, WA | Dance | 5–18 | Jul 21–25 | added |
+| Bear Creek School – Sports Camps | Redmond, WA | Sports | 5–18 | Jun 15–18, Jun 22–26, Jun 29–Jul 3 | 1370 |
+| Bear Creek School – Arts Camps | Redmond, WA | Arts | 5–18 | Jun 15–18, Jun 22–26, Jun 29–Jul 3 | 1371 |
+| Bear Creek School – STEM Camps | Redmond, WA | STEM | 5–11 | Jun 15–18, Jun 22–26, Jun 29–Jul 3 | 1372 |
+
+### Camps Updated (Apr 3–7, 2026)
+| Camp | Change |
+|---|---|
+| Seattle Mountaineers – Summer Camps | camp_type fixed; age_max corrected |
+
+---
+
+### Scheduled Agent Created (Apr 7, 2026)
+
+- **Name**: PopCamps Weekly Date Research
+- **Trigger ID**: `trig_01XJPpD84baZhPizi591tZ5Z`
+- **Schedule**: Every Monday at 8am Pacific (15:00 UTC) — cron `0 15 * * 1`
+- **Manage at**: https://claude.ai/code/scheduled/trig_01XJPpD84baZhPizi591tZ5Z
+
+**What it does:**
+1. Queries Supabase for all camps where `session_dates` is null or "TBD" AND `website_url` is not null
+2. Uses WebFetch to visit each camp's website and look for summer 2026 session dates
+3. Writes `CAMP_DATE_UPDATES.md` in the repo root with findings (dates found or reason not found)
+4. Commits and pushes to GitHub using a PAT
+
+**GitHub PAT used by agent**: `ghp_*** (stored in scheduled agent config only — not recorded here)`
+- Scope: `repo` (write access to `Camps2026/popcamps`)
+- Created: Apr 7, 2026
+- Expires: Apr 2027
+
+**Purpose**: Each Monday morning, site owner gets a fresh `CAMP_DATE_UPDATES.md` in the GitHub repo showing which camps have published their 2026 dates so the database can be updated.
+
+---
+
+### Facebook Ad Copy (Final)
+> "Free Washington state summer camp directory. Search by city, age, and date — then save camps to a calendar organized by child."
+
+---
+
+### Total camps in DB: ~1,372 as of Apr 7, 2026

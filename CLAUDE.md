@@ -135,7 +135,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Use `mcp__chrome-devtools__emulate` + `mcp__chrome-devtools__take_screenshot` to check layout
 - Use `mcp__chrome-devtools__evaluate_script` to force-show UI states
 
-## Current site state (as of Apr 3, 2026)
+## Current site state (as of Apr 7, 2026)
 - Title: `popcamps | Washington Summer Camp Directory`
 - H1: `Washington Summer Camp Directory`
 - og:title / twitter:title: `PopCamps — Washington Summer Camp Directory`
@@ -153,13 +153,21 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Listing accuracy disclaimer: on every camp detail page and footer
 - Page load: shows loading spinner (not dummy data) while Supabase loads
 - Date filter: camps with no dates (null/TBD) are excluded from date searches; umbrella camps check sub-programs
-- Auth/login (as of Apr 3, 2026):
-  - Session restores immediately on refresh from stored token — no DB query needed to show logged-in state
-  - Admin/owner/profile checks run in background after nav updates
-  - Admin users also load personal profile name and calendar data (not just admin page)
-  - logOut() clears UI instantly, awaits signOut with 5s cap to release auth lock
-  - Login timeout: 30 seconds
-  - Scheduled weekly agent (trig_01Q1ngAG9dHeZhxrcgjgmQha) runs Mondays 3pm UTC to research missing session dates
+- Mobile camp cards: color banner height reduced to 80px (less wasted space, more camps visible)
+- ~1,372 camps in DB as of Apr 7, 2026
+
+## Auth / login architecture (as of Apr 7, 2026)
+- `onAuthStateChange` callback is **synchronous** — no awaits inside it (prevents Supabase auth lock deadlock)
+- All async DB work runs in `_handleAuthSession(userId)` — called without await from inside the callback
+- `_campsReady` flag: set true after `loadCampsFromSupabase` finishes
+- `_userDataLoaded` flag: set true when `loadUserData` runs — prevents double-load
+- `loadUserData` only runs after BOTH auth session AND real Supabase camps are ready
+- `logOut()` resets `_userDataLoaded = false` so next login works correctly
+- Login timeout: 30 seconds
+- logOut() clears UI instantly, awaits signOut with 5s cap
+
+## Scheduled agents
+- **PopCamps Weekly Date Research** (`trig_01XJPpD84baZhPizi591tZ5Z`): runs every Monday at 8am Pacific (15:00 UTC). Queries Supabase for camps with null/TBD session_dates, visits each website, writes `CAMP_DATE_UPDATES.md` to repo. GitHub PAT: `ghp_*** (in scheduled agent config only)` (expires Apr 2027). Manage at: https://claude.ai/code/scheduled/trig_01XJPpD84baZhPizi591tZ5Z
 
 ## Camp type colors (imgClass)
 | Type | Class | Color |
@@ -178,7 +186,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 ## Planned future work
 - Google Analytics (deferred until real traffic)
 - Remaining session_dates cleanup: only 1 camp left (Redmond Ridge Junior Golf, ID 185 — "2026 dates not yet published")
-- Facebook ads — launching soon
+- Facebook ads — launching soon (ad copy ready: "Free Washington state summer camp directory. Search by city, age, and date — then save camps to a calendar organized by child.")
 
 ## Work log
 Full history of all changes: `~/Documents/campquest/CAMPQUEST_WORK_LOG.md`
