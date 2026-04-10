@@ -3053,7 +3053,6 @@ function showEditChildModal(index) {
 
   box.appendChild(field('First Name',   'edit-child-name',  child.name,  'text'));
   box.appendChild(field('Age',          'edit-child-age',   child.age,   'number'));
-  box.appendChild(field('Emoji / Icon', 'edit-child-emoji', child.emoji, 'text'));
 
   // Save button
   var saveBtn = document.createElement('button');
@@ -3062,7 +3061,7 @@ function showEditChildModal(index) {
   saveBtn.onclick = async function() {
     var name  = document.getElementById('edit-child-name').value.trim();
     var age   = document.getElementById('edit-child-age').value.trim();
-    var emoji = document.getElementById('edit-child-emoji').value.trim() || child.emoji;
+    var emoji = child.emoji;
     if (!name) { document.getElementById('edit-child-name').style.borderColor = 'var(--coral)'; return; }
     children[index].name  = name;
     children[index].age   = age || child.age;
