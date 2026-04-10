@@ -1142,3 +1142,80 @@ Runs outside the auth lock. Does:
 ---
 
 ### Total camps in DB: ~1,372 as of Apr 7, 2026
+
+---
+
+## Session: Apr 10, 2026 — New Camps Added
+
+### Camps Added
+
+| Camp | City | Type | Ages | Sessions | ID |
+|---|---|---|---|---|---|
+| Paint Away! Kids Summer Art Camp (Ages 6–9) | Redmond, WA | Arts | 6–9 | Jun 22–26, Jul 6–10, Jul 20–24, Aug 3–7, Aug 17–21 | 1373 |
+| Paint Away! Kids Summer Art Camp (Ages 9–14) | Redmond, WA | Arts | 9–14 | Jun 29–Jul 3, Jul 13–17, Jul 27–31, Aug 10–14, Aug 24–28 | 1374 |
+| Redmond Academy of Theatre Arts – Summer Camps | Redmond, WA | Arts | 3–15 | Jul 6–10 through Aug 24–31 (8 weeks) | 1375 |
+| Crossfire Premier Summer Day Camps | Redmond, WA | Sports | 7–13 | Jul 6–9, Jul 27–31, Aug 3–7, Aug 17–21 | 1376 |
+| Infinity Farm – Farmer Camp | Issaquah, WA | Outdoor | 2–7 | Jun 29–Aug 13 (Mon–Thu, 7 weeks) | 1377 |
+| Issaquah Youth Football – Summer Camp | Issaquah, WA | Sports | 8–14 | Late July – TBD | 1378 |
+| Positive Ally Summer Camp – Kirkland | Kirkland, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1379 |
+| Positive Ally Summer Camp – Issaquah | Issaquah, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1380 |
+| Positive Ally Summer Camp – Seattle | Seattle, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1381 |
+| Positive Ally Summer Camp – Bellevue | Bellevue, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1382 |
+| Positive Ally Summer Camp – Sammamish | Sammamish, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1383 |
+| Positive Ally Summer Camp – Bothell | Bothell, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1384 |
+| Positive Ally Summer Camp – Maple Valley | Maple Valley, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1385 |
+| Positive Ally Summer Camp – Tacoma | Tacoma, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1386 |
+| Positive Ally Summer Camp – Monroe | Monroe, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1387 |
+| Positive Ally Summer Camp – Kenmore | Kenmore, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1388 |
+| Positive Ally Summer Camp – Redmond | Redmond, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1389 |
+| Positive Ally Summer Camp – Lynnwood | Lynnwood, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1390 |
+| Positive Ally Summer Camp – Tukwila | Tukwila, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1391 |
+| Positive Ally Summer Camp – Snohomish | Snohomish, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1392 |
+| Positive Ally Summer Camp – Everett | Everett, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1393 |
+| Positive Ally Summer Camp – Snoqualmie | Snoqualmie, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1394 |
+| Positive Ally Summer Camp – Renton | Renton, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1395 |
+| Positive Ally Summer Camp – Mercer Island | Mercer Island, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1396 |
+| Positive Ally Summer Camp – North Bend | North Bend, WA | STEM | 5–12 | Jun 22–Aug 28 (10 weeks) | 1397 |
+| Curious Cub Adventures – Issaquah Farm Program | Issaquah, WA | Outdoor | 2–8 | Jun 29–Aug 28 (9 weeks) | 1398 |
+| Curious Cub Adventures – Bellevue Farm Program | Bellevue, WA | Outdoor | 2–10 | Jun 29–Aug 28 (9 weeks) | 1399 |
+| Rockory Music School – Summer Camps | Kirkland, WA | Music | 8–15 | Jun 15–Aug 28 (9 weeks, skip Jul 27–31) | 1400 |
+| NW Film Camp – Creator Camp (Kirkland) | Kirkland, WA | Arts | 8–11 | Jul 6–Aug 28 (8 weeks) | 1401 |
+| NW Film Camp – Filmmaker Camp (MoPOP Seattle) | Seattle, WA | Arts | 12–18 | Jun 22–26, Jul 6–10, Jul 20–24 | 1402 |
+| NW Film Camp – Filmmaker Camp (West Seattle) | Seattle, WA | Arts | 12–17 | Jul 13–17, Jul 20–24 | 1403 |
+| NW Film Camp – Creator Camp (Seattle Phinney) | Seattle, WA | Arts | 8–11 | Jun 22–Aug 21 (9 weeks) | 1404 |
+| NW Film Camp – Creator Camp (North Seattle) | Seattle, WA | Arts | 8–11 | Jul 13–Aug 28 (7 weeks) | 1405 |
+| NBC Basketball – Junior Day Camp (Kirkland) | Kirkland, WA | Sports | 8–12 | Jun 22–25 | 1406 |
+| NBC Basketball – Complete Skills Day Camp (Kirkland) | Kirkland, WA | Sports | 11–14 | Jul 20–23 | 1407 |
+| Enchanted Farms – Summer Camp | Duvall, WA | Outdoor | 6–13 | Jun 22–26 | 1408 |
+| Kraken Community Iceplex – Kraken Hockey Camp | Seattle, WA | Sports | 7–17 | Jul 6–10 | 1409 |
+| Kraken Community Iceplex – Compete & Battle Camp | Seattle, WA | Sports | 7–17 | Jul 13–17 | 1410 |
+| Kraken Community Iceplex – Edgework, Speed & Skills | Seattle, WA | Sports | 7–17 | Jul 20–24 | 1411 |
+| Kraken Community Iceplex – Goal Scoring Camp | Seattle, WA | Sports | 7–17 | Aug 3–7 | 1412 |
+| Kraken Community Iceplex – Elite Shooting & Edgework | Seattle, WA | Sports | 10–18 | Aug 10–14 | 1413 |
+| Kraken Community Iceplex – Goalie Camp | Seattle, WA | Sports | 6–18 | Aug 7–9 | 1414 |
+| Kraken Community Iceplex – Summer Pond Hockey Clinic | Seattle, WA | Sports | 6–14 | Jul 7–Aug 13 (Tue/Thu) | 1415 |
+| Creative Sprouts Summer Camp | Kirkland, WA | Variety | 5–11 | Jun 26–Sep 1 (10 weeks) | 1416 |
+| Sur La Table – Kids Great Kids Bake Week (Kirkland) | Kirkland, WA | Cooking | 7–11 | Jun 15–19, Jul 6–10, Aug 17–21 | 1417 |
+| Sur La Table – Kids Cook, Bake & Create (Kirkland) | Kirkland, WA | Cooking | 7–11 | Jun 22–26, Jul 13–17, Aug 24–28 | 1418 |
+| Sur La Table – Kids World of Flavor (Kirkland) | Kirkland, WA | Cooking | 7–11 | Jun 29–Jul 3, Aug 10–14 | 1419 |
+| Sur La Table – Teens Technique & Taste Mastery (Kirkland) | Kirkland, WA | Cooking | 12–17 | Jun 15–19, Jul 6–10, Aug 17–21 | 1420 |
+| Sur La Table – Teens The Pastry Showcase (Kirkland) | Kirkland, WA | Cooking | 12–17 | Jun 22–26, Aug 24–28 | 1421 |
+| Sur La Table – Teens Culinary World Tour (Kirkland) | Kirkland, WA | Cooking | 12–17 | Jun 29–Jul 3, Aug 10–14 | 1422 |
+| Sticky Fingers Cooking – Grand Knight Chess Summer Camp | Bellevue, WA | Cooking | 5–15 | Jul 20–24 | 1423 |
+| Orangutan Academy – Summer STEAM & Chess Camps | Seattle, WA | STEM | 5–14 | Jun 22–Aug 28 (10 weeks) | 1424 |
+
+### Camps Updated (Apr 10, 2026)
+| Camp | Change |
+|---|---|
+| Seattle Aquarium Summer Camps (ID 116) | URL updated to specific camp page; hours added (full day 9:30am–4pm, half-day 9:30am–12:45pm); before/after care confirmed Yes |
+| Positive Ally (IDs 1379–1397) | Ages updated to 5–12 after initial insert |
+| Sur La Table (IDs 1417–1422) | August session dates added after initial insert; URL updated to /in-store-cooking-classes/ |
+
+### Camps Skipped (Apr 10, 2026)
+| Camp | Reason |
+|---|---|
+| Hope Alliance for Kids (Royal Family Kids Camp / Teen Reach) | Exclusively for foster children — not a general-public camp |
+| Camp Wingate*Kirkland (campwk.com) | Located in Massachusetts, not Washington |
+| Sur La Table – Seattle location | No camps offered at Seattle location |
+
+### Total camps in DB: ~1,424 as of Apr 10, 2026

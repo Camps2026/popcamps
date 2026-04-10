@@ -154,7 +154,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Page load: shows loading spinner (not dummy data) while Supabase loads
 - Date filter: camps with no dates (null/TBD) are excluded from date searches; umbrella camps check sub-programs
 - Mobile camp cards: color banner height reduced to 80px (less wasted space, more camps visible)
-- ~1,372 camps in DB as of Apr 7, 2026
+- ~1,424 camps in DB as of Apr 10, 2026
 
 ## Auth / login architecture (as of Apr 7, 2026)
 - `onAuthStateChange` callback is **synchronous** — no awaits inside it (prevents Supabase auth lock deadlock)
