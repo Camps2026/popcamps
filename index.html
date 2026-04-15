@@ -667,7 +667,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
           <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem;">
             <div style="display:flex;flex-direction:column;gap:.2rem;">
               <span style="font-size:.72rem;color:var(--muted);font-weight:500;">Start</span>
-              <input type="date" id="fp-date-start" onchange="applyFilters()" style="width:100%;padding:.45rem .6rem;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;color:var(--text);">
+              <input type="date" id="fp-date-start" onchange="autoSetFpEndDate();applyFilters()" style="width:100%;padding:.45rem .6rem;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;color:var(--text);">
             </div>
             <div style="display:flex;flex-direction:column;gap:.2rem;">
               <span style="font-size:.72rem;color:var(--muted);font-weight:500;">End</span>
@@ -1955,6 +1955,19 @@ function clearLocationInput() {
   hideCityDropdown();
   updateLocationClear();
   if (document.getElementById('results-section').style.display === 'block') applyFilters();
+}
+
+function autoSetFpEndDate() {
+  var startEl = document.getElementById('fp-date-start');
+  var endEl = document.getElementById('fp-date-end');
+  if (!startEl || !startEl.value) return;
+  var startDate = new Date(startEl.value + 'T00:00:00');
+  var nextDay = new Date(startDate);
+  nextDay.setDate(nextDay.getDate() + 1);
+  var nextDayStr = nextDay.toISOString().split('T')[0];
+  if (endEl && (!endEl.value || endEl.value <= startEl.value)) {
+    endEl.value = nextDayStr;
+  }
 }
 
 function autoSetEndDate() {
