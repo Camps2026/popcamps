@@ -3288,8 +3288,12 @@ function goToSearchFromCalendar(mondayISO) {
   function toISO(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
   var startEl = document.getElementById('date-start');
   var endEl   = document.getElementById('date-end');
+  var fpStartEl = document.getElementById('fp-date-start');
+  var fpEndEl   = document.getElementById('fp-date-end');
   if (startEl) startEl.value = toISO(mon);
   if (endEl)   endEl.value   = toISO(fri);
+  if (fpStartEl) fpStartEl.value = toISO(mon);
+  if (fpEndEl)   fpEndEl.value   = toISO(fri);
   showPage('search');
   setTimeout(function() { applyFilters(); }, 100);
 }
