@@ -2011,8 +2011,36 @@ function obStep(from) {
   dots.forEach(function(d,i){ document.getElementById(d).style.background = i < to ? 'var(--forest)' : '#eef2ef'; });
 }
 
+async function checkPwnedPassword(password) {
+  try {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(password);
+    var hashBuffer = await crypto.subtle.digest('SHA-1', data);
+    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    var hashHex = hashArray.map(function(b){ return b.toString(16).padStart(2,'0'); }).join('').toUpperCase();
+    var prefix = hashHex.slice(0, 5);
+    var suffix = hashHex.slice(5);
+    var resp = await fetch('https://api.pwnedpasswords.com/range/' + prefix);
+    if (!resp.ok) return false;
+    var text = await resp.text();
+    var lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var parts = lines[i].split(':');
+      if (parts[0].trim() === suffix) return true;
+    }
+    return false;
+  } catch(e) {
+    return false;
+  }
+}
+
 async function obFinish() {
   var d = window._obDraft || {};
+  var isPwned = await checkPwnedPassword(d.pass || '');
+  if (isPwned) {
+    showToast('This password has appeared in a data breach. Please go back and choose a different password.');
+    return;
+  }
   var signUpResp = await sbClient.auth.signUp({ email: d.email||'', password: d.pass||'' });
   if (signUpResp.error) { showToast('Error: ' + signUpResp.error.message); return; }
   var newUser = signUpResp.data.user;
