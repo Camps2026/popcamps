@@ -1879,11 +1879,45 @@ function applyFilters() {
   const sort = sortEl ? sortEl.value : 'match';
   if (sort === 'rating') data.sort((a,b) => b.ratingNum - a.ratingNum);
 
-  // Update count label
+  // Update count label with removable filter tags
   const countEl = document.getElementById('results-count');
   if (countEl) {
-    const loc = (locEl && locEl.value.trim()) ? locEl.value.trim() : 'all areas';
-    countEl.innerHTML = `<em>${data.length}</em> camp${data.length!==1?'s':''} in <em>${loc}</em>`;
+    window._filterTagRemovers = [];
+    var _tags = [];
+    function _addTag(label, removeFn) {
+      var idx = window._filterTagRemovers.length;
+      window._filterTagRemovers.push(removeFn);
+      _tags.push('<span style="display:inline-flex;align-items:center;gap:.2rem;background:#eef2ef;border-radius:20px;padding:.15rem .45rem .15rem .65rem;font-size:.75rem;font-weight:600;color:var(--forest);white-space:nowrap;">' + label + '<button onclick="window._filterTagRemovers[' + idx + ']()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;line-height:1;padding:0;margin-left:.1rem;" title="Remove filter">×</button></span>');
+    }
+    if (locEl && locEl.value.trim()) {
+      (function(v){ _addTag(v, function(){ clearLocationInput(); }); })(locEl.value.trim());
+    }
+    if (nameQuery && nameQuery.length > 1) {
+      (function(v){ _addTag('Name: ' + v, function(){ var el=document.getElementById('filter-name-search'); if(el) el.value=''; applyFilters(); }); })(nameQuery);
+    }
+    if (ageVal && ageVal !== 'Any') {
+      (function(v){ _addTag('Age ' + v, function(){ var el=document.getElementById('age-filter'); if(el) el.value='Any'; applyFilters(); }); })(ageVal);
+    }
+    if (startVal || endVal) {
+      var _mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var _dl='';
+      if (startVal && endVal) { var _ds=new Date(startVal+'T00:00:00'),_de=new Date(endVal+'T00:00:00'); _dl=_mo[_ds.getMonth()]+' '+_ds.getDate()+'–'+_mo[_de.getMonth()]+' '+_de.getDate(); }
+      else if (startVal) { var _ds=new Date(startVal+'T00:00:00'); _dl='From '+_mo[_ds.getMonth()]+' '+_ds.getDate(); }
+      else { var _de=new Date(endVal+'T00:00:00'); _dl='Until '+_mo[_de.getMonth()]+' '+_de.getDate(); }
+      _addTag(_dl, function(){ var a=document.getElementById('fp-date-start'),b=document.getElementById('fp-date-end'),c=document.getElementById('date-start'),d=document.getElementById('date-end'); if(a)a.value='';if(b)b.value='';if(c)c.value='';if(d)d.value=''; applyFilters(); });
+    }
+    activeFilters.type.forEach(function(t) {
+      (function(v){ _addTag(v, function(){ var btn=document.querySelector('.chip[data-filter="type"][data-val="'+v+'"]'); if(btn) btn.classList.remove('selected'); activeFilters.type=activeFilters.type.filter(function(x){return x!==v;}); applyFilters(); }); })(t);
+    });
+    (activeFilters.location||[]).forEach(function(l) {
+      (function(v){ _addTag(v.replace(', WA',''), function(){ var btn=document.querySelector('.chip[data-filter="location"][data-val="'+v+'"]'); if(btn) btn.classList.remove('selected'); activeFilters.location=activeFilters.location.filter(function(x){return x!==v;}); applyFilters(); }); })(l);
+    });
+    if (beforeAfterEl && beforeAfterEl.checked) _addTag('Before/After Care', function(){ var el=document.getElementById('filter-before-after-care'); if(el) el.checked=false; applyFilters(); });
+    if (mealsEl && mealsEl.checked) _addTag('Meals', function(){ var el=document.getElementById('filter-meals'); if(el) el.checked=false; applyFilters(); });
+    if (overnightEl && overnightEl.checked) _addTag('Overnight', function(){ var el=document.getElementById('filter-overnight'); if(el) el.checked=false; applyFilters(); });
+    var _ct = '<em>'+data.length+'</em> camp'+(data.length!==1?'s':'');
+    countEl.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;';
+    countEl.innerHTML = _tags.length ? _ct+': '+_tags.join('') : _ct+' in <em>all areas</em>';
   }
 
   currentFilteredData = data;
