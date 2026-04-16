@@ -1824,6 +1824,15 @@ function applyFilters() {
   // Location search bar (text match)
   const locEl = document.getElementById('location-input');
   const query = locEl ? locEl.value.trim().toLowerCase() : '';
+
+  // When a city/location filter is active, include sub-programs matching that city
+  // so each location has its own visible card in results
+  var locChipsActive = activeFilters.location && activeFilters.location.length > 0;
+  if ((query && query.length > 1) || locChipsActive) {
+    (window.subPrograms || []).forEach(function(sp) {
+      if (!data.some(function(c){ return c.id === sp.id; })) data.push(sp);
+    });
+  }
   if (query && query.length > 1) {
     data = data.filter(c =>
       c.location.toLowerCase().includes(query)
