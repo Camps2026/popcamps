@@ -1219,3 +1219,85 @@ Runs outside the auth lock. Does:
 | Sur La Table – Seattle location | No camps offered at Seattle location |
 
 ### Total camps in DB: ~1,424 as of Apr 10, 2026
+
+---
+
+## Session: Apr 15, 2026 — Security Fixes, UI Improvements & New Camps
+
+### Security Fixes (Supabase)
+
+| Fix | What was done |
+|---|---|
+| `site_admins` RLS | Enabled RLS + added policy so only a logged-in user can see their own row |
+| `camp-photos` bucket policy | Removed broad SELECT policy that allowed listing all files (bucket kept for future use) |
+| Leaked password protection | Added HaveIBeenPwned check in frontend signup (`obFinish()`) — blocks compromised passwords before account creation. Supabase-side toggle not available on free plan. |
+
+### UI / Feature Improvements
+
+| Feature | What was done |
+|---|---|
+| Active filter chips | `results-count` heading now shows removable filter chips (×) for every active filter: city, name search, age, dates, camp type, location chips, amenities. No more "X camps in all areas" only. |
+| Filter panel end date auto-set | When user picks a start date in the filter panel, end date auto-sets to next day (same as hero search bar already did) |
+| Calendar → Search date pre-fill | Clicking a week row on My Calendar now pre-fills both the hero dates AND the filter panel dates (Mon–Fri of that week) |
+| Duplicate camp type tag removed | Camp cards were showing the type badge on the banner AND as a tag chip below the location. The redundant chip below location is now hidden when it only repeats the type. |
+
+### Camps Added
+
+| Camp | City | Type | Ages | Sessions | IDs |
+|---|---|---|---|---|---|
+| Parkour Visions (umbrella) | Seattle | Sports | 4–16 | — | 1648 |
+| VillaVenture – Nature Adventure Parkour Camp | Seattle | Sports | 6–14 | Jun 22–Jul 31 (6 weeks) | 1649 |
+| VillaVenture – Parkour Explorers Camp (4–7) | Seattle | Sports | 4–7 | Jun 22–Jul 24 (5 weeks) | 1650 |
+| VillaVenture – Parkour Explorers Camp (7–10) | Seattle | Sports | 7–10 | Jun 29–Jul 3 | 1651 |
+| VillaVenture – Parkour Explorers Camp (10–16) | Seattle | Sports | 10–16 | Jul 13–17 | 1652 |
+| Nature-Adventure Parkour Camp | Seattle | Outdoor | 7–12 | 5 sessions Jun–Aug | 1653 |
+| Parkour Multiverse | Seattle | Sports | 7–12 | 5 sessions Jun–Aug | 1654 |
+| Parkour Multiverse | Shoreline | Sports | 7–12 | Jul 6–10, Aug 24–28 | 1655 |
+| Parkour Multiverse | Mercer Island | Sports | 7–12 | Aug 10–14 | 1656 |
+| Speedrunners | Seattle | Sports | 9–16 | Jul 6–10 | 1657 |
+| Level Up! | Seattle | Sports | 9–16 | Aug 17–21 | 1658 |
+| Mathnasium STEM Summer Day Camp | Seattle (West Seattle) | STEM | 5–11 | Jul 13–Aug 23 (7 weeks) | 1659 |
+| Destination Science (umbrella) | Bellevue | STEM | 5–11 | — | 1660 |
+| Destination Science – Bellevue (BASIS) | Bellevue | STEM | 5–11 | Jul 6–Aug 7 (5 weeks) | 1661 |
+| Destination Science – Bellevue (ECS) | Bellevue | STEM | 5–11 | Jul 13–Aug 7 (4 weeks) | 1662 |
+| Destination Science – Bellevue (St. Lukes) | Bellevue | STEM | 5–11 | Jul 6–Aug 7 (5 weeks) | 1663 |
+| Destination Science – Issaquah (Snoqualmie Springs) | Issaquah | STEM | 5–11 | Jul 6–24 (3 weeks) | 1664 |
+| Destination Science – Issaquah Highlands (Blakely Hall) | Issaquah | STEM | 5–11 | Jul 27–Aug 14 (3 weeks) | 1665 |
+| Destination Science – Mercer Island | Mercer Island | STEM | 5–11 | Jul 6–31 (4 weeks) | 1666 |
+| Destination Science – Bothell | Bothell | STEM | 5–11 | Jul 6–24 (3 weeks) | 1667 |
+| Singapore Maths Club (umbrella) | Bellevue | Academic | 5–12 | — | 1668 |
+| Singapore Maths Club – Bellevue | Bellevue | Academic | 5–12 | Jul 6–Aug 21 (7 weeks) | 1669 |
+| Singapore Maths Club – Bothell | Bothell | Academic | 5–12 | Jul 6–Aug 21 (7 weeks) | 1670 |
+| The Bush School – Discovery Day Camp | Mazama | Outdoor | 7–10 | Jul 6–10, Jul 13–17 | 1671 |
+| The Bush School – College Essay Writing Retreat | Mazama | Academic | 17 | Jul 26–31 (overnight) | 1672 |
+| Mr. G's Tennis Camp | Maple Valley | Sports | 4–15 | Jun 22–25, Jul 6–9, Jul 20–23 | 1673 |
+| Tennis Center Sand Point (umbrella) | Seattle | Sports | 5–18 | — | 1674 |
+| Tennis Center Sand Point – Ages 10 & Under | Seattle | Sports | 5–10 | 9 weeks Jun 22–Aug 21 | 1675 |
+| Tennis Center Sand Point – Ages 11 & Up | Seattle | Sports | 11–18 | 9 weeks Jun 22–Aug 21 | 1676 |
+| adidas Tennis Camps (umbrella) | Seattle | Sports | 8–18 | — | 1677 |
+| adidas Tennis Camps – Seattle (UW) | Seattle | Sports | 8–18 | Jun 21–25, Jul 5–9, Jul 19–23 (overnight) | 232 (updated) |
+| adidas Tennis Camps – Tacoma (UPS) | Tacoma | Sports | 8–18 | Jun 28–Jul 1, Aug 2–5 (overnight) | 1679 |
+| adidas Tennis Camps – Bellevue (Bellevue HS) | Bellevue | Sports | 8–18 | Jul 13–16 | 1680 |
+| adidas Tennis Camps – Spokane (Ferris HS) | Spokane | Sports | 8–18 | Jul 6–9 | 1681 |
+| Chess4Life (umbrella) | Bellevue | Chess | 6–12 | — | 1682 |
+| Chess4Life – Bellevue | Bellevue | Chess | 6–12 | 10 weeks Jun 22–Aug 28 | 1683 |
+| Chess4Life – Issaquah | Issaquah | Chess | 6–12 | 10 weeks Jun 22–Aug 26 | 1684 |
+| Chess4Life – Bothell | Bothell | Chess | 6–12 | 8 weeks Jun 29–Aug 21 | 1685 |
+| Central Park Tennis Club Summer Camp (umbrella) | Kirkland | Sports | 6–18 | — | 1686 |
+| Central Park Tennis Club – Stars (Ages 6–12) | Kirkland | Sports | 6–12 | 9 weeks Mon–Thu Jun 22–Aug 20 | 1687 |
+| Central Park Tennis Club – Champs (Ages 12–18) | Kirkland | Sports | 12–18 | 9 weeks Mon–Thu Jun 22–Aug 20 | 1688 |
+
+### Camps Updated
+| Camp | Change |
+|---|---|
+| Urban Warriors Ninja (ID 1443) | Session dates corrected: Jul 20–24 → Jul 6–10 |
+| Destination Science (IDs 1660–1667) | URL updated to destinationscience.org search page; ages updated to 5–11; before/after care set for BASIS, ECS, Mercer Island, Bothell locations |
+| adidas Tennis Camps – Seattle (ID 232) | Converted to sub-program under new adidas Tennis Camps umbrella |
+
+### Camps Skipped
+| Camp | Reason |
+|---|---|
+| Redmond Tennis Club | Already in DB as "Redmond Tennis Center Camps" (ID 107) — same URL |
+| Agape Tennis Academy | Located in Atlanta, GA — not Washington state |
+
+### Total camps in DB: ~1,464 as of Apr 15, 2026
