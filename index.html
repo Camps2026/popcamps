@@ -2855,6 +2855,8 @@ async function toggleSave(id, btn) {
     savedCamps.add(id); btn.classList.add('saved'); btn.textContent='♥'; showToast('Saved ♥');
     if (currentUser && camp) await sbClient.from('user_saved_camps').insert({user_id: currentUser.id, camp_supabase_id: camp.supabaseId});
   }
+  var favEl = document.getElementById('sched-favorites');
+  if (favEl && favEl.style.display !== 'none') renderFavorites();
 }
 
 function showPage(p) {
