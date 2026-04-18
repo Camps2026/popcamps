@@ -1932,16 +1932,17 @@ function applyFilters() {
   currentFilteredData = data;
   renderCamps(data);
   updateFilterCount();
-  // Inject signup nudge after 4th card if user is not logged in
-  if (!currentUser && data.length >= 4) {
+  // Inject signup nudge after a complete row of cards if user is not logged in
+  if (!currentUser) {
     var grid = document.getElementById('camps-grid');
-    var cards = grid.children;
-    if (cards.length >= 4 && !grid.querySelector('#signup-nudge')) {
+    var insertAfter = window.innerWidth > 768 ? 6 : 4;
+    if (data.length >= insertAfter && !grid.querySelector('#signup-nudge')) {
       var nudge = document.createElement('div');
       nudge.id = 'signup-nudge';
       nudge.style.cssText = 'grid-column:1/-1;background:#f0f7f0;border:1.5px solid #c8dfc8;border-radius:16px;padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;';
       nudge.innerHTML = '<div><div style="font-weight:700;color:var(--forest);font-size:.95rem;">📅 Planning your summer?</div><div style="font-size:.82rem;color:var(--muted);margin-top:.2rem;">Sign up free to save camps to a calendar organized by child.</div></div><button onclick="goToSignUp()" style="background:var(--moss);color:#fff;border:none;padding:.55rem 1.2rem;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif;">Sign Up Free →</button>';
-      grid.insertBefore(nudge, cards[4]);
+      var cards = grid.children;
+      if (cards.length >= insertAfter) grid.insertBefore(nudge, cards[insertAfter]);
     }
   }
 }
