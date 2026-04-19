@@ -1334,9 +1334,13 @@ Added a large batch of Nike-branded and US Sports Camps programs. All use provid
 Changes made to `index.html` to increase parent account signups.
 
 ### Signup Form Simplification
-- Removed zip code field from the signup form entirely
-- `user_profiles` DB insert no longer saves zip — only `id` + `full_name`
-- `currentUser` object no longer stores zip
+- Removed zip code field from the signup form entirely (earlier session)
+- Removed first name and last name fields from the signup form (Apr 19, 2026)
+- Signup now requires only **email + password** — minimum possible friction
+- `user_profiles` DB insert no longer saves `full_name` or `zip` — only `id`
+- `currentUser` object no longer stores name or zip
+- Welcome toast changed from "Welcome to PopCamps, [name]!" → "Welcome to PopCamps!"
+- Email input is now auto-focused when signup modal opens (was first name field)
 
 ### Improved Value Prop
 - New subtitle in signup modal: *"Add camps to a color-coded calendar for each child — plan your whole summer in one place."*
