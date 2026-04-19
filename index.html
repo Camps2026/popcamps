@@ -4723,8 +4723,6 @@ function goToSignUp(onSuccess, ctx) {
   var errEl = document.createElement('div');
   errEl.style.cssText = 'display:none;background:#fff0f0;border:1.5px solid #f0c0b8;border-radius:8px;padding:.6rem .9rem;font-size:.82rem;color:var(--coral);margin-bottom:1rem;';
 
-  var fnameInp = mkInput('su-fname','text','Maria');
-  var lnameInp = mkInput('su-lname','text','Rodriguez');
   var emailInp = mkInput('su-email','email','maria@example.com');
   var passInp  = mkInput('su-pass','password','Min. 6 characters');
 
@@ -4734,11 +4732,6 @@ function goToSignUp(onSuccess, ctx) {
     ? 'Sign up to add this camp to your calendar and track your whole summer.'
     : 'Add camps to a color-coded calendar for each child — plan your whole summer in one place.';
   hdr.innerHTML = '<div style="font-size:2rem;margin-bottom:.4rem;">&#127957;</div><h2 style="font-family:\'Playfair Display\',serif;color:var(--forest);font-size:1.4rem;margin-bottom:.3rem;">Create your PopCamps account</h2><p style="color:var(--muted);font-size:.85rem;">' + subtitle + '</p>';
-
-  var nameRow = document.createElement('div');
-  nameRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem;';
-  nameRow.appendChild(mkField('First Name', fnameInp));
-  nameRow.appendChild(mkField('Last Name', lnameInp));
 
   var emailWrap = document.createElement('div');
   emailWrap.style.marginBottom = '.8rem';
@@ -4763,7 +4756,7 @@ function goToSignUp(onSuccess, ctx) {
   cancelBtn.textContent = 'Maybe later';
   cancelBtn.onclick = function(){ closeOverlay('signup-modal'); };
 
-  box.appendChild(hdr); box.appendChild(errEl); box.appendChild(nameRow);
+  box.appendChild(hdr); box.appendChild(errEl);
   box.appendChild(emailWrap); box.appendChild(passWrap);
   box.appendChild(submitBtn); box.appendChild(loginLink); box.appendChild(cancelBtn);
   overlay.appendChild(box);
@@ -4771,9 +4764,7 @@ function goToSignUp(onSuccess, ctx) {
   document.body.appendChild(overlay);
 
   submitBtn.onclick = async function() {
-    var fname=fnameInp.value.trim(), lname=lnameInp.value.trim();
     var email=emailInp.value.trim(), pass=passInp.value;
-    if (!fname||!lname) { showErr(errEl,'Please enter your full name.'); return; }
     if (!email||!email.includes('@')) { showErr(errEl,'Please enter a valid email address.'); return; }
     if (pass.length<6) { showErr(errEl,'Password must be at least 6 characters.'); return; }
     submitBtn.disabled = true; submitBtn.textContent = 'Creating account...';
@@ -4783,15 +4774,15 @@ function goToSignUp(onSuccess, ctx) {
       submitBtn.disabled=false; submitBtn.textContent='Create Account'; return;
     }
     var newUser = signUpResp.data.user;
-    await sbClient.from('user_profiles').insert({ id: newUser.id, full_name: fname+' '+lname });
-    currentUser = { id: newUser.id, name: fname+' '+lname, email: email, createdAt: newUser.created_at };
+    await sbClient.from('user_profiles').insert({ id: newUser.id });
+    currentUser = { id: newUser.id, name: '', email: email, createdAt: newUser.created_at };
     closeOverlay('signup-modal'); updateNavForUser();
-    showToast('Welcome to PopCamps, '+fname+'! 🎉');
+    showToast('Welcome to PopCamps! 🎉');
     showAddFirstChildModal(function() {
       if (onSuccess) onSuccess();
     });
   };
-  setTimeout(function(){ fnameInp.focus(); }, 50);
+  setTimeout(function(){ emailInp.focus(); }, 50);
 }
 
 function showLoginModal(source) {
