@@ -1300,4 +1300,122 @@ Runs outside the auth lock. Does:
 | Redmond Tennis Club | Already in DB as "Redmond Tennis Center Camps" (ID 107) — same URL |
 | Agape Tennis Academy | Located in Atlanta, GA — not Washington state |
 
+---
+
+## Nike / US Sports Camps Additions (Apr 2026)
+
+Added a large batch of Nike-branded and US Sports Camps programs. All use provider `subject_tag = "US Sports Camps"` and `website_url = "https://www.ussportscamps.com"`.
+
+### New Camps Added
+| Camp | City | Type | Ages | Dates |
+|---|---|---|---|---|
+| Nike Golf Camp at Mint Valley Golf Course | Longview | Sports | 8–18 | Jul 13–16 |
+| Nike Swim Camp at University of Puget Sound | Tacoma | Sports | 8–18 | Jun 22–26 |
+| Nike Peak Performance Swim Camp Seattle-Tacoma | Tacoma | Sports | 12–18 | Jun 28–Jul 2 |
+| Xcelerate Nike Boys Lacrosse Camp at UW | Seattle | Sports | 8–18 | Jul 6–9 |
+| Xcelerate Nike Boys Lacrosse Camp at PLU | Tacoma | Sports | 8–18 | Jun 15–18 |
+| Xcelerate Nike Girls Lacrosse Camp at PLU | Tacoma | Sports | 8–18 | Jun 22–25 |
+| Nike Softball Camp at Marymoor Park | Redmond | Sports | 8–18 | Jun 22–25 |
+| Nike Softball Camp at University of Puget Sound | Tacoma | Sports | 8–18 | Jun 15–18 |
+| James Finley Volleyball Camp at UW | Seattle | Sports | 10–18 | Jun 22–26 |
+| Nike Volleyball Camp at Fieldhouse USA Auburn | Auburn | Sports | 8–18 | Jun 22–26 |
+| NBC Volleyball Camp at Auburn Adventist Academy | Auburn | Sports | 8–18 | Jul 13–17 |
+| NBC Volleyball Camp at University of Puget Sound | Tacoma | Sports | 8–18 | Jun 15–19 |
+| Nike Volleyball Camp at Anacortes High School | Anacortes | Sports | 8–18 | Jun 22–26 |
+| NBC Volleyball Camp at Puget Sound Adventist Academy | Spokane | Sports | 8–18 | Jun 22–26 |
+| Nike Volleyball Camp at Bellingham High School | Bellingham | Sports | 8–18 | Jun 15–19 |
+| Nike Cross Country Camp at University of Puget Sound | Tacoma | Sports | 10–18 | Jun 15–20 (overnight) |
+| Nike Flag Football Camp in Central Park – Issaquah | Issaquah | Sports | 7–14 | Jul 14–17 |
+
+---
+
+## Signup Conversion Improvements (Apr 2026)
+
+Changes made to `index.html` to increase parent account signups.
+
+### Signup Form Simplification
+- Removed zip code field from the signup form entirely
+- `user_profiles` DB insert no longer saves zip — only `id` + `full_name`
+- `currentUser` object no longer stores zip
+
+### Improved Value Prop
+- New subtitle in signup modal: *"Add camps to a color-coded calendar for each child — plan your whole summer in one place."*
+- Context-aware subtitle when triggered from "Add to Calendar" button (`ctx === 'calendar'`): *"Sign up to add this camp to your calendar and track your whole summer."*
+- `goToSignUp(onSuccess, ctx)` — now accepts optional context string
+- `requireAccount(callback, ctx)` — passes ctx through to goToSignUp
+- Both "Add to My Calendar" button handlers pass `'calendar'` as ctx
+
+### Inline Signup Nudge in Search Results
+- When user is not logged in and results contain 6+ camps (desktop) or 4+ camps (mobile), a nudge banner is injected into the results grid after the 6th card (desktop) / 4th card (mobile)
+- Uses `grid-column: 1/-1` to span full width
+- Banner reads: *"📅 Planning your summer? Sign up free to save camps to a calendar organized by child."* + "Sign Up Free →" button
+- Only inserted once (checks for existing `#signup-nudge`)
+- Inserted after 6th card on desktop to avoid blank grid gaps in 3-column layout
+
+---
+
+## Bug Fix: Saved Camps Not Refreshing on Calendar Page (Apr 2026)
+
+**Problem:** When a user clicked the heart icon to save a camp, then went to the calendar page and opened "Saved Camps" panel, the newly saved camp didn't appear until they closed and reopened the panel.
+
+**Cause:** `toggleSave()` updated the in-memory `savedCamps` set but never called `renderFavorites()` to refresh the UI.
+
+**Fix:** Added check at end of `toggleSave()` — if the `#sched-favorites` panel is currently visible, call `renderFavorites()` immediately after toggling.
+
+```js
+var favEl = document.getElementById('sched-favorites');
+if (favEl && favEl.style.display !== 'none') renderFavorites();
+```
+
+---
+
+## New Camp Additions – Arts & Activity Camps (Apr 2026)
+
+### Arts Camps
+| Camp | City | Type | Ages | Dates |
+|---|---|---|---|---|
+| American Academy of Fine Arts (umbrella) | Bellevue | Arts | 5–18 | — |
+| American Academy of Fine Arts – Bellevue | Bellevue | Arts | 5–18 | Jun 23–27, Jun 30–Jul 3, Jul 7–11, Jul 14–18, Jul 21–25, Jul 28–Aug 1, Aug 4–8, Aug 11–15 |
+| American Academy of Fine Arts – Kirkland | Kirkland | Arts | 5–18 | Jun 23–27, Jun 30–Jul 3, Jul 7–11, Jul 14–18, Jul 21–25, Jul 28–Aug 1, Aug 4–8, Aug 11–15 |
+| East Shore Art & Community Summer Camps | Kirkland | Arts | 4–17 | Jun 23–27, Jun 30–Jul 3, Jul 7–11, Jul 14–18, Jul 21–25, Jul 28–Aug 1 |
+| Art Camp at Crossroads Studio | Bellevue | Arts | 5–18 | Jun 22–26, Jun 29–Jul 3, Jul 6–10, Jul 13–17, Jul 20–24, Jul 27–31, Aug 3–7, Aug 10–14 |
+| Anna's Art Lab Summer Camp | Kirkland | Arts | 4–18 | Jun 15–Aug 29 (flexible scheduling — book individual days) |
+
+**Note on Anna's Art Lab:** Camp has no fixed weekly sessions — parents buy a pass and book individual days. `session_dates` set to span full summer so it appears in all date-range searches.
+
+### Steamoji STEM Camps – 44 camps added across 6 WA locations
+All Steamoji camps: `camp_type = "STEM"`, `age_min = 5`, `age_max = 14`, `subject_tag = "Steamoji"`, `website_url = "https://www.steamoji.com"`, `before_after_care = true`.
+
+**Locations added:**
+- Kirkland (Kirkland Performance Center area) — 8 programs
+- Bothell — 8 programs
+- Redmond — 6 programs
+- Bellevue — 8 programs
+- Lynnwood — 7 programs
+- Klahanie/Issaquah — 7 programs
+
+**Note:** Initial batch added with `age_max = 18`, then corrected to `age_max = 14` in a follow-up bulk update.
+
+---
+
+## Provider Tagging – subject_tag Field (Apr 2026)
+
+**Purpose:** Repurposed the existing unused `subject_tag` column to store the camp provider/organization name. This has zero effect on the website frontend (the column is not used by any filter or display logic). The goal is to make 2027 updates fast — next year we can query `WHERE subject_tag = 'Pedalheads'` and batch-check all Pedalheads URLs at once.
+
+**No schema changes needed** — column already existed in the `camps` table.
+
+### How it was done
+Used Supabase REST API `PATCH` calls filtered by `website_url=ilike.*domain*` to tag all camps from a given provider in a single request.
+
+### Providers tagged (Batch 1 — Apr 2026)
+Pedalheads, Steamoji, City of Olympia, Camp Invention, Seattle Parks & Recreation, Camp Fire Samish, Kirkland Parks & Recreation, Issaquah Parks & Recreation, Seattle Mariners, Play-Well TEKnologies, Edgeworks Climbing, Arena Sports, Seattle Gymnastics Academy, Seattle Bouldering Project, IslandWood, PGA Junior Golf, Code Ninjas, Snapology, Camp Galileo, NxtGen Baseball
+
+### Providers tagged (Batch 2 — Apr 2026)
+US Sports Camps (Nike / NBC / Xcelerate / Peak Performance / James Finley), Sunset Lake, Redmond Art Works, Boy Scouts, Nature Vision, The Mountaineers, Wilderness Awareness School, City of Issaquah, YMCA, Seattle Girls School, Washington Rush, Camp Ghormley, Renton Civic Theatre, Premier Golf, Samena, Girl Scouts, Camp Jonah, Village Theatre KIDSTAGE, Revolution Soccer, Lavner Camps, Brains & Motion, Heartwood Nature Programs, Camp Fire Seattle, School of Rock, iD Tech, Boy Scouts Seattle, CYO Camps, KidsQuest Museum, Bellevue Parks & Recreation, Kaleidoscope Rock Academy, Seattle ReCreative, Bricks 4 Kidz, Wise Camps, Seattle Shaolin Kungfu, Avid4 Adventure, ARC School of Ballet, Kitsap Forest Theater
+
+### Providers tagged (Batch 3 — Apr 19, 2026)
+~170 additional providers including: American Academy of Fine Arts, Alki Adventure Camp, All That Dance, Alpha Martial Arts, American Dance Institute, Anna's Art Lab, Attuned Music, Audubon Society, Baila District, Pacific Northwest Ballet, Bellevue Children's Academy, Broadway Bound, Bellevue Youth Symphony, Combat Arts Academy, Camp Burton, Camp Fire, Camp Firwood, Camp Gallagher, Camp Gilead, Horse Country Farm Camps, Camp Indianola, Camp Kalsman, Camp Killoqua, Camp Koinonia, Camp Korey, Camp Lutherwood, Camp Solomon Schechter, Capitol Debate, Cedar River Montessori, Challenge Island, Challenger Sports, Climb the Mountain, Cougar Mountain Zoo, Creative Dance Center, Creative Sprouts, Crista Camps, Crossfire Premier Soccer, Curious Cub Adventures, Center for Wooden Boats, Cyan Swim, Cascade Youth Symphony, Dance Fremont, DASSdance, Deerfield Farm, Destination Science, Eastside Dance, Eastside Dream Elite, Eastside String Academy, Echo Falls Golf, Ekone Summer Camp, Emerald City Dance, Emerald City Karate, Enchanted Farms, Enso Center, eXit SPACE Dance, French American School, City of Fife Parks, Flight Feathers Ballet, Camp Four Winds, FrogLegs Cooking Camp, Full Moon Rising Farm, Gage Academy of Art, YMCA Camp Bishop, Grand Knight Chess, Happy Time Studio, Holy Names Academy, Bear Creek School, Camp Huston, Hidden Valley Camp, Imagine Children's Museum, IncrediCamps, Infinity Farm, Inspire Academy of Dance, Island Time Kids, Issaquah Dance Theatre, Issaquah Youth Football, Jam Academy, Jung Do Taekwondo, Karen Iglitzin Music, KEEN Youth Camps, Kenmore Community Rowing, Kids Carpentry Seattle, King County Parks, Kong Academy Parkour, Kraken Community Iceplex, Lakeside School, Lake Stevens Soccer, Lazy F Camp, Mathnasium, City of Mercer Island, Meter Music School, MMPA, MoPOP, Moss Bay, Mr. G's Tennis Camp, Museum of Flight, WSU Music, Music Northwest, Music Works NW, Maple Valley Youth Symphony, My World Mandarin, NBC Basketball, Northwest School, Northwest University, Camp Nor'wester, Northwest Boychoir, NW Film Camp, Open Window School, Orangutan Academy, Overtime Athletics, Pacific Science Center, Paint Away!, VillaVenture Parkour, PCC Markets, TGA Tennis & Golf, Pacific Northwest Ballet School, PopRox Dance, Chess4Life, Pacific Reign Gymnastics, Positive Ally, Precision Performing Arts, Premiere Dance Center, Premier Martial Arts, PRO Club Bellevue, Quest Northwest, Rain City Fencing, Rain City Rock Camp, Redmond Academy of Theatre Arts, Redmond Ridge Golf, Redmond Tennis Club, Rockory Music School, Seattle Area German American School, Sail Sand Point, Salle Auriol Fencing, SAMBICA, Sammamish Rowing, Seattle Children's Theatre, Seattle Prep, Mad Science, Seattle Amistad School, Seattle Aquarium, Seattle Children's Museum, Seattle Drum School, Seattle Girls' Choir, Seattle Humane, Seattle JazzED, Seattle Children's PlayGarden, Seattle Rhythmic Gymnastics, Seattle Public Schools, Seattle's Performers, Seattle Tennis Club, Seattle Waldorf School, Segno Music, Shoreline Parks, Singapore Maths Club, Stroum Jewish Community Center, Sound FC Soccer, Sponge Language School, Steve & Kate's Camp, STG Presents, Sticky Fingers Cooking, Studio East, Summer String Academy, Sur La Table, Suzuki Institute, Seattle Youth Symphony, adidas Tennis Camps, Tennis Center Sand Point, Tenzan Aikido, The Little Gym, The Rhapsody Project, The Salish Sea School, Villa Academy, TOPs Kirkland, TRUE MARTIAL ARTS, TYSA Music, Urban Warriors Ninja, Warm Beach Camp, Washington Gymnastics Camps, West Seattle Performing Arts, Whatcom Family YMCA, Wherland Suzuki Studio, Wildwood Ranch, Wing Luke Museum, Woodinville Sports Club, YMCA Camp Casey, YMCA Inland NW, YMCA Pierce County, Youth Tech, Youth Theatre Northwest, Woodland Park Zoo, AL Studio Art, The Ridge Summer Camp, Black Diamond Camp, AoPS Academy, Bellevue Badminton Club, Redmond Parks & Recreation, US Baseball Academy, Overlake School, Camp Spalding, Kirkland Arts Center, Cedar Springs Camp, Snohomish Valley Golf, Central Park Tennis Club, St. Thomas School, The Bush School, Edmonds School District
+
+**Final result: 0 untagged camps out of ~1,464 total.** All camps have a provider tag.
+
 ### Total camps in DB: ~1,464 as of Apr 15, 2026
