@@ -592,6 +592,10 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
           <button id="location-clear-btn" onclick="clearLocationInput()" style="display:none;background:none;border:none;cursor:pointer;color:#b0bcb5;font-size:1rem;padding:.1rem .2rem;line-height:1;flex-shrink:0;" title="Clear">✕</button>
         </div>
         <div id="city-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.1);z-index:200;max-height:220px;overflow-y:auto;margin-top:4px;"></div>
+        <label id="nearby-toggle-hero" style="display:none;align-items:center;gap:.35rem;cursor:pointer;font-size:.75rem;color:var(--muted);margin-top:.35rem;padding-left:.2rem;user-select:none;">
+          <input type="checkbox" id="include-nearby" onchange="toggleNearby('hero')" style="width:13px;height:13px;accent-color:var(--moss);cursor:pointer;flex-shrink:0;">
+          Include nearby cities
+        </label>
       </div>
       <div class="search-row-2">
         <div class="search-field">
@@ -658,6 +662,10 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
           <div id="location-filter-chips" class="filter-chips" style="max-height:140px;overflow-y:auto;padding-right:.2rem;">
             <span style="font-size:.78rem;color:var(--muted);">Loading cities...</span>
           </div>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.8rem;color:var(--muted);margin-top:.65rem;user-select:none;">
+            <input type="checkbox" id="include-nearby-fp" onchange="toggleNearby('fp')" style="width:14px;height:14px;accent-color:var(--moss);cursor:pointer;flex-shrink:0;">
+            Include nearby cities
+          </label>
         </div>
         <div class="filter-divider"></div>
 
@@ -1523,6 +1531,83 @@ function linkUmbrellaPrograms(campsArr) {
 }
 
 var _allCities = [];
+var NEARBY_CITIES = {
+  'Seattle, WA':           ['Shoreline, WA','Burien, WA','Tukwila, WA','Renton, WA','Mercer Island, WA','SeaTac, WA'],
+  'Bellevue, WA':          ['Kirkland, WA','Redmond, WA','Sammamish, WA','Issaquah, WA','Mercer Island, WA','Renton, WA','Newcastle, WA'],
+  'Kirkland, WA':          ['Bellevue, WA','Redmond, WA','Bothell, WA','Kenmore, WA','Woodinville, WA'],
+  'Redmond, WA':           ['Bellevue, WA','Kirkland, WA','Sammamish, WA','Bothell, WA','Woodinville, WA'],
+  'Sammamish, WA':         ['Redmond, WA','Bellevue, WA','Issaquah, WA','Bothell, WA'],
+  'Issaquah, WA':          ['Sammamish, WA','Bellevue, WA','North Bend, WA','Maple Valley, WA'],
+  'Bothell, WA':           ['Kirkland, WA','Kenmore, WA','Woodinville, WA','Redmond, WA','Lynnwood, WA','Mill Creek, WA','Snohomish, WA'],
+  'Shoreline, WA':         ['Seattle, WA','Kenmore, WA','Lynnwood, WA','Mountlake Terrace, WA'],
+  'Lynnwood, WA':          ['Edmonds, WA','Mountlake Terrace, WA','Shoreline, WA','Bothell, WA','Kenmore, WA','Mill Creek, WA','Mukilteo, WA'],
+  'Edmonds, WA':           ['Lynnwood, WA','Mountlake Terrace, WA','Shoreline, WA','Mukilteo, WA'],
+  'Woodinville, WA':       ['Bothell, WA','Kirkland, WA','Redmond, WA','Kenmore, WA','Snohomish, WA'],
+  'Kenmore, WA':           ['Bothell, WA','Kirkland, WA','Shoreline, WA','Woodinville, WA'],
+  'Renton, WA':            ['Bellevue, WA','Seattle, WA','Tukwila, WA','Kent, WA','Newcastle, WA','Maple Valley, WA'],
+  'Burien, WA':            ['Seattle, WA','Tukwila, WA','SeaTac, WA','Renton, WA','Des Moines, WA'],
+  'Tukwila, WA':           ['Seattle, WA','Burien, WA','Renton, WA','SeaTac, WA','Kent, WA'],
+  'SeaTac, WA':            ['Seattle, WA','Burien, WA','Tukwila, WA','Des Moines, WA'],
+  'Des Moines, WA':        ['Federal Way, WA','Burien, WA','SeaTac, WA','Kent, WA'],
+  'Kent, WA':              ['Renton, WA','Auburn, WA','Federal Way, WA','Covington, WA','Tukwila, WA'],
+  'Federal Way, WA':       ['Kent, WA','Auburn, WA','Tacoma, WA','Des Moines, WA','Fife, WA'],
+  'Auburn, WA':            ['Kent, WA','Federal Way, WA','Renton, WA','Maple Valley, WA','Puyallup, WA','Sumner, WA'],
+  'Tacoma, WA':            ['Federal Way, WA','Lakewood, WA','Puyallup, WA','University Place, WA','Fife, WA','Gig Harbor, WA'],
+  'Puyallup, WA':          ['Tacoma, WA','Auburn, WA','Sumner, WA','Bonney Lake, WA','South Hill, WA'],
+  'Mercer Island, WA':     ['Seattle, WA','Bellevue, WA'],
+  'Everett, WA':           ['Marysville, WA','Mukilteo, WA','Snohomish, WA','Lynnwood, WA','Mill Creek, WA'],
+  'Marysville, WA':        ['Everett, WA','Arlington, WA','Stanwood, WA','Snohomish, WA'],
+  'Mill Creek, WA':        ['Everett, WA','Lynnwood, WA','Bothell, WA','Mukilteo, WA','Snohomish, WA'],
+  'Mukilteo, WA':          ['Everett, WA','Lynnwood, WA','Mill Creek, WA','Edmonds, WA'],
+  'Mountlake Terrace, WA': ['Lynnwood, WA','Shoreline, WA','Edmonds, WA'],
+  'Maple Valley, WA':      ['Renton, WA','Covington, WA','Auburn, WA','Issaquah, WA'],
+  'Snohomish, WA':         ['Monroe, WA','Everett, WA','Bothell, WA','Woodinville, WA','Marysville, WA','Mill Creek, WA'],
+  'Monroe, WA':            ['Snohomish, WA','Woodinville, WA','Duvall, WA'],
+  'Duvall, WA':            ['Monroe, WA','Woodinville, WA','Redmond, WA'],
+  'Stanwood, WA':          ['Marysville, WA','Arlington, WA'],
+  'North Bend, WA':        ['Issaquah, WA','Snoqualmie, WA'],
+  'Snoqualmie, WA':        ['North Bend, WA','Issaquah, WA'],
+  'Gig Harbor, WA':        ['Tacoma, WA','Port Orchard, WA'],
+  'Olympia, WA':           ['Lacey, WA','Tumwater, WA'],
+  'Lacey, WA':             ['Olympia, WA','Tumwater, WA'],
+  'Tumwater, WA':          ['Olympia, WA','Lacey, WA'],
+  'Bellingham, WA':        ['Ferndale, WA','Lynden, WA','Burlington, WA'],
+  'Spokane, WA':           ['Spokane Valley, WA','Liberty Lake, WA'],
+  'Spokane Valley, WA':    ['Spokane, WA','Liberty Lake, WA'],
+  'Vancouver, WA':         ['Camas, WA','Washougal, WA','Battle Ground, WA'],
+  'Camas, WA':             ['Vancouver, WA','Washougal, WA'],
+  'Bremerton, WA':         ['Silverdale, WA','Port Orchard, WA','Poulsbo, WA'],
+  'Silverdale, WA':        ['Bremerton, WA','Poulsbo, WA'],
+  'Poulsbo, WA':           ['Bremerton, WA','Silverdale, WA'],
+  'Wilkeson, WA':          ['Buckley, WA','Enumclaw, WA','Orting, WA'],
+  'Enumclaw, WA':          ['Auburn, WA','Buckley, WA','Wilkeson, WA']
+};
+function getNearbyExpansion(cities) {
+  var expanded = cities.slice();
+  cities.forEach(function(city) {
+    (NEARBY_CITIES[city] || []).forEach(function(n) {
+      if (expanded.indexOf(n) === -1) expanded.push(n);
+    });
+  });
+  return expanded;
+}
+function isNearbyOn() {
+  var h = document.getElementById('include-nearby');
+  var fp = document.getElementById('include-nearby-fp');
+  return (h && h.checked) || (fp && fp.checked);
+}
+function toggleNearby(source) {
+  var hero = document.getElementById('include-nearby');
+  var fp   = document.getElementById('include-nearby-fp');
+  if (source === 'hero' && fp)  fp.checked   = hero ? hero.checked : false;
+  if (source === 'fp'   && hero) hero.checked = fp   ? fp.checked   : false;
+  applyFilters();
+}
+function showNearbyToggleHero(show) {
+  var el = document.getElementById('nearby-toggle-hero');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
 function populateCityAutocomplete(cities) {
   _allCities = cities.filter(function(c){ return c !== 'Multiple locations, WA'; });
 }
@@ -1531,6 +1616,7 @@ function onCityInput() {
   var val = (document.getElementById('location-input').value || '').trim().toLowerCase();
   var dd = document.getElementById('city-dropdown');
   if (!dd) return;
+  showNearbyToggleHero(val.length > 1);
   if (!val) { dd.style.display = 'none'; return; }
   var matches = _allCities.filter(function(c){ return c.toLowerCase().indexOf(val) !== -1; }).slice(0, 8);
   if (!matches.length) { dd.style.display = 'none'; return; }
@@ -1546,6 +1632,7 @@ function selectCity(city) {
   var input = document.getElementById('location-input');
   if (input) { input.value = city; updateLocationClear(); }
   hideCityDropdown();
+  showNearbyToggleHero(!!city);
   if (document.getElementById('results-section').style.display === 'block') applyFilters();
 }
 
@@ -1834,9 +1921,14 @@ function applyFilters() {
     });
   }
   if (query && query.length > 1) {
-    data = data.filter(c =>
-      c.location.toLowerCase().includes(query)
-    );
+    var nearbyOn = isNearbyOn();
+    var exactCity = _allCities.find(function(c){ return c.toLowerCase().replace(', wa','') === query || c.toLowerCase() === query; });
+    if (nearbyOn && exactCity) {
+      var nearbySet = getNearbyExpansion([exactCity]).map(function(c){ return c.toLowerCase(); });
+      data = data.filter(function(c){ return nearbySet.some(function(nc){ return c.location.toLowerCase() === nc; }); });
+    } else {
+      data = data.filter(c => c.location.toLowerCase().includes(query));
+    }
   }
 
   // Camp name search (filter panel)
@@ -1872,7 +1964,8 @@ function applyFilters() {
 
   // Location chips
   if (activeFilters.location && activeFilters.location.length) {
-    data = data.filter(c => activeFilters.location.includes(c.location));
+    var locFilter = isNearbyOn() ? getNearbyExpansion(activeFilters.location) : activeFilters.location;
+    data = data.filter(c => locFilter.includes(c.location));
   }
 
   // Amenity checkboxes
@@ -1924,6 +2017,8 @@ function applyFilters() {
     if (beforeAfterEl && beforeAfterEl.checked) _addTag('Before/After Care', function(){ var el=document.getElementById('filter-before-after-care'); if(el) el.checked=false; applyFilters(); });
     if (mealsEl && mealsEl.checked) _addTag('Meals', function(){ var el=document.getElementById('filter-meals'); if(el) el.checked=false; applyFilters(); });
     if (overnightEl && overnightEl.checked) _addTag('Overnight', function(){ var el=document.getElementById('filter-overnight'); if(el) el.checked=false; applyFilters(); });
+    var _cityActive = (locEl && locEl.value.trim().length > 1) || (activeFilters.location && activeFilters.location.length);
+    if (isNearbyOn() && _cityActive) _addTag('+ Nearby', function(){ var h=document.getElementById('include-nearby'),fp=document.getElementById('include-nearby-fp'); if(h)h.checked=false; if(fp)fp.checked=false; applyFilters(); });
     var _ct = '<em>'+data.length+'</em> camp'+(data.length!==1?'s':'');
     countEl.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;';
     countEl.innerHTML = _tags.length ? _ct+': '+_tags.join('') : _ct+' in <em>all areas</em>';
@@ -1976,6 +2071,9 @@ function clearLocationInput() {
   if (input) { input.value = ''; }
   hideCityDropdown();
   updateLocationClear();
+  showNearbyToggleHero(false);
+  var h = document.getElementById('include-nearby'); if (h) h.checked = false;
+  var fp = document.getElementById('include-nearby-fp'); if (fp) fp.checked = false;
   if (document.getElementById('results-section').style.display === 'block') applyFilters();
 }
 
@@ -2023,6 +2121,8 @@ function clearFilters() {
   var ns=document.getElementById('filter-name-search'); if(ns) ns.value='';
   var fps=document.getElementById('fp-date-start'); if(fps) fps.value='';
   var fpe=document.getElementById('fp-date-end'); if(fpe) fpe.value='';
+  var nb=document.getElementById('include-nearby'); if(nb) nb.checked=false;
+  var nbfp=document.getElementById('include-nearby-fp'); if(nbfp) nbfp.checked=false;
   applyFilters();
 }
 
