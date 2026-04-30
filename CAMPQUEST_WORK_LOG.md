@@ -1423,3 +1423,63 @@ US Sports Camps (Nike / NBC / Xcelerate / Peak Performance / James Finley), Suns
 **Final result: 0 untagged camps out of ~1,464 total.** All camps have a provider tag.
 
 ### Total camps in DB: ~1,464 as of Apr 15, 2026
+
+---
+
+## New Camp Additions – Apr 20, 2026
+
+### Camps Added
+
+| Camp | City | Type | IDs | Notes |
+|---|---|---|---|---|
+| WSS Chamber Music and Art Camp | Redmond | Music | 1797 | Wherland Suzuki Studio; full day Aug 10–14; Book 4+; no age filter |
+| WSS Summer Suzuki Music & Art Camp | Redmond | Music | 1798 | Wherland Suzuki Studio; half day Aug 17–21; ages 5–12 |
+| Youth Theatre Northwest (umbrella) | Mercer Island | Arts | 1799 | Deleted old ID 81 (standard entry with all sessions in one text field) |
+| Youth Theatre Northwest sub-programs (34) | Mercer Island | Arts | 1800–1833 | Individual named sessions Jun 22–Aug 21 |
+| Youth Theatre Northwest audition-based (3) | Mercer Island | Arts | 1834–1836 | Legally Blonde Jr, Fantastic Mr. Fox, Summer of Horror Film Shoot |
+| Dandylyon Drama (umbrella) | Shoreline | Arts | 1837 | Outdoor drama camps |
+| Dandylyon Drama: Storytellers Camp | Shoreline | Arts | 1838 | Ages 4–6; half day; Jul 6–31 |
+| Dandylyon Drama: Playmakers Camp | Shoreline | Arts | 1839 | Ages 7–10; full day; Jul 6–31 |
+| Dandylyon Drama: Advanced Theatre Camp | Shoreline | Arts | 1840 | Ages 11–15; full day; Aug 3–14 |
+| Russian School of Mathematics (Redmond) | Redmond | Academic | 1841 | Umbrella only; url: mathschool.com/locations/redmond/schedule |
+| Russian School of Mathematics (Bellevue) | Bellevue | Academic | 1847 | Umbrella only; url: mathschool.com/locations/bellevue/schedule |
+| Russian School of Mathematics (Factoria) | Factoria | Academic | 1853 | Umbrella only; url: mathschool.com/locations/factoria/schedule |
+| St. Thomas School Summer Camps (umbrella) | Medina | Variety | 1859 | Deleted old ID 163; ages 3–14; Jun 22–Jul 31 |
+| STS: Sports & Outdoor Camps | Medina | Sports | 1860 | Basketball, Soccer, Running, Hiking |
+| STS: STEM, Coding & Robotics Camps | Medina | STEM | 1861 | DigiPen, Robotics, Engineering, Python, Science exploration |
+| STS: Arts & Crafts Camps | Medina | Arts | 1862 | Art, Fired Arts, Fiber, Color Splash, Concept Art |
+| STS: Chess Camps | Medina | Chess | 1863 | Jul 13–31; Beg/Intermediate/Cross-Training |
+| STS: Cooking Camps | Medina | Cooking | 1864 | French Baking, Little Chefs, Cooking Camp |
+| STS: Theater & Music Camps | Medina | Arts | 1865 | Music Theatre Experience, Karaoke Camp |
+
+### Deletions
+- ID 81: Old Youth Theatre Northwest standard entry (replaced by umbrella + sub-programs)
+- ID 163: Old St. Thomas School standard entry (replaced by umbrella + sub-programs)
+- IDs 1842–1846: RSM Redmond sub-programs (kept umbrella only — user preferred single card)
+- IDs 1848–1852: RSM Bellevue sub-programs (kept umbrella only)
+- IDs 1854–1858: RSM Factoria sub-programs (kept umbrella only)
+
+### DB Total: ~1,483 camps as of Apr 20, 2026
+
+---
+
+## UI Improvement – Apr 29, 2026
+
+### Camp Detail Page: Reduced Color Banner Height on Mobile
+
+**What changed:** The colored banner at the top of camp detail pages (the section showing the camp type badge and decorative icon) was reduced in height on mobile from 160px to 90px.
+
+**Why:** The banner contained no useful information — just a decorative background icon and the camp type badge — but took up a lot of vertical space before parents could see the actual camp details (name, location, ages, hours, dates).
+
+**How:** Added one CSS rule in the mobile media query block:
+```css
+.detail-banner { height: 90px; }
+```
+
+**What stayed the same:**
+- Camp type badge — still fully visible (pinned to bottom of banner)
+- Save/heart button — still visible (pinned to top-right corner)
+- All camp info below the banner — unaffected
+- Desktop layout — unaffected (override is mobile-only)
+
+**Commit:** `406cb65` — pushed to GitHub Apr 29, 2026
