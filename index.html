@@ -9,6 +9,7 @@
   gtag('js', new Date());
 
   gtag('config', 'G-BRKG5LF4QF');
+  function track(name, params) { try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) {} }
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -998,7 +999,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       #page-privacy td,#page-privacy th{padding:.5rem;}
     </style>
     <div data-custom-class="body">
-      <div><strong><span style="font-size:26px;"><span data-custom-class="title"><h1>PRIVACY POLICY</h1></span></span></strong></div><div><span style="color:rgb(127,127,127);"><strong><span style="font-size:15px;"><span data-custom-class="subtitle">Last updated March 30, 2026</span></span></strong></span></div><div><br></div><div style="line-height:1.5;"><span data-custom-class="body_text">This Privacy Notice for <strong>PopCamps</strong> ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services, including when you visit our website at <a href="https://popcamps.one/" target="_blank" data-custom-class="link">https://popcamps.one/</a> or use our camp directory and planning tools.</span></div><div><br></div><div style="line-height:1.5;"><span data-custom-class="body_text"><strong>Questions or concerns?</strong> If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:camps2026@outlook.com" data-custom-class="link">camps2026@outlook.com</a>.</span></div>
+      <div><strong><span style="font-size:26px;"><span data-custom-class="title"><h1>PRIVACY POLICY</h1></span></span></strong></div><div><span style="color:rgb(127,127,127);"><strong><span style="font-size:15px;"><span data-custom-class="subtitle">Last updated November 24, 2026</span></span></strong></span></div><div><br></div><div style="line-height:1.5;"><span data-custom-class="body_text">This Privacy Notice for <strong>PopCamps</strong> ("we," "us," or "our") describes how and why we might access, collect, store, use, and/or share ("process") your personal information when you use our services, including when you visit our website at <a href="https://popcamps.one/" target="_blank" data-custom-class="link">https://popcamps.one/</a> or use our camp directory and planning tools.</span></div><div><br></div><div style="line-height:1.5;"><span data-custom-class="body_text"><strong>Questions or concerns?</strong> If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:camps2026@outlook.com" data-custom-class="link">camps2026@outlook.com</a>.</span></div>
 
       <div><br></div><div style="line-height:1.5;"><strong><span data-custom-class="heading_1"><h2>SUMMARY OF KEY POINTS</h2></span></strong></div>
       <div style="line-height:1.5;"><span data-custom-class="body_text"><strong>What personal information do we process?</strong> Names (or nicknames), email addresses, children's ages, and camp schedule data you provide directly.</span></div><div><br></div>
@@ -1028,6 +1029,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       <div style="line-height:1.5;"><span data-custom-class="body_text"><strong>Sensitive Information.</strong> We do not process sensitive information.</span></div><div><br></div>
       <div style="line-height:1.5;"><strong><span data-custom-class="heading_2">Information automatically collected</span></strong></div>
       <div style="line-height:1.5;"><span data-custom-class="body_text">When you visit our Services, certain information is collected automatically, such as your IP address, browser type, device characteristics, operating system, and referring URLs. This information is used to maintain security and operation of our Services.</span></div>
+      <div style="line-height:1.5;"><span data-custom-class="body_text"><strong>Analytics and cookies.</strong> We use Google Analytics to understand how people use PopCamps, for example which searches are popular and which camps get saved or clicked. Google Analytics uses cookies and similar technology to collect general information such as pages visited, actions taken on the site, device and browser type, and approximate location (city or region). We do not send Google your name, email address, or any information about your children. You can opt out of Google Analytics on all websites by installing Google's opt-out browser add-on: <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener" data-custom-class="link">https://tools.google.com/dlpage/gaoptout</a></span></div>
 
       <div><br></div>
       <div id="pp-infouse" style="line-height:1.5;"><strong><span data-custom-class="heading_1"><h2>2. HOW DO WE PROCESS YOUR INFORMATION?</h2></span></strong></div>
@@ -1048,6 +1050,7 @@ nav{background:var(--forest);padding:0 2rem;display:flex;align-items:center;just
       <ul>
         <li data-custom-class="body_text"><strong>Supabase</strong> — database, authentication, and file storage</li>
         <li data-custom-class="body_text"><strong>Formspree</strong> — handles contact form submissions (camp listing and claim requests)</li>
+        <li data-custom-class="body_text"><strong>Google Analytics</strong> — measures how the site is used (see "Analytics and cookies" above)</li>
       </ul>
       <div style="line-height:1.5;"><span data-custom-class="body_text">We may also share information in connection with a business transfer (merger, acquisition, or sale of assets).</span></div>
 
@@ -2223,6 +2226,7 @@ async function obFinish() {
   }
   var signUpResp = await sbClient.auth.signUp({ email: d.email||'', password: d.pass||'' });
   if (signUpResp.error) { showToast('Error: ' + signUpResp.error.message); return; }
+  track('sign_up', { method: 'email' });
   var newUser = signUpResp.data.user;
   await sbClient.from('user_profiles').insert({ id: newUser.id, full_name: (d.fname||'')+' '+(d.lname||''), zip: d.zip||'' });
   currentUser = { id: newUser.id, name: (d.fname||'')+' '+(d.lname||''), email: d.email||'', zip: d.zip||'', createdAt: newUser.created_at };
@@ -2258,6 +2262,9 @@ function showResults() {
   // Show results section
   const s = document.getElementById('results-section');
   s.style.display = 'block';
+  var _gaCityRaw = (document.getElementById('location-input').value || '').trim().toLowerCase();
+  var _gaCity = !_gaCityRaw ? '(any)' : (_allCities.find(function(c){ var l = c.toLowerCase(); return l === _gaCityRaw || l === _gaCityRaw + ', wa'; }) || '(other)');
+  track('search', { search_term: _gaCity, age: document.getElementById('age-filter').value, used_dates: !!(document.getElementById('date-start').value || document.getElementById('date-end').value) });
   applyFilters();
   // Scroll after a paint cycle
   requestAnimationFrame(() => {
@@ -2325,6 +2332,7 @@ function openUmbrellaDetail(id) {
   var wb = document.getElementById('umb-website-btn');
   if (c.website) { wb.href = 'https://' + c.website; wb.style.display = 'inline-block'; }
   else { wb.style.display = 'none'; }
+  if (!wb.dataset.gaBound) { wb.dataset.gaBound = '1'; wb.addEventListener('click', function(){ if (umbrellaCurrentCamp) track('visit_camp_website', { camp_id: umbrellaCurrentCamp.supabaseId }); }); }
   pbActiveSubj = 'all';
   pbSearchQuery = '';
   pbShownCount = 8;
@@ -2539,6 +2547,7 @@ function buildSubProgramCTA(c) {
   regBtn.rel = 'noopener';
   regBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;width:100%;box-sizing:border-box;padding:.9rem;border-radius:10px;margin-bottom:.6rem;font-weight:700;font-size:.95rem;background:var(--blue);color:#fff;';
   regBtn.textContent = 'Check Availability & Register ↗';
+  regBtn.addEventListener('click', function(){ track('visit_camp_website', { camp_id: c.supabaseId }); });
   cta.appendChild(regBtn);
 
   var alreadyAdded = scheduleItems.some(function(i){ return i.campId === c.id && i.child === activeChild; });
@@ -2672,6 +2681,7 @@ function buildDetailCTA(c) {
     regBtn.className = 'cta-btn-external';
     regBtn.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:.5rem;text-decoration:none;width:100%;box-sizing:border-box;padding:.9rem;border-radius:10px;margin-bottom:.6rem;font-weight:700;font-size:.95rem;background:var(--blue);color:#fff;';
     regBtn.textContent = 'Check Availability & Register';
+    regBtn.addEventListener('click', function(){ track('visit_camp_website', { camp_id: c.supabaseId }); });
   } else if (type === 'contact') {
     regBtn = document.createElement('button');
     regBtn.className = 'cta-btn-contact';
@@ -2965,6 +2975,7 @@ async function toggleSave(id, btn) {
     if (currentUser && camp) await sbClient.from('user_saved_camps').delete().eq('user_id', currentUser.id).eq('camp_supabase_id', camp.supabaseId);
   } else {
     savedCamps.add(id); btn.classList.add('saved'); btn.textContent='♥'; showToast('Saved ♥');
+    if (camp) track('save_camp', { camp_id: camp.supabaseId });
     if (currentUser && camp) await sbClient.from('user_saved_camps').insert({user_id: currentUser.id, camp_supabase_id: camp.supabaseId});
   }
   var favEl = document.getElementById('sched-favorites');
@@ -3352,6 +3363,7 @@ async function addToSchedule(campId, registered) {
   }
   var newItem = {campId: campId, registered: registered || false, child: activeChild, localId: Date.now() + '_' + Math.floor(Math.random() * 99999)};
   scheduleItems.push(newItem);
+  var _gaCamp = camps.find(function(c){ return c.id === campId; }); if (_gaCamp) track('add_to_calendar', { camp_id: _gaCamp.supabaseId, registered: !!registered });
   if (currentUser) {
     var camp = camps.find(function(c){ return c.id === campId; });
     if (camp) {
@@ -4083,6 +4095,7 @@ function showAddToScheduleModal() {
     var newLocalId = Date.now() + '_' + Math.floor(Math.random() * 99999);
     var newItem = {campId: campId, registered: registered, child: selectedChild, session: selectedSession, customStart: customStart, customEnd: customEnd, localId: newLocalId};
     scheduleItems.push(newItem);
+    track('add_to_calendar', { camp_id: c.supabaseId, registered: !!registered });
     if (currentUser) {
       var campObj = camps.find(function(cc){ return cc.id === campId; });
       if (campObj) {
@@ -4307,6 +4320,7 @@ async function submitListing() {
       body: JSON.stringify({ 'Camp Name': name, 'Camp Type': type, '_replyto': email, 'Location': loc, 'Description': desc })
     });
     if (resp.ok) {
+      track('list_your_camp');
       btn.style.display = 'none';
       showToast('✅ Camp listing submitted! You\'ll hear from us within 24 hours.');
     } else {
@@ -4333,6 +4347,7 @@ async function submitClaim() {
       body: JSON.stringify({ 'Camp Name': campName, 'Your Name': name, 'Role': role, '_replyto': email, 'Phone': phone, 'Verification': verify })
     });
     if (resp.ok) {
+      track('claim_your_camp', claimTargetCamp && claimTargetCamp.supabaseId ? { camp_id: claimTargetCamp.supabaseId } : {});
       document.getElementById('claim-form-section').innerHTML =
         '<div style="text-align:center;padding:2rem 1rem;">' +
           '<div style="font-size:3rem;margin-bottom:1rem;">🎉</div>' +
@@ -4884,6 +4899,7 @@ function goToSignUp(onSuccess, ctx) {
       showErr(errEl, signUpResp.error.message);
       submitBtn.disabled=false; submitBtn.textContent='Create Account'; return;
     }
+    track('sign_up', { method: 'email' });
     var newUser = signUpResp.data.user;
     await sbClient.from('user_profiles').insert({ id: newUser.id });
     currentUser = { id: newUser.id, name: '', email: email, createdAt: newUser.created_at };
