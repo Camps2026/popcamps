@@ -6,7 +6,9 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 ## Rules — read these first
 - **Single file only**: All code lives in `index.html`. No separate JS or CSS files, ever.
 - **No build tools**: No npm, no webpack, no frameworks. CDN links only.
-- **Always push to GitHub after every change** — don't wait to be asked.
+- **Never delete or replace anything** (files, database rows, settings, scheduled tasks) without P's explicit yes.
+- **Show every change (current vs new) and wait for P's yes before editing.** Push only after P approves.
+- **Backups live in `~/Documents/popcamps-backups/`, never inside this repo.** They contain parent data.
 - **Never use the Supabase secret key** in frontend code.
 - **Always read the file before editing** — never guess at line numbers or content.
 - **Explain every change before making it** — owner is not a developer.
@@ -18,21 +20,27 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 - GitHub repo: https://github.com/Camps2026/popcamps
 - Local repo: `~/Documents/campquest/`
 
+## Pushing to GitHub (auto-push is OFF)
+- `.claude/settings.json` has an auto-push hook, but it never fires. It checks whether an edited file's path starts with `/Users/phannipasathiennoppakao/documents/campquest` (lowercase "d"). The real path uses "Documents". Mac folders ignore case, but this text check doesn't, so it never matches, and its errors are hidden.
+- Treat auto-push as off. After P approves, commit only the approved files and push by hand. Don't change `settings.json` without P's yes.
+
 ## Supabase (publishable — safe for frontend)
 - URL: `https://ikhvkrbwwnapeofqpxdb.supabase.co`
 - Publishable key: `sb_publishable_YPY0o2fRbGoDP1CBFoZb-A_11ucDenw`
 - Service role key (for direct DB writes — never put in frontend code): `YOUR_SERVICE_KEY`
-- Table: `camps` — 1003 rows as of Apr 3, 2026, RLS disabled (public read, intentional)
+- `camps`: 1,527 rows as of Nov 24, 2026 (927 standard + 40 umbrella + 560 sub-programs). The site shows 967 cards (standard + umbrella); sub-programs appear inside their umbrella.
+- Row-level security (RLS) is ON for all 8 tables (confirmed Nov 24, 2026).
+- Optional later tightening: limit edit requests to a camp's owner, and route owner edits through review instead of direct updates.
 
 ## Supabase tables
-- `camps` — main camp listings (1003 rows as of Apr 3, 2026)
-- `camp_owners` — links `auth.users.id` to `camps.id` (plain integer, no FK)
-- `site_admins` — stores admin user_id; RLS disabled (publicly readable)
-- `camp_edit_requests` — staging table for owner edits pending admin review
-- `user_profiles` — stores parent user name, email, zip
-- `user_children` — stores children profiles per parent user
-- `user_schedules` — stores camps added to each child's calendar
-- `user_saved_camps` — stores saved/favorited camps per user
+- `camps` — main camp listings. Policy: anyone can read; only that camp's owner or an admin can update; nobody can add or delete through the website key.
+- `camp_owners` — links `auth.users.id` to `camps.id` (plain integer, no FK). Policy: each user sees only their own ownership rows; owners are added only by P in the dashboard.
+- `site_admins` — stores admin user_id. Policy: a signed-in user can see only their own admin row; nobody can add admins through the website key.
+- `camp_edit_requests` — staging table for owner edits pending admin review. Policy: signed-in users can submit requests and see their own; admins see all and are the only ones who can update them. Note: any signed-in user can submit a request for any camp (it still needs admin approval).
+- `user_profiles` — stores parent user name, email, zip. Policy: each parent can read and change only their own rows.
+- `user_children` — stores children profiles per parent user. Policy: each parent can read and change only their own rows.
+- `user_schedules` — stores camps added to each child's calendar. Policy: each parent can read and change only their own rows.
+- `user_saved_camps` — stores saved/favorited camps per user. Policy: each parent can read and change only their own rows.
 - Storage bucket: `camp-photos` (public, unused — photo upload feature removed)
 
 ## camps table key columns
@@ -135,14 +143,16 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Use `mcp__chrome-devtools__emulate` + `mcp__chrome-devtools__take_screenshot` to check layout
 - Use `mcp__chrome-devtools__evaluate_script` to force-show UI states
 
-## Current site state (as of Apr 7, 2026)
+## Current site state (as of Nov 24, 2026)
 - Title: `popcamps | Washington Summer Camp Directory`
 - H1: `Washington Summer Camp Directory`
 - og:title / twitter:title: `PopCamps — Washington Summer Camp Directory`
 - og:description: `Find the best summer camps in Washington state. Filter by age, type, and dates.`
 - og:image: `https://popcamps.one/og-image.png` (1200×630px)
 - SEO: meta description, canonical, Open Graph, Twitter Card, Schema.org, sitemap all in place
-- Footer: dark green — "Listings updated regularly for summer 2026. · © 2026 PopCamps · Privacy Policy · Terms and Conditions" + disclaimer line
+- Hero banner: yellow pill "2027 camp dates being added now" (commit a7669d0)
+- 2027 no-results message: an empty search with 2027 dates shows "Most camps haven't posted 2027 dates yet. We're adding them as they're announced. Search without dates to browse all camps." Every other empty search still shows "No camps match your filters" (commit a7669d0)
+- Footer: dark green — "Listings updated regularly. 2027 dates added as camps announce them. · © 2026 PopCamps · Privacy Policy · Terms and Conditions" + disclaimer line (commit a7669d0)
 - My Calendar page: full summer toggle, Mon–Sun visible on both mobile and desktop, camp blocks stay within rows, icons removed from blocks, dates show in camp blocks on mobile
 - City search: custom autocomplete dropdown (replaced native datalist — works on mobile)
 - Camp owner portal: LIVE — magic link login, edit form, admin review queue (photo upload removed)
@@ -154,8 +164,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Page load: shows loading spinner (not dummy data) while Supabase loads
 - Date filter: camps with no dates (null/TBD) are excluded from date searches; umbrella camps check sub-programs
 - Mobile camp cards: color banner height reduced to 80px (less wasted space, more camps visible)
-- ~1,464 camps in DB as of Apr 19, 2026
-- `subject_tag` column: repurposed as provider name tag (e.g. "Pedalheads", "Steamoji", "US Sports Camps"). All ~1,464 camps tagged as of Apr 19, 2026. Not used by frontend — for 2027 batch update efficiency only.
+- `subject_tag` column: repurposed as provider name tag (e.g. "Pedalheads", "Steamoji", "US Sports Camps"). All camps tagged as of Apr 19, 2026. Not used by frontend — for 2027 batch update efficiency only.
 
 ## Auth / login architecture (as of Apr 7, 2026)
 - `onAuthStateChange` callback is **synchronous** — no awaits inside it (prevents Supabase auth lock deadlock)
@@ -167,8 +176,17 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 - Login timeout: 30 seconds
 - logOut() clears UI instantly, awaits signOut with 5s cap
 
-## Scheduled agents
-- **PopCamps Weekly Date Research** (`trig_01XJPpD84baZhPizi591tZ5Z`): runs every Monday at 8am Pacific (15:00 UTC). Queries Supabase for camps with null/TBD session_dates, visits each website, writes `CAMP_DATE_UPDATES.md` to repo. GitHub PAT: `ghp_*** (in scheduled agent config only)` (expires Apr 2027). Manage at: https://claude.ai/code/scheduled/trig_01XJPpD84baZhPizi591tZ5Z
+## Known 2027 issue
+- `session_dates` have no year (e.g. "Jun 22–26"). The date search hardcodes 2026 in `parseSessionDate()` and `campHasSessionInRange()`, so any 2027 date search returns nothing. The My Calendar full-summer view in `renderSchedule()` also hardcodes summer 2026. To be fixed in the 2027 data phase.
+
+## Scheduled work
+- **Supabase keep-alive**: GitHub Actions workflow `.github/workflows/keep-alive.yml`. Reads one camp every 3 days so Supabase doesn't pause. If Supabase doesn't answer, the run fails and GitHub emails P (commit 7effc7d). GitHub turns scheduled workflows off after 60 days with no commits.
+- **Claude cloud scheduled tasks can't reach Supabase or GitHub.** They report success but change nothing. Don't rely on them for data work. Existing PopCamps tasks:
+  - PopCamps — Monthly New Camp Discovery: on (does nothing; to be switched off or rebuilt in Phase 2)
+  - PopCamps — Add 2027 Banner (Nov 1): off
+  - PopCamps — Clear 2026 Dates + Add 2027 Banner (Sep 15): off
+  - PopCamps Weekly Date Research: off
+  - PopCamps Weekly Date Checker: off
 
 ## Camp type colors (imgClass)
 | Type | Class | Color |
@@ -184,10 +202,15 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 | Chess | img-chess | Dark gray |
 | Variety | img-variety | Teal |
 
-## Planned future work
-- Google Analytics (deferred until real traffic)
-- Remaining session_dates cleanup: only 1 camp left (Redmond Ridge Junior Golf, ID 185 — "2026 dates not yet published")
-- Facebook ads — launching soon (ad copy ready: "Free Washington state summer camp directory. Search by city, age, and date — then save camps to a calendar organized by child.")
+## 2027 plan
+0. Stabilize — done (Nov 24, 2026)
+1. Measure and decide
+2. Data foundation — new `camp_seasons` table
+3. Quick 2027 fixes — by Jan 4, 2027
+4. Weekly 2027 date checks — from Jan 4, 2027
+5. Mobile-first redesign
+6. Launch, then marketing
+7. Registration alerts
 
 ## Work log
 Full history of all changes: `~/Documents/campquest/CAMPQUEST_WORK_LOG.md`

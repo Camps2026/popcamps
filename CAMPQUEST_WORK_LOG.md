@@ -1483,3 +1483,37 @@ US Sports Camps (Nike / NBC / Xcelerate / Peak Performance / James Finley), Suns
 - Desktop layout — unaffected (override is mobile-only)
 
 **Commit:** `406cb65` — pushed to GitHub Apr 29, 2026
+
+---
+
+## Broken Link Audit – Aug 12, 2026
+
+Checked 501 unique camp website URLs; 83 had issues (13 real 404s, 3 unreachable, the rest were sites blocking automated checks). Full report: `BROKEN_LINK_AUDIT.md`.
+
+**Commit:** `09228f0`
+
+---
+
+## 2027 Coming-Soon Banner – Sep 25, 2026
+
+Added a yellow "2027 Summer Camps coming soon" pill above the homepage heading.
+
+**Commit:** `93dcb53`
+
+---
+
+## Phase 0: Stabilize – Nov 24, 2026
+
+- **Supabase paused and restored.** The free project paused from inactivity; it was restored and responds normally.
+- **Full camps backup:** all 1,527 rows saved to `~/Documents/popcamps-backups/2026-11-24/camps.json` (outside the repo).
+- **Other tables exported as CSV** to the same backup folder; empty tables skipped.
+- **Row-level security confirmed ON** for all 8 tables.
+- **Old Airtable token deleted.** It was visible in this public repo's history (commits `0f13227`, `6d41400`); it's harmless now.
+- **2026 dates checked:** still in the database (~1,459 camps). The Sep 15 "clear dates" scheduled task didn't change anything.
+- **Scheduled tasks for Sep 15 and Nov 1 switched off by P.**
+- **Keep-alive workflow added:** `.github/workflows/keep-alive.yml` reads one camp every 3 days and emails P if Supabase doesn't answer. Commit `7effc7d`.
+- **2027 text updates** (commit `a7669d0`):
+  - Banner: "2027 Summer Camps coming soon" → "2027 camp dates being added now"
+  - Empty 2027 searches now say: "Most camps haven't posted 2027 dates yet. We're adding them as they're announced. Search without dates to browse all camps."
+  - Footer: "Listings updated regularly for summer 2026." → "Listings updated regularly. 2027 dates added as camps announce them."
+- **CLAUDE.md updated:** new approval rules, auto-push explained as off, current database facts, 2027 plan.
