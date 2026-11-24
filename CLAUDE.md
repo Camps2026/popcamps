@@ -17,6 +17,7 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 - Frontend: `index.html` (single file, all inline CSS + JS)
 - Database: Supabase (PostgreSQL)
 - Deployment: GitHub Pages → custom domain `popcamps.one`
+- Analytics: Google Analytics G-BRKG5LF4QF, with events: search, save_camp, add_to_calendar, visit_camp_website, sign_up, list_your_camp, claim_your_camp. All go through the `track()` helper; never send names, emails or children's details. Search sends only a listed city, "(any)" or "(other)".
 - GitHub repo: https://github.com/Camps2026/popcamps
 - Local repo: `~/Documents/campquest/`
 

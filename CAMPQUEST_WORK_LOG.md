@@ -1517,3 +1517,16 @@ Added a yellow "2027 Summer Camps coming soon" pill above the homepage heading.
   - Empty 2027 searches now say: "Most camps haven't posted 2027 dates yet. We're adding them as they're announced. Search without dates to browse all camps."
   - Footer: "Listings updated regularly for summer 2026." → "Listings updated regularly. 2027 dates added as camps announce them."
 - **CLAUDE.md updated:** new approval rules, auto-push explained as off, current database facts, 2027 plan.
+
+---
+
+## Google Analytics Events + Privacy Policy Update – Nov 24, 2026
+
+**What changed:**
+- Added a `track()` helper next to the Google tag; every event goes through it.
+- New events: `search` (city from our list only, or "(any)"/"(other)"; age; whether dates were used), `save_camp`, `add_to_calendar`, `visit_camp_website` (detail, umbrella and sub-program buttons), `sign_up`, `list_your_camp`, `claim_your_camp`. Camp events include the camp's database ID. No names, emails or children's details are sent.
+- Privacy Policy: new "Analytics and cookies" paragraph with Google's opt-out add-on link, Google Analytics added to the service-provider list, "Last updated" set to November 24, 2026.
+
+**Tested:** all 7 events confirmed at 390×844 on the live site by checking the Google Analytics network requests. Test sign-ups and form submissions were faked in the test browser, so no real data was created.
+
+**Commit:** `14311fa`
