@@ -179,6 +179,8 @@ If the matched lines are clearly not about the 2027 summer schedule (e.g. 'check
 
 Either way, it's recorded as the notes line `Full 2027 schedule posted`. The camp becomes `confirmed` only if its ages and hours are also filled.
 
+**Leaving out sessions.** 'Complete' may be combined with 'without session N' only when the left-out sessions are not youth sessions under §1 (family, adult, staff, holdover). When a session is left out because the camp's page likely has a mistake (e.g. a day camp starting on a Saturday), don't mark the camp complete: it stays partial and keeps being checked until the page is fixed.
+
 **Fill in as found.** Every verified field goes into the next review batch right away, even if other fields are still missing. The status stays `partial` until every required field is filled, then becomes `confirmed`.
 
 **"Not published by camp."** A required field counts as filled when either:
