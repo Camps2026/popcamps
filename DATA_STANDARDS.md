@@ -12,6 +12,7 @@ Adopted Nov 24, 2026.
 - **Clean text:** no leading or trailing spaces, no line breaks inside a value, single spaces only.
 - **Ranges use an en dash `–`**, not a hyphen `-`, with no spaces around it: "Jun 21–25", "9am–3pm", "Ages 6–12".
 - **Never log in, create an account or start a registration** on a camp's site to see information.
+- **Respect robots.txt.** If a site's robots.txt asks automated visitors not to read a page, the sweep doesn't read it; the page is listed as routine "check by hand".
 
 ## 1. Session dates
 **Stored:** one `camp_sessions` row per session, with real dates in `start_date` / `end_date`.
@@ -116,11 +117,12 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - **Page still shows only 2026 (past) dates:** status stays `not_posted`. Add the note "page still shows 2026 dates" and re-check next week.
 - **Dates visible only behind a login or account:** never log in. Status stays `not_posted`, `schedule_note` = "See camp website for dates", plus a note "Dates behind login".
 - **Nothing changed** since the last check.
+- Dates that start on the wrong weekday in 2027 but fit 2026's calendar (e.g. "Jun 22–26" is Mon–Fri in 2026 but Tue–Sat in 2027), with no 2027-specific dates on the page → treated as "page still shows 2026 dates".
 
 ### 10.3 🟢 Green: goes in the batch as-is
 - The proof check passed.
 - On an allowed source (section 8), with the year stated (or the camp says "2027 summer camps").
-- Every session reads as a valid date in 2027 and starts on its stated weekday. In 2027, Jun 21 and Jun 28 are Mondays.
+- Weekday test (always run): every 2027 session starts on the weekday the camp's pattern uses: Monday for weekly day camps, Sunday allowed for overnight camps. A "2027" somewhere on the page isn't enough on its own.
 - Each session lasts 1–14 days, ages are within 0–21, and nothing contradicts other pages or earlier findings.
 
 ### 10.4 🟡 Yellow: P decides, case by case
@@ -136,6 +138,7 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - **Two pages on the camp's site disagree.** The registration page wins; the review shows both quotes side by side.
 - **Dates found only in an image or a PDF.** Save the file itself as proof. For a PDF, its text is also checked by the script; an image is checked by P.
 - **One page lists several locations or age groups, and it isn't clear which part matches our camp.**
+- The weekday pattern is mixed or unclear (some sessions fit 2027, some fit 2026).
 - Teens / adults without numeric ages.
 
 ### 10.5 🔴 Red: not stored; status → `needs_review`
@@ -159,7 +162,7 @@ So the next check goes straight to the right place instead of searching again.
 **Weekly check order:** `source_url` first → the "linked from" page → `camps.website_url`. If the location moved, the new one replaces it (section 8) and the change is noted in the batch.
 
 **Saved proof copies, on P's Mac only** (outside the repo, never uploaded):
-`~/Documents/popcamps-backups/proofs/<season year>/<camp id>/<YYYY-MM-DD>-<page|pdf|image>.<txt|pdf|png>`
+`~/Documents/popcamps-backups/proofs/<season year>/_pages/<page key>/<YYYY-MM-DD>-page.<txt|html.gz|jpg|pdf>`, plus `-meta.json` listing the camps the page covers. Full HTML and screenshots are kept only when a page changed or produced a finding; unchanged pages keep only a text fingerprint in `sweep-state/state.json`.
 For PDFs, keep both the PDF and its extracted text. Old copies are kept, so any stored value can be traced back to what the page said on that day.
 
 ## Open questions for P
