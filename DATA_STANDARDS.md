@@ -34,14 +34,14 @@ Adopted Nov 24, 2026.
 - Both ends carry am/pm ("9am–12pm", not "9–12pm"). Noon is "12pm".
 - More than one option: label each, separated by ", ": "Half day 9am–12pm, Full day 9am–3pm".
 - Extended care is **not** part of hours. Put it in `notes`: "Extended care 7:30am–9am and 3pm–5:30pm".
-- Fill `camp_seasons.hours` or `camp_sessions.hours` only if different from `camps.hours`. Unknown means empty, never "See website".
+- For 2027, always store the verified hours: in `camp_seasons.hours` when they're the same for every session, otherwise on each session. (`camps.hours` is 2026 data.) Unknown means empty, never "See website".
 
 ## 3. Ages
 - In years. Whole numbers, or one decimal when the camp states half years ("3½" → 3.5). Allowed range 0–21.
 - "Ages 6–12" → 6 and 12. "8+" → minimum 8, maximum empty.
 - Grades: minimum = lowest grade + 5, maximum = highest grade + 6 (K = grade 0). "Grades 1–5" → 6–11. Keep the camp's wording in `notes`, e.g. "Grades 1–5".
 - Teens / adults without numbers → yellow (section 10).
-- Fill ages on a session only if different from the camp's ages.
+- For 2027, store the verified ages on every session. (`camps.age_min` / `age_max` are 2026 data.)
 
 ## 4. Camp types (`camps.camp_type`)
 Allowed values, the 9 search filter types: **Sports, Arts, STEM, Outdoor / Nature, Music, Dance, Cooking, Academic, Variety**.
@@ -61,32 +61,31 @@ Allowed values, the 9 search filter types: **Sports, Arts, STEM, Outdoor / Natur
 | Status | Means | Site wording |
 |---|---|---|
 | `not_posted` | The camp hasn't published dates for that year (including: page still shows 2026, or dates only behind a login) | "2027 dates not yet posted" |
-| `partial` | Some sessions posted, others still TBD | Show the posted dates, plus "More 2027 dates not yet posted" |
-| `confirmed` | All sessions found on an allowed source (section 8) | Show dates |
+| `partial` | Some or all 2027 dates are posted, but the listing isn't complete yet (section 12) | Show the posted dates, plus "More 2027 dates not yet posted" |
+| `confirmed` | Complete (section 12) and approved in a batch. No longer checked, except the optional May check | Show dates |
 | `needs_review` | Red-flagged information waiting for P | Treat as not_posted on the site until resolved |
 | `not_running` | The camp says it won't run that year (P confirms first) | "Not running in 2027" |
 
 Exact wording: **"2027 dates not yet posted"**. Use the season year, capital first letter, no trailing period on cards. For a date search with no results, keep the current message: "Most camps haven't posted 2027 dates yet. We're adding them as they're announced. Search without dates to browse all camps."
 
 ## 6. Price (`price_text`)
-- Only if found on an allowed source (section 8); otherwise leave empty. Never "varies" or a guess.
-- Format: "$350/week", "$95/day", "$1,250/session", "$350–$425/week", "Free". Use a comma for thousands, no cents unless they're non-zero.
-- Units: /day, /week, /session, /month, /camp.
-- Member pricing: "$350/week ($300 members)".
-- Different prices for different sessions go on each session.
+**Not collected for now.** Leave `price_text` in `camp_seasons` and `camp_sessions` empty; the columns stay in place, unused. *(For later, when prices are collected: "$350/week", "$95/day", "$1,250/session", "$350–$425/week", "Free"; comma for thousands; no cents unless non-zero; units /day, /week, /session, /month, /camp; member pricing "$350/week ($300 members)"; only from an allowed source.)*
 
 ## 7. Registration
 | Field | Rule |
 |---|---|
-| `registration_status` | `not_open`, `open`, `waitlist`, `full` or `closed`, as stated on an allowed source. Empty if unknown. |
 | `registration_opens` | Exact date only, when the camp states one ("Registration opens Feb 1, 2027"). |
 | `registration_opens_text` | When there's no exact date: "Early February 2027", "Winter 2027". Capital first letter, include the year. |
 | `registration_url` | The page where parents actually sign up (may be a registration system; see section 8). |
+
+**Availability is not collected** (open / waitlist / full / sold out). PopCamps links parents to the camp for availability. The `registration_status` column stays in the database, unused. The registration opening date is still collected; it's optional and never blocks completion (section 12).
 
 ## 8. Sources (`source_url`)
 **Allowed:**
 1. **The camp's own site:** the same domain as `camps.website_url`, or a subdomain of it.
 2. **A registration or booking system** (ActiveNet, CampBrain, CampMinder, UltraCamp, Sawyer registration, RegFox, Eventbrite and similar), **only when the camp's own website links to it.** Record the linking page in `notes` as "Linked from https://…". If the camp's site doesn't link to it, it doesn't count.
+
+**Approved registration accounts.** For camps whose dates live on an outside registration system, P confirms once per organization that the account is the camp's official one (e.g. `anc.apm.activecommunities.com/olyparksartsrec` for the City of Olympia). An approved account counts as an allowed source for all of that organization's camps without a "linked from" check, and isn't asked about again. The list of approved accounts is kept in `approved-accounts.json` in the popcamps-sweep repository; additions need P's yes.
 
 **Never allowed:** aggregators and listings such as ActivityHero, Yelp, Google, social media, news articles or PopCamps itself, even if their information looks right.
 
@@ -108,14 +107,15 @@ Exact wording: **"2027 dates not yet posted"**. Use the season year, capital fir
   1. **The quote is in the saved page.** The comparison ignores only invisible differences: spacing and line breaks, non-breaking spaces, soft hyphens, zero-width characters, and curly vs straight quotation marks. Dashes, digits and words must match exactly.
   2. **Each stored value is in its own quote.**
      - **Dates:** the script reads the dates out of the quote, and they must match the stored `start_date` and `end_date` exactly.
-     - **Hours, ages and price:** the script reads them out of the quote and compares them with the stored value after converting both to the standard formats in sections 2, 3 and 6. So "9:00 AM - 3:00 PM" supports "9am–3pm", and "Grades 1–5" supports ages 6–11.
-- **Every stored value** (each session's dates, hours, ages, price, registration date) **must be backed by a quote.**
+     - **Hours and ages:** the script reads them out of the quote and compares them with the stored value after converting both to the standard formats in sections 2 and 3. So "9:00 AM - 3:00 PM" supports "9am–3pm", and "Grades 1–5" supports ages 6–11.
+- **Every stored value** (each session's dates, hours, ages, registration opening date) **must be backed by a quote.**
 - **If a quote isn't found in the saved page, or a quote is found but doesn't contain the value it is meant to support, the finding is 🔴 red and nothing from it is stored.**
 
 ### 10.2 Routine: not on the review list
 These go in the batch only as routine updates (`last_checked_at` and `notes`). P approves the batch as a whole, but they aren't listed for review.
 - **Page still shows only 2026 (past) dates:** status stays `not_posted`. Add the note "page still shows 2026 dates" and re-check next week.
 - **Dates visible only behind a login or account:** never log in. Status stays `not_posted`, `schedule_note` = "See camp website for dates", plus a note "Dates behind login".
+- **Can't be read automatically** (robots.txt says no, the site blocks automated reading, it shows a CAPTCHA, or it needs a login): never bypassed, never logged in. These camps appear in a separate **"Check by hand"** section of the review, apart from the normal review list.
 - **Nothing changed** since the last check.
 - Dates that start on the wrong weekday in 2027 but fit 2026's calendar (e.g. "Jun 22–26" is Mon–Fri in 2026 but Tue–Sat in 2027), with no 2027-specific dates on the page → treated as "page still shows 2026 dates".
 
@@ -126,20 +126,19 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - Each session lasts 1–14 days, ages are within 0–21, and nothing contradicts other pages or earlier findings.
 
 ### 10.4 🟡 Yellow: P decides, case by case
-- Only some dates posted (→ `partial`).
 - No year on the page, but the weekdays only fit 2027.
 - Sessions outside Jun–Aug (spring, winter or mid-term breaks are fine, but flag them).
 - Sessions longer than 14 days or a single day.
 - Short weeks around Jul 5 (Independence Day observed) and Sep 6 (Labor Day) are normal; note them, don't flag them.
-- Hours, ages or price differ from `camps`.
+- Hours or ages differ from our 2026 listing in `camps`.
 - Registration info is vague.
 - Previously stored dates have changed.
-- The page is on the camp's site but different from `website_url`.
 - **Two pages on the camp's site disagree.** The registration page wins; the review shows both quotes side by side.
 - **Dates found only in an image or a PDF.** Save the file itself as proof. For a PDF, its text is also checked by the script; an image is checked by P.
 - **One page lists several locations or age groups, and it isn't clear which part matches our camp.**
 - The weekday pattern is mixed or unclear (some sessions fit 2027, some fit 2026).
 - Teens / adults without numeric ages.
+- A required field is proposed as "not published by camp" after 3 checks in a row without it (section 12).
 
 ### 10.5 🔴 Red: not stored; status → `needs_review`
 - **The proof check failed** (section 10.1).
@@ -165,6 +164,25 @@ So the next check goes straight to the right place instead of searching again.
 `~/Documents/popcamps-backups/proofs/<season year>/_pages/<page key>/<YYYY-MM-DD>-page.<txt|html.gz|jpg|pdf>`, plus `-meta.json` listing the camps the page covers. Full HTML and screenshots are kept only when a page changed or produced a finding; unchanged pages keep only a text fingerprint in `sweep-state/state.json`.
 For PDFs, keep both the PDF and its extracted text. Old copies are kept, so any stored value can be traced back to what the page said on that day.
 
+## 12. When a 2027 listing is complete, and when to check
+**Required for a complete listing:** all 2027 session dates (the page shows the full 2027 schedule, with no sessions marked TBD or "coming soon"), ages (on every session), and hours (in `camp_seasons.hours`, or on every session).
+**Optional:** the registration opening date; it never blocks completion. **Not collected:** price and availability.
+
+**Fill in as found.** Every verified field goes into the next review batch right away, even if other fields are still missing. The status stays `partial` until every required field is filled, then becomes `confirmed`.
+
+**"Not published by camp."** A required field counts as filled when either:
+- the camp's own page says it isn't published or given (with a quote, under the proof rule); or
+- dates are posted and the field hasn't been found in 3 checks in a row. This is only proposed, as yellow, and is recorded only when P approves it in a batch. It is never set automatically.
+
+It's recorded as a line in `notes`: `Not published by camp: ages` (or `hours`). This stops a camp from being checked forever.
+
+**When to check:**
+- `not_posted`, `partial` and `needs_review` camps stay on the normal schedule.
+- For `partial` camps, the sweep looks only for the missing fields.
+- `confirmed` (complete and approved) and `not_running` camps are no longer checked.
+- **Optional May check** (a setting, on by default, that can be turned off): in early May, confirmed camps are re-checked by page fingerprint only, and the review lists just the ones whose page changed.
+
 ## Open questions for P
 1. **Inclusive tag later:** camps focused on neurodiverse or disabled kids (currently typed "Neurodiversity") need a separate "Inclusive" tag, not a camp type. To design later.
 2. **Optional:** if the "Dates at" line in `notes` gets messy, a dedicated column could replace it. That would be a small schema change, as its own batch with P's yes.
+3. Camp 1611 (Challenge Island STEAM Camps – Edmonds) is on Edmonds Parks' registration account, but its provider tag says "City of Olympia". Is the tag wrong? (Not changed now; fixed later in a batch with P's yes.)
