@@ -21,6 +21,7 @@ Adopted Nov 24, 2026.
 - A continuous program (e.g. drop-in all summer) is one session covering the whole span, with `notes` "Drop-in" or similar.
 - A program offered on specific weekdays only ("Wed/Sat") is not a session. It goes in `camp_seasons.schedule_note`.
 - Different age groups or times in the same week are **separate sessions**, each with its own `label`, ages and hours.
+- Large camps with many programs (e.g. YMCA Camp Orkila): every youth program session is stored as its own session, with its own `label` (the camp's program name) and ages, even when several programs share the same week. Counselor-in-Training (CIT) programs are kept as sessions. Internships, staff training and other staff programs, family camps and adult programs are left out. Holdover nights between sessions are not sessions.
 - `label` holds only the name the camp uses: "Week 1 – Passport to Adventures", "Session 3a (Mini)". No dates in the label.
 
 **Displayed:** generated from the sessions, never typed by hand:
@@ -35,6 +36,7 @@ Adopted Nov 24, 2026.
 - More than one option: label each, separated by ", ": "Half day 9am–12pm, Full day 9am–3pm".
 - Extended care is **not** part of hours. Put it in `notes`: "Extended care 7:30am–9am and 3pm–5:30pm".
 - For 2027, always store the verified hours: in `camp_seasons.hours` when they're the same for every session, otherwise on each session. (`camps.hours` is 2026 data.) Unknown means empty, never "See website".
+- Overnight camps (camps marked overnight in our listing): hours are stored as "Overnight", backed by a quote showing the camp is overnight or resident (e.g. "Overnight Camp", "resident camp"). This counts as filled for completeness (section 12).
 
 ## 3. Ages
 - In years. Whole numbers, or one decimal when the camp states half years ("3½" → 3.5). Allowed range 0–21.
@@ -122,7 +124,7 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 ### 10.3 🟢 Green: goes in the batch as-is
 - The proof check passed.
 - On an allowed source (section 8), with the year stated (or the camp says "2027 summer camps").
-- Weekday test (always run): every 2027 session starts on the weekday the camp's pattern uses: Monday for weekly day camps, Sunday allowed for overnight camps. A "2027" somewhere on the page isn't enough on its own.
+- Weekday test (always run): every 2027 session starts on the weekday the camp's pattern uses: Monday for weekly day camps; Saturday or Sunday allowed for overnight camps (camps marked overnight in our listing). A "2027" somewhere on the page isn't enough on its own.
 - Each session lasts 1–14 days, ages are within 0–21, and nothing contradicts other pages or earlier findings.
 
 ### 10.4 🟡 Yellow: P decides, case by case
@@ -130,7 +132,8 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - Sessions outside Jun–Aug (spring, winter or mid-term breaks are fine, but flag them).
 - Sessions longer than 14 days or a single day.
 - Short weeks around Jul 5 (Independence Day observed) and Sep 6 (Labor Day) are normal; note them, don't flag them.
-- Hours or ages differ from our 2026 listing in `camps`.
+- Hours differ from our 2026 listing in `camps`.
+- The camp's overall 2027 age range (the youngest minimum to the oldest maximum across all its 2027 sessions) differs from our 2026 listing in `camps`. Different ages on different sessions are not a flag on their own.
 - Registration info is vague.
 - Previously stored dates have changed.
 - **Two pages on the camp's site disagree.** The registration page wins; the review shows both quotes side by side.
@@ -165,8 +168,16 @@ So the next check goes straight to the right place instead of searching again.
 For PDFs, keep both the PDF and its extracted text. Old copies are kept, so any stored value can be traced back to what the page said on that day.
 
 ## 12. When a 2027 listing is complete, and when to check
-**Required for a complete listing:** all 2027 session dates (the page shows the full 2027 schedule, with no sessions marked TBD or "coming soon"), ages (on every session), and hours (in `camp_seasons.hours`, or on every session).
+**Required for a complete listing:** all 2027 session dates (the page shows the full 2027 schedule, with no sessions marked TBD or "coming soon"; see "Full schedule" below), ages (on every session), and hours (in `camp_seasons.hours`, or on every session; "Overnight" for overnight camps, section 2).
 **Optional:** the registration opening date; it never blocks completion. **Not collected:** price and availability.
+
+**Full schedule.** The 2027 dates count as complete when either:
+- the camp's own page says the schedule is complete, with a quote under the proof rule (e.g. "Our full 2027 summer schedule is now posted"); or
+- P marks the camp complete in the batch reply (e.g. "Y2 complete"). For every camp with dates, the review shows whether the saved page has any TBD / "more dates coming" wording, such as "TBD", "TBA", "coming soon", "more dates/sessions to be added" or "check back". The review shows either "None found" or the matching lines. P marks a camp complete only when none were found, and the batch refuses "complete" for a camp where some were found.
+
+If the matched lines are clearly not about the 2027 summer schedule (e.g. 'check back for fall classes'), P can still mark the camp complete with 'Y2 complete (override)'. The batch records this as the notes line 'Full 2027 schedule posted (P override: matched lines not about summer)'.
+
+Either way, it's recorded as the notes line `Full 2027 schedule posted`. The camp becomes `confirmed` only if its ages and hours are also filled.
 
 **Fill in as found.** Every verified field goes into the next review batch right away, even if other fields are still missing. The status stays `partial` until every required field is filled, then becomes `confirmed`.
 
