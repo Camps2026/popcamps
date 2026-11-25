@@ -20,7 +20,7 @@ Adopted Nov 24, 2026.
 - `start_date` must fall in the row's `season_year`.
 - A continuous program (e.g. drop-in all summer) is one session covering the whole span, with `notes` "Drop-in" or similar.
 - A program offered on specific weekdays only ("Wed/Sat") is not a session. It goes in `camp_seasons.schedule_note`.
-- Different age groups, times or prices in the same week are **separate sessions**, each with its own `label`, ages, hours and price.
+- Different age groups or times in the same week are **separate sessions**, each with its own `label`, ages and hours.
 - `label` holds only the name the camp uses: "Week 1 – Passport to Adventures", "Session 3a (Mini)". No dates in the label.
 
 **Displayed:** generated from the sessions, never typed by hand:
@@ -61,7 +61,7 @@ Allowed values, the 9 search filter types: **Sports, Arts, STEM, Outdoor / Natur
 | Status | Means | Site wording |
 |---|---|---|
 | `not_posted` | The camp hasn't published dates for that year (including: page still shows 2026, or dates only behind a login) | "2027 dates not yet posted" |
-| `partial` | Some or all 2027 dates are posted, but the listing isn't complete yet (section 12) | Show the posted dates, plus "More 2027 dates not yet posted" |
+| `partial` | Some or all 2027 dates are posted, but the listing isn't complete yet (section 12) | Show the posted dates. Add "More 2027 dates not yet posted" only when some 2027 dates are still missing (the full schedule isn't posted yet, section 12), not when only hours or ages are missing |
 | `confirmed` | Complete (section 12) and approved in a batch. No longer checked, except the optional May check | Show dates |
 | `needs_review` | Red-flagged information waiting for P | Treat as not_posted on the site until resolved |
 | `not_running` | The camp says it won't run that year (P confirms first) | "Not running in 2027" |
