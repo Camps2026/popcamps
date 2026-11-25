@@ -1530,3 +1530,30 @@ Added a yellow "2027 Summer Camps coming soon" pill above the homepage heading.
 **Tested:** all 7 events confirmed at 390×844 on the live site by checking the Google Analytics network requests. Test sign-ups and form submissions were faked in the test browser, so no real data was created.
 
 **Commit:** `14311fa`
+
+---
+
+## Database Cleanup + 2027 Tables – Nov 24, 2026
+
+All SQL was rehearsed first on a throwaway local copy of the backup (every check passed), then run in the Supabase SQL Editor with P's approval at each step. Full results: `~/Documents/popcamps-backups/2026-11-24/RUN-LOG.md`. SQL files: `~/Documents/popcamps-backups/2026-11-24/sql/`.
+
+**Backups first:** camps.json (all 1,527 rows), plus CSV exports of camps, site_admins, user_profiles, user_children and user_schedules.
+
+**Duplicates removed (d0–d2):**
+- 407 rows were exact copies of another row (identical in every column except id): 406 sub-programs (mostly Pedalheads locations repeated 7–21 times, plus Camp Kirby and Sunset Lake) and 1 standard camp (STG AileyCamp). The lowest id in each of the 37 groups was kept.
+- No saved camps, calendar entries, owner links or edit requests pointed at a copy; 0 broken links before or after.
+- The 21 groups (65 rows) that share a name but have different details were left untouched (fingerprint unchanged).
+- camps: 1,527 → 1,120 rows. The Seattle Pedalheads umbrella went from 166 listed programs to 16.
+
+**Hidden programs fixed (d3):**
+- Pedalheads – Lakewood Park (Seward Park), id 893: its parent name contained a line break, so it matched no umbrella. Now linked to "Pedalheads Bike Camp – Seattle".
+- Nike Soccer Camp at Seattle University – All Skills (1697) and – Elite (1698): their parent umbrella didn't exist. Now standard camps with their own cards.
+- Result: 928 standard, 152 sub-programs, 40 umbrellas; the site shows 968 cards.
+
+**New tables for 2027 (00–03):**
+- 01 first failed safely (nothing created) because camps' primary key is (camp_name, id). New file 01a added the rule `camps_id_key UNIQUE (id)` without changing data or the existing key; 01 then succeeded.
+- `camp_seasons` (one row per camp per year) and `camp_sessions` (one row per session, real dates). Security: anyone can read; only admins can add or change; nobody can delete through the website key.
+- 1,084 rows added for 2027, all `not_posted` (928 standard + 152 sub-programs + 4 umbrellas without sub-programs). camp_sessions is empty.
+- The camps fingerprint was identical before and after (00 vs 03), so creating the tables changed no camp data.
+
+**Not done yet:** the site still reads 2026 `session_dates`; the new tables are not used by the site.

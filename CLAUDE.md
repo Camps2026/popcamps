@@ -29,8 +29,9 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 - URL: `https://ikhvkrbwwnapeofqpxdb.supabase.co`
 - Publishable key: `sb_publishable_YPY0o2fRbGoDP1CBFoZb-A_11ucDenw`
 - Service role key (for direct DB writes — never put in frontend code): `YOUR_SERVICE_KEY`
-- `camps`: 1,527 rows as of Nov 24, 2026 (927 standard + 40 umbrella + 560 sub-programs). The site shows 967 cards (standard + umbrella); sub-programs appear inside their umbrella.
-- Row-level security (RLS) is ON for all 8 tables (confirmed Nov 24, 2026).
+- `camps`: 1,120 rows as of Nov 24, 2026 (928 standard, 152 sub-programs, 40 umbrellas). The site shows 968 cards (standard + umbrella); sub-programs appear inside their umbrella. 407 exact duplicate rows were removed on Nov 24, 2026.
+- `camps` keys: the primary key is (camp_name, id), plus a separate rule that `id` is unique on its own (`camps_id_key`, added Nov 24, 2026). Other tables point at `camps.id`.
+- Row-level security (RLS) is ON for all 10 tables (the 8 original tables confirmed Nov 24, 2026; `camp_seasons` and `camp_sessions` created with it on).
 - Optional later tightening: limit edit requests to a camp's owner, and route owner edits through review instead of direct updates.
 
 ## Supabase tables
@@ -42,20 +43,22 @@ PopCamps (popcamps.one) is a Washington state summer camp directory. Parents sea
 - `user_children` — stores children profiles per parent user. Policy: each parent can read and change only their own rows.
 - `user_schedules` — stores camps added to each child's calendar. Policy: each parent can read and change only their own rows.
 - `user_saved_camps` — stores saved/favorited camps per user. Policy: each parent can read and change only their own rows.
+- `camp_seasons` — one row per camp per year (2027 onward): status, schedule note, hours/price if different, registration fields, source_url, check timestamps. 1,084 rows for 2027 as of Nov 24, 2026, all `not_posted` (928 standard + 152 sub-programs + the 4 umbrellas without sub-programs). Unique (camp_id, season_year); deleted automatically if its camp is deleted. Policy: anyone can read; only admins (site_admins) can add or change; nobody can delete through the website key.
+- `camp_sessions` — one row per session (real start_date/end_date, optional label, ages, hours, price). Empty as of Nov 24, 2026. Checks: end ≥ start, ages 0–21 (decimals allowed), min ≤ max. Policy: same as camp_seasons.
 - Storage bucket: `camp-photos` (public, unused — photo upload feature removed)
 
 ## camps table key columns
 | Column | Description |
 |---|---|
-| `id` | Integer primary key |
+| `id` | bigint; part of the primary key (camp_name, id) and unique on its own (`camps_id_key`) |
 | `camp_name` | Name of the camp |
 | `camp_type` | Type: Sports, Arts, STEM, Outdoor, Academic, Music, Dance, Cooking, Chess, Variety |
 | `city_state` | e.g. "Seattle, WA" |
 | `display_type` | `standard`, `umbrella`, or `sub-program` |
 | `parent_camp_id` | For sub-programs: stores the `camp_name` of the parent umbrella |
-| `session_dates` | Comma-separated date ranges e.g. "Jun 22–26, Jun 29–Jul 3" |
+| `session_dates` | 2026 dates as free text, e.g. "Jun 22–26, Jun 29–Jul 3" (no year). Don't change it; 2027+ dates go in `camp_sessions` |
 | `hours` | e.g. "9am–3pm" |
-| `age_min` / `age_max` | Integer age range |
+| `age_min` / `age_max` | Age range in years; decimals allowed (e.g. 3.5) |
 | `website_url` | Camp website (all HTTPS, verified clean as of Mar 31, 2026) |
 | `description` | Optional camp description (added for owner portal) |
 | `owner_updated_at` | Timestamptz — set when owner edits are approved; drives "Updated" badge |
@@ -179,6 +182,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 
 ## Known 2027 issue
 - `session_dates` have no year (e.g. "Jun 22–26"). The date search hardcodes 2026 in `parseSessionDate()` and `campHasSessionInRange()`, so any 2027 date search returns nothing. The My Calendar full-summer view in `renderSchedule()` also hardcodes summer 2026. To be fixed in the 2027 data phase.
+- The new `camp_seasons` / `camp_sessions` tables exist (Nov 24, 2026), but the site doesn't read them yet.
 
 ## Scheduled work
 - **Supabase keep-alive**: GitHub Actions workflow `.github/workflows/keep-alive.yml`. Reads one camp every 3 days so Supabase doesn't pause. If Supabase doesn't answer, the run fails and GitHub emails P (commit 7effc7d). GitHub turns scheduled workflows off after 60 days with no commits.
@@ -206,7 +210,7 @@ Claude will provide copy-paste SQL for the Supabase SQL Editor (supabase.com →
 ## 2027 plan
 0. Stabilize — done (Nov 24, 2026)
 1. Measure and decide
-2. Data foundation — new `camp_seasons` table
+2. Data foundation — `camp_seasons` + `camp_sessions` created and 2027 rows added (Nov 24, 2026); duplicates removed; site not yet reading them
 3. Quick 2027 fixes — by Jan 4, 2027
 4. Weekly 2027 date checks — from Jan 4, 2027
 5. Mobile-first redesign
