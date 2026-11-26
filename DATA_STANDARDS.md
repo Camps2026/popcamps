@@ -90,7 +90,7 @@ Exact wording: **"2027 dates not yet posted"**. Use the season year, capital fir
 
 **Approved registration accounts.** For camps whose dates live on an outside registration system, P confirms once per organization that the account is the camp's official one (e.g. `anc.apm.activecommunities.com/olyparksartsrec` for the City of Olympia). An approved account counts as an allowed source for all of that organization's camps without a "linked from" check, and isn't asked about again. The list of approved accounts is kept in `approved-accounts.json` in the popcamps-sweep repository; additions need P's yes.
 
-**Never allowed:** aggregators and listings such as ActivityHero, Yelp, Google, social media, news articles or PopCamps itself, even if their information looks right.
+**Never allowed:** aggregators and listings such as ActivityHero, Yelp, Google, social media, news articles or PopCamps itself, even if their information looks right. They may point the finder to the camp's own site (section 13), but never count as a source.
 
 **Format:**
 - The exact page or file where the information appears, not the home page.
@@ -202,6 +202,37 @@ It's recorded as a line in `notes`: `Not published by camp: ages` (or `hours`). 
 - For `partial` camps, the sweep looks only for the missing fields.
 - `confirmed` (complete and approved) and `not_running` camps are no longer checked.
 - **Optional May check** (a setting, on by default, that can be turned off): in early May, confirmed camps are re-checked by page fingerprint only, and the review lists just the ones whose page changed.
+
+## 13. Finding a camp's new link (the finder)
+When a camp's link may have moved, the weekly sweep searches for the camp's own new page. It never changes a listing by itself: **P approves every link change**, and approved changes ship as a reviewed listing batch with its undo file (section 0).
+
+**When the finder runs** (any one of these):
+- The camp's page returns 404 or 410, or can't be reached.
+- It redirects to another domain, or to the site's home page.
+- It's a parked or "domain for sale" page (e.g. hugedomains).
+- It shows no camp content.
+- From **February 1** (a setting), the camp still has no 2027 information.
+
+**Where it looks, in order:**
+1. The camp's own site: home page, `sitemap.xml`, and links named "camp" or "summer". At most 3 pages per camp per run.
+2. A web search limited to the camp's own domain.
+3. An open web search for the camp's name, city and "WA".
+
+**Priority and limits.** Camps whose link is broken or moved (404/410, unreachable, redirect, parked page, no camp content) come first. Camps that only have no 2027 information yet get step 1 (their own site) only; they go on to steps 2 and 3 only after 4 weekly checks in a row with nothing new. At most 30 camps get web searches per run (a setting); the rest wait their turn, oldest first.
+
+Aggregators and listing sites (section 8) may point the finder to a page, but never count as proof. All page reads follow the same rules as the weekly check: honest identification, robots.txt, no logins, no forms, nothing that gets around a block.
+
+**Proof that it's the same camp:**
+- **Required:** the same name or organization, **and** a Washington location, each shown by a saved quote from the new page.
+- **Stronger:** a matching phone number, a matching street address, or a link to the new page from the camp's old site.
+- **Confidence:** *high* = required proof plus at least one stronger match; *medium* = required proof only; *low* = anything less, shown for information and never offered for approval.
+- A page that shows a location outside Washington is rejected, even when the name matches (section 0).
+
+**On the review page:**
+- **Possible new link:** old link → new link, the proof quotes, and the confidence. P approves or rejects each one.
+- **Still looking:** camps the finder couldn't place, with what it tried and the next try date. They're retried every 2 weeks.
+
+**"May be closed."** Only suggested from March, and only after at least 3 tries in a row found nothing. It's a suggestion for P; nothing is removed, hidden or marked `not_running` without P's yes.
 
 ## Open questions for P
 1. **Inclusive tag later:** camps focused on neurodiverse or disabled kids (currently typed "Neurodiversity") need a separate "Inclusive" tag, not a camp type. To design later.
