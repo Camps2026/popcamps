@@ -6,6 +6,7 @@ If a rule here and a habit disagree, this file wins. Changes to this file need P
 Adopted Nov 24, 2026.
 
 ## 0. Ground rules
+- PopCamps lists only camps located in Washington state.
 - **Never change 2026 data in `camps`** (`session_dates`, `hours`, ages…). 2027+ information goes in `camp_seasons` and `camp_sessions`.
 - **Every change ships as a reviewed SQL batch** (`~/Documents/popcamps-backups/<date>/sql/`). Each batch has a check before, runs as one unit, and has a check after. P pastes it after approving.
 - **Identify camps by `id` only.** Never by name: different camps share names.
@@ -152,6 +153,7 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - Ages outside 0–21.
 - The camp appears closed or not running. Propose `not_running`; P confirms.
 - The camp looks like a duplicate of another listing.
+- **Outside Washington.** The camp's own page shows its location outside Washington: red ("outside Washington"), and its dates are not stored. Existing listings outside Washington go to P for a decision; nothing is removed without P's yes.
 
 ### 10.6 Approved exceptions
 When P approves an item in a batch, the yellow reasons on that item are recorded as accepted for that camp: the batch, its date, and each reason. They're kept in `accepted-exceptions.json` in the popcamps-sweep repo. Only an approved batch adds to it, and only once that batch has run (the sweep sees the batch's timestamp in the database). Nothing is added by hand or automatically.
