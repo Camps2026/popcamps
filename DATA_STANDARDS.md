@@ -124,7 +124,7 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 ### 10.3 🟢 Green: goes in the batch as-is
 - The proof check passed.
 - On an allowed source (section 8), with the year stated (or the camp says "2027 summer camps").
-- Weekday test (always run): every 2027 session starts on the weekday the camp's pattern uses: Monday for weekly day camps; Saturday or Sunday allowed for overnight camps (camps marked overnight in our listing). A "2027" somewhere on the page isn't enough on its own.
+- Weekday test (always run): every 2027 session starts on the weekday the camp's pattern uses: Monday for weekly day camps; Saturday, Sunday or Monday for overnight camps (camps marked overnight in our listing). In a week whose Monday is a holiday (Memorial Day, Independence Day observed, Labor Day), a Tuesday start is also fine. The weekly check and the database audit use exactly the same rule. A "2027" somewhere on the page isn't enough on its own.
 - Each session lasts 1–14 days, ages are within 0–21, and nothing contradicts other pages or earlier findings.
 
 ### 10.4 🟡 Yellow: P decides, case by case
@@ -136,6 +136,7 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - The camp's overall 2027 age range (the youngest minimum to the oldest maximum across all its 2027 sessions) differs from our 2026 listing in `camps`. Different ages on different sessions are not a flag on their own.
 - Registration info is vague.
 - Previously stored dates have changed.
+- **Same calendar dates as the 2026 listing.** A 2027 session starts and ends on the same month and day as one of the camp's 2026 sessions in `camps.session_dates` (e.g. 2027 "Jun 22–26" when 2026 had "Jun 22–26"). Shown as "same calendar dates as the 2026 listing; may be last year's dates". Weekdays move by one day each year, so real 2027 dates almost never repeat 2026's exactly. The weekly check and the database audit both apply it.
 - **Two pages on the camp's site disagree.** The registration page wins; the review shows both quotes side by side.
 - **Dates found only in an image or a PDF.** Save the file itself as proof. For a PDF, its text is also checked by the script; an image is checked by P.
 - **One page lists several locations or age groups, and it isn't clear which part matches our camp.**
@@ -151,6 +152,11 @@ These go in the batch only as routine updates (`last_checked_at` and `notes`). P
 - Ages outside 0–21.
 - The camp appears closed or not running. Propose `not_running`; P confirms.
 - The camp looks like a duplicate of another listing.
+
+### 10.6 Approved exceptions
+When P approves an item in a batch, the yellow reasons on that item are recorded as accepted for that camp: the batch, its date, and each reason. They're kept in `accepted-exceptions.json` in the popcamps-sweep repo. Only an approved batch adds to it, and only once that batch has run (the sweep sees the batch's timestamp in the database). Nothing is added by hand or automatically.
+
+The database audit doesn't report an accepted reason again for that camp while the camp's stored 2027 sessions and hours are unchanged. If they change (e.g. new or different sessions), the reason is reported again. An accepted exception never changes a value and never marks a camp confirmed.
 
 ## 11. Remembering where each camp's dates live
 So the next check goes straight to the right place instead of searching again.
