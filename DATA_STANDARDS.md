@@ -21,7 +21,7 @@ Adopted Nov 24, 2026.
 - `start_date` must fall in the row's `season_year`.
 - A continuous program (e.g. drop-in all summer) is one session covering the whole span, with `notes` "Drop-in" or similar.
 - A program offered on specific weekdays only ("Wed/Sat") is not a session. It goes in `camp_seasons.schedule_note`.
-- Different age groups or times in the same week are **separate sessions**, each with its own `label`, ages and hours.
+- Different age groups or times in the same week are separate sessions, each with its own ages and hours. Each label uses only the camp's own words from its page (see EXTRACT.md); the sweep never makes one up.
 - Large camps with many programs (e.g. YMCA Camp Orkila): every youth program session is stored as its own session, with its own `label` (the camp's program name) and ages, even when several programs share the same week. Counselor-in-Training (CIT) programs are kept as sessions. Internships, staff training and other staff programs, family camps and adult programs are left out. Holdover nights between sessions are not sessions.
 - `label` holds only the name the camp uses: "Week 1 – Passport to Adventures", "Session 3a (Mini)". No dates in the label.
 
@@ -219,6 +219,8 @@ When a camp's link may have moved, the weekly sweep searches for the camp's own 
 3. An open web search for the camp's name, city and "WA".
 
 **Priority and limits.** Camps whose link is broken or moved (404/410, unreachable, redirect, parked page, no camp content) come first. Camps that only have no 2027 information yet get step 1 (their own site) only; they go on to steps 2 and 3 only after 4 weekly checks in a row with nothing new. At most 30 camps get web searches per run (a setting); the rest wait their turn, oldest first.
+
+When several pages qualify for one camp, the finder offers the most specific camp page (a home page only when no camp page qualifies); between equally good pages, the one whose title or address says "summer".
 
 Aggregators and listing sites (section 8) may point the finder to a page, but never count as proof. All page reads follow the same rules as the weekly check: honest identification, robots.txt, no logins, no forms, nothing that gets around a block.
 
