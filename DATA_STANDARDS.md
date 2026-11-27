@@ -236,6 +236,14 @@ Aggregators and listing sites (section 8) may point the finder to a page, but ne
 
 **"May be closed."** Only suggested from March, and only after at least 3 tries in a row found nothing. It's a suggestion for P; nothing is removed, hidden or marked `not_running` without P's yes.
 
+## 14. Weekly link check (`camps.website_url`)
+Every camps.website_url is checked weekly. Each link is OK (loads, and it's the same camp: name or organization plus a Washington location), BROKEN (404/410, unreachable, parked or for-sale page) or SUSPICIOUS (loads but doesn't match the camp, or redirects to a home page or another domain). Broken and suspicious links go to the finder. The website never shows them; it shows 'Website link being updated' instead. Links added or changed by camp owners or through 'List Your Camp' must pass the same check before they're approved.
+
+- A link the sweep may not read (robots.txt says no, the site blocks automated reading, or a CAPTCHA) is CHECK BY HAND: it's listed for P each week and stays shown on the website. If P confirms it's broken, it's treated as BROKEN.
+- A link on an approved registration account (§8) is OK when the camp's name or organization is on the page.
+- A link stored without https:// is OK if it works with https:// added (the website adds it); the audit reports it separately until the stored link is fixed.
+- A redirect within the camp's own site (www or a subdomain of the same domain) is the same site, and OK if it's still this camp. A redirect to a home page, even on the same site, is SUSPICIOUS.
+
 ## Open questions for P
 1. **Inclusive tag later:** camps focused on neurodiverse or disabled kids (currently typed "Neurodiversity") need a separate "Inclusive" tag, not a camp type. To design later.
 2. **Optional:** if the "Dates at" line in `notes` gets messy, a dedicated column could replace it. That would be a small schema change, as its own batch with P's yes.
