@@ -1,0 +1,8 @@
+# GitHub Pages (Jekyll) build settings for popcamps.one.
+# Internal docs stay in the repository but are not published on the site.
+exclude:
+  - CLAUDE.md
+  - CAMPQUEST_WORK_LOG.md
+  - DATA_STANDARDS.md
+  - BROKEN_LINK_AUDIT.md
+  - README.md
